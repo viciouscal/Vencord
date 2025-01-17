@@ -1,20 +1,5 @@
-## No Longer Maintained
+# Better Screenshare..
 
-I have chosen to stop maintaining this repository. Maintaining a third party plugin like this can be unpredictable and often requires unexpected refactors that I'm no longer motivated to handle. While I was able to learn a lot of new things working on this plugin I have simply lost interest in continuing its development.
-
-### What's Next?  
-- If you're interested in taking this plugin forward feel free to fork it and make it your own!  
-- If you encounter issues note that this plugin may not work with the latest versions of Discord or Vencord without updates.  
-
-I'm really sorry to everyone who is frustrated now and I ask for your understanding.
-
-Thank you to everyone who used and supported this plugin!
-
-# Better Screenshare
-
-## Download
-
-[Download the latest installer](https://github.com/philhk/Installer/releases/latest/)
 
 ## How to use each Setting?
 
