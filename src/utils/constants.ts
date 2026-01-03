@@ -51,9 +51,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "V",
         id: 343383572805058560n
     },
-    dontcomenearme: {
-        name: "dontcomenearme",
-        id: 1225257807746564168n
+    viciouscal: {
+        name: "viciouscal",
+        id: 883820228360929320n
     },
     Apexo: {
         name: "Apexo",
@@ -163,10 +163,6 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Tyman: {
         name: "Tyman",
         id: 487443883127472129n
-    },
-    viciouscal: {
-        name: "viciouscal",
-        id: 883820228360929320n
     },
     afn: {
         name: "afn",
