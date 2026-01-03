@@ -51,6 +51,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "V",
         id: 343383572805058560n
     },
+    dontcomenearme: {
+        name: "dontcomenearme",
+        id: 1225257807746564168n
+    },
     Apexo: {
         name: "Apexo",
         id: 228548952687902720n
