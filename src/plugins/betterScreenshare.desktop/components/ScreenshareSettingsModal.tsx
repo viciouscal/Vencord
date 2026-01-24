@@ -18,9 +18,10 @@
 
 import { Flex } from "@components/Flex";
 import { Switch } from "@components/Switch";
+import { Card } from "@components/Card";
 import { ModalSize, openModalLazy } from "@utils/modal";
 import { SelectOption } from "@vencord/discord-types";
-import { Button, Card, Forms, React, Select, Slider, TextInput, useEffect, useState } from "@webpack/common";
+import { Button, Forms, React, Select, Slider, TextInput, useEffect, useState } from "@webpack/common";
 
 import { MicrophoneSettingsModal } from "../../betterMicrophone.desktop/components";
 import {
