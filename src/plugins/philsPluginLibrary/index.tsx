@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { fakeD } from "../fakeDeafen";
-import { replacedUserPanelComponent } from "./patches";
+import { replacedUserPanelComponent } from "@plugins/philsPluginLibrary/patches";
 
 export default definePlugin({
     name: "PhilsPluginLibrary",
