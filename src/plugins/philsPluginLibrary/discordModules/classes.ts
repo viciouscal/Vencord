@@ -16,10 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findByPropsLazy } from "@webpack";
+import { proxyLazyWebpack } from "@webpack";
+import { findByProps } from "@webpack";
 
 import * as types from "../types";
 
-export const panelClasses: types.PanelClasses = findByPropsLazy("button", "buttonContents", "buttonColor");
+export const panelClasses: types.PanelClasses = proxyLazyWebpack(() => {
+    try {
+        const module = findByProps("button", "buttonContents");
+        if (module) return module;
+    } catch (e) {
+        
+    }
+    
+    
+    return {} as types.PanelClasses;
+});
 
-// waitFor(filters.byProps("button", "buttonContents", "buttonColor"), result => panelClasses = result);
+// waitFor(filters.byProps("button", "buttonContents"), result => panelClasses = result);
