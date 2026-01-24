@@ -16,27 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classes } from "@utils/misc";
-import { Button } from "@webpack/common";
+import { findComponentByCodeLazy } from "@webpack";
 import React, { JSX } from "react";
 
-import { panelClasses } from "../../../philsPluginLibrary";
+const PanelButton = findComponentByCodeLazy(".GREEN,positionKeyStemOverride:");
 
 export type IconComponent = <T extends { className: string; }>(props: T) => JSX.Element;
-export interface SettingsPanelButtonProps extends Partial<React.ComponentProps<typeof Button>> {
+export interface SettingsPanelButtonProps {
     icon?: IconComponent;
+    tooltipText?: string;
+    onClick?: () => void;
+    plated?: boolean;
 }
 
 export const SettingsPanelButton = (props: SettingsPanelButtonProps) => {
     return (
-        <Button
-            size={Button.Sizes.SMALL}
-            className={classes(panelClasses.button, panelClasses.buttonColor)}
-            innerClassName={classes(panelClasses.buttonContents)}
-            wrapperClassName={classes(panelClasses.button)}
-            {...props}
-        >
-            {props.icon && <props.icon className={classes(panelClasses.buttonIcon)} />}
-        </Button>
+        <PanelButton
+            tooltipText={props.tooltipText}
+            icon={props.icon}
+            onClick={props.onClick}
+            plated={props.plated}
+        />
     );
 };
