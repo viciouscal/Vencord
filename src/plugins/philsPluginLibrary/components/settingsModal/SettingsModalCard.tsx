@@ -17,7 +17,8 @@
 */
 
 import { Switch } from "@components/Switch";
-import { Card, Forms } from "@webpack/common";
+import { Card } from "@components/Card";
+import { Forms } from "@webpack/common";
 import React from "react";
 
 export interface SettingsModalItemProps extends Pick<React.ComponentProps<"div">,
