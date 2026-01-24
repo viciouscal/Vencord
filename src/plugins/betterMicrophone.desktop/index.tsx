@@ -19,11 +19,11 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-import { addSettingsPanelButton, Emitter, MicrophoneSettingsIcon, removeSettingsPanelButton } from "../philsPluginLibrary";
-import { PluginInfo } from "./constants";
-import { openMicrophoneSettingsModal } from "./modals";
-import { MicrophonePatcher } from "./patchers";
-import { initMicrophoneStore } from "./stores";
+import { addSettingsPanelButton, Emitter, MicrophoneSettingsIcon, removeSettingsPanelButton } from "@plugins/philsPluginLibrary";
+import { PluginInfo } from "@plugins/betterMicrophone.desktop/constants";
+import { openMicrophoneSettingsModal } from "@plugins/betterMicrophone.desktop/modals";
+import { MicrophonePatcher } from "@plugins/betterMicrophone.desktop/patchers";
+import { initMicrophoneStore } from "@plugins/betterMicrophone.desktop/stores";
 
 export default definePlugin({
     name: "BetterMicrophone",
@@ -35,7 +35,12 @@ export default definePlugin({
 
         this.microphonePatcher = new MicrophonePatcher().patch();
 
-        addSettingsPanelButton({ name: PluginInfo.PLUGIN_NAME, icon: MicrophoneSettingsIcon, tooltipText: "Microphone Settings", onClick: openMicrophoneSettingsModal });
+        addSettingsPanelButton({ 
+            name: PluginInfo.PLUGIN_NAME, 
+            icon: MicrophoneSettingsIcon, 
+            tooltipText: "Microphone Settings", 
+            onClick: openMicrophoneSettingsModal 
+        });
     },
     stop(): void {
         this.microphonePatcher?.unpatch();
