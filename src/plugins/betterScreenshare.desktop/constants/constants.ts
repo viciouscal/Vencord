@@ -28,7 +28,11 @@ export const PluginInfo = {
         github: "https://github.com/viciouscal"
     },
     CONTRIBUTORS: {
-        
+                philhk: {
+            github: "https://github.com/philhk",
+            id: 305288513941667851n,
+            name: "philhk"
+        },
      },
     README: "https://github.com/viciouscal/Vencord/tree/main/src/plugins/betterScreenshare.desktop"
 } as const satisfies types.PluginInfo;
