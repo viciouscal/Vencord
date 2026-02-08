@@ -18,7 +18,7 @@ import { ChannelStore, Menu, SelectedChannelStore } from "@webpack/common";
 
 import { SetColorModal } from "./SetColorModal";
 
-export const DATASTORE_KEY = "equicord-customcolors";
+export const DATASTORE_KEY = "customcolors";
 export let colors: Record<string, string> = {};
 
 (async () => {
@@ -200,3 +200,4 @@ export default definePlugin({
         return getCustomColorString(id, true);
     },
 });
+
