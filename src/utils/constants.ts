@@ -140,6 +140,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "fres",
         id: 843448897737064448n
     },
+        mochienya: {
+        name: "mochie",
+        id: 1043599230247374869n
+    },
         Drag: {
         name: "dragalt_",
         id: 1189903210564038697n
