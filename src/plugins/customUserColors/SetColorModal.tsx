@@ -4,199 +4,80 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./styles.css";
+import { set } from "@api/DataStore";
+import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
+import { classNameFactory } from "@utils/css";
+import { Margins } from "@utils/margins";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
+import { Button, ColorPicker, useState } from "@webpack/common";
 
-import { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { get } from "@api/DataStore";
-import { definePluginSettings, Settings } from "@api/Settings";
-import { Devs } from "@utils/constants";
-import { openModal } from "@utils/modal";
-import definePlugin, { OptionType } from "@utils/types";
-import { Channel, User } from "@vencord/discord-types";
-import { extractAndLoadChunksLazy } from "@webpack";
-import { ChannelStore, Menu, SelectedChannelStore } from "@webpack/common";
+import { colors, DATASTORE_KEY } from "./index";
 
-import { SetColorModal } from "./SetColorModal";
+const cl = classNameFactory("vc-customColors-");
 
-export const DATASTORE_KEY = "equicord-customcolors";
-export let colors: Record<string, string> = {};
+export function SetColorModal({ id, modalProps }: { id: string, modalProps: ModalProps; }) {
+    const initialColor = parseInt(colors[id], 16) || 372735;
+    // color picker default to current color set for user (if null it's 0x05afff :3 )
 
-(async () => {
-    colors = await get<Record<string, string>>(DATASTORE_KEY) || {};
-})();
+    const [colorPickerColor, setColorPickerColor] = useState(initialColor);
+    // hex color code as an int (NOT rgb 0-255)
 
-// needed for color picker to be available without opening settings (ty pindms!!)
-const requireSettingsMenu = extractAndLoadChunksLazy(['type:"USER_SETTINGS_MODAL_OPEN"']);
-const ColorIcon = () => {
-    return (
-        <svg
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-            width="18"
-            height="18"
-        >
-            <path d="m9.17 12.67 2.16 2.16a1 1 0 0 0 .99.25l2.57-.75A3 3 0 0 0 16.6 13l4.91-8.05a1.8 1.8 0 0 0-2.47-2.47L11 7.39a3 3 0 0 0-1.32 1.72l-.75 2.57a1 1 0 0 0 .25.99ZM8.03 13.14c.27.07.51.23.7.43l1.7 1.7c.2.19.36.43.43.7A4 4 0 0 1 7 21H2a1 1 0 1 1 0-2c.68 0 1.13-.77 1.04-1.44a4 4 0 0 1 5-4.42Z" />
-        </svg>
-    );
-};
-
-const userContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: { user: User; }) => {
-    if (user?.id == null) return;
-
-    const setCustomColorItem = (
-        <Menu.MenuItem
-            label="Set Color"
-            id="set-color"
-            icon={ColorIcon}
-            action={async () => {
-                await requireSettingsMenu();
-                openModal(modalProps => <SetColorModal id={user.id} modalProps={modalProps} />);
-            }}
-        />
-    );
-
-    children.push(<Menu.MenuSeparator />, setCustomColorItem);
-};
-
-const channelContextMenuPatch: NavContextMenuPatchCallback = (children, { channel }: { channel: Channel; }) => {
-    if (channel?.id == null) return;
-
-    const setCustomColorItem = (
-        <Menu.MenuItem
-            label="Set Color"
-            id="set-color"
-            icon={ColorIcon}
-            action={async () => {
-                await requireSettingsMenu();
-                openModal(modalProps => <SetColorModal id={channel.id} modalProps={modalProps} />);
-            }}
-        />
-    );
-
-    children.push(<Menu.MenuSeparator />, setCustomColorItem);
-};
-
-export function getCustomColorString(id: string | undefined, withHash?: boolean): string | undefined {
-    if (!id) return;
-    if (!colors[id] || !Settings.plugins.CustomUserColors.enabled) return;
-    if (withHash) return `#${colors[id]}`;
-    return colors[id];
-}
-
-const settings = definePluginSettings({
-    dmList: {
-        type: OptionType.BOOLEAN,
-        description: "Users with custom colors defined will have their name in the dm list colored",
-        default: true,
-    },
-    colorInServers: {
-        type: OptionType.BOOLEAN,
-        description: "If name colors should be changed within servers",
-        default: true,
+    function setUserColor(color: number) {
+        setColorPickerColor(color);
     }
-});
 
-export default definePlugin({
-    name: "CustomUserColors",
-    description: "Lets you add a custom color to any user, anywhere! Highly recommend to use with typingTweaks and roleColorEverywhere",
-    authors: [Devs.mochienya],
-    contextMenus: {
-        "user-context": userContextMenuPatch,
-        "gdm-context": channelContextMenuPatch,
-    },
-    settings,
-    requireSettingsMenu,
-    getCustomColorString,
+    function handleKey(e: KeyboardEvent) {
+        if (e.key === "Enter")
+            saveUserColor();
+    }
 
-    patches: [
-        {
-            // this also affects name headers in chats outside of servers
-            find: '="SYSTEM_TAG"',
-            replacement: {
-                // Override colorString with our custom color and disable gradients if applying the custom color.
-                match: /(?<=colorString:\i,colorStrings:\i,colorRoleName:\i.*?}=)(\i),/,
-                replace: "$self.wrapMessageColorProps($1, arguments[0]),"
-            },
-            predicate: () => !Settings.plugins.IrcColors.enabled,
-            noWarn: true
-        },
-        {
-            find: "PrivateChannel.renderAvatar",
-            replacement: {
-                match: /(\i\]:\i\}\),children:\i\}\),)(?=.{0,100}isSystemDM\(\))/,
-                replace: "$1style:{color:`${$self.colorDMList(arguments[0])}`},"
-            },
-            predicate: () => settings.store.dmList,
-        },
-        {
-            find: '"AvatarWithText"',
-            replacement: [
-                {
-                    match: /(\}=\i)/,
-                    replace: ",style$1"
-                },
-                {
-                    match: /(?<="div",\{className:\i\.\i,)(?=children:\[)/,
-                    replace: "style:style||{},"
-                },
-            ],
-            predicate: () => settings.store.dmList,
-        },
-        {
-            find: '"Reply Chain Nudge")',
-            replacement: {
-                match: /(className:.{0,15},colorString:)(\i),/,
-                replace: "$1$self.colorInReplyingTo(arguments[0]) ?? $2,",
-            },
-        },
-    ],
+    async function saveUserColor() {
+        colors[id] = colorPickerColor.toString(16).padStart(6, "0");
+        await set(DATASTORE_KEY, colors);
+        modalProps.onClose();
+    }
 
-    wrapMessageColorProps(colorProps: { colorString: string, colorStrings?: Record<"primaryColor" | "secondaryColor" | "tertiaryColor", string>; }, context: any) {
-        try {
-            const channelId = SelectedChannelStore.getChannelId();
-            const channel = ChannelStore.getChannel(channelId);
-            const isDM = channel.isDM() || channel.isMultiUserDM();
-            const colorString = this.colorIfServer(context);
-            if (colorString === colorProps.colorString) return colorProps;
-            if (!settings.store.colorInServers && !isDM) return colorProps;
+    async function deleteUserColor() {
+        delete colors[id];
+        await set(DATASTORE_KEY, colors);
+        modalProps.onClose();
+    }
 
-            return {
-                ...colorProps,
-                colorString,
-                colorStrings: colorProps.colorStrings && {
-                    primaryColor: colorString,
-                    secondaryColor: undefined,
-                    tertiaryColor: undefined
-                }
-            };
-        } catch (e) {
-            console.error("Failed to calculate message color strings:", e);
-            return colorProps;
-        }
-    },
+    return (
+        <ModalRoot {...modalProps}>
+            <ModalHeader className={cl("modal-header")}>
+                <HeadingPrimary>
+                    Custom Color
+                </HeadingPrimary>
+                <ModalCloseButton onClick={modalProps.onClose} />
+            </ModalHeader>
+            <ModalContent className={cl("modal-content")} onKeyDown={handleKey}>
+                <section className={Margins.bottom16}>
+                    <HeadingSecondary>
+                        Pick a Color
+                    </HeadingSecondary>
+                    <ColorPicker
+                        color={colorPickerColor}
+                        onChange={setUserColor}
+                        showEyeDropper={false}
+                    />
+                </section>
+            </ModalContent>
 
-    colorDMList(context: any): string | undefined {
-        const id = context?.user?.id ?? context?.channel?.id;
-        const colorString = getCustomColorString(id, true);
-
-        return colorString ?? "inherit";
-    },
-
-    colorIfServer(context: any): string | undefined {
-        const userId = context?.message?.author?.id;
-        const colorString = context?.author?.colorString;
-
-        if (context?.message?.channel_id === "1337" && userId === "313337") return colorString;
-
-        if (context?.channel?.guild_id && !settings.store.colorInServers) return colorString;
-
-        const color = getCustomColorString(userId, true);
-        return color ?? colorString ?? undefined;
-    },
-
-    colorInReplyingTo(a: any) {
-        const { id } = a.reply.message.author;
-        return getCustomColorString(id, true);
-    },
-});
+            <ModalFooter className={cl("modal-footer")}>
+                <Button
+                    color={Button.Colors.RED}
+                    onClick={deleteUserColor}
+                >
+                    Delete Entry
+                </Button>
+                <Button
+                    color={Button.Colors.BRAND}
+                    onClick={saveUserColor}
+                >
+                    Save
+                </Button>
+            </ModalFooter>
+        </ModalRoot>
+    );
+}
