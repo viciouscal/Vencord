@@ -132,6 +132,18 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "mantikafasi",
         id: 287555395151593473n
     },
+        desu: {
+        name: "desu",
+        id: 526331463709360141n
+    },
+        Fres: {
+        name: "fres",
+        id: 843448897737064448n
+    },
+        Drag: {
+        name: "dragalt_",
+        id: 1189903210564038697n
+    },
     Xinto: {
         name: "Xinto",
         id: 423915768191647755n
