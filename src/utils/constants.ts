@@ -58,6 +58,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         unknown: {
         name: "unknown",
         id: 400538965041741825n
+        badge: false
     },
     Apexo: {
         name: "Apexo",
