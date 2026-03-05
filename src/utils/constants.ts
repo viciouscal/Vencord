@@ -55,6 +55,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "viciouscal",
         id: 883820228360929320n
     },
+        unknown: {
+        name: "unknown",
+        id: 400538965041741825n
+    },
     Apexo: {
         name: "Apexo",
         id: 228548952687902720n
