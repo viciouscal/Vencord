@@ -55,10 +55,14 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "viciouscal",
         id: 883820228360929320n
     },
-        unknown: {
+    unknown: {
         name: "unknown",
         id: 400538965041741825n,
         badge: false
+    },
+    coll: {
+        name: "stealingweed",
+        id: 1058459294640648192n
     },
     Apexo: {
         name: "Apexo",
