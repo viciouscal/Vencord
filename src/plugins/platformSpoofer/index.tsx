@@ -34,6 +34,10 @@ const settings = definePluginSettings({
                 label: "Console",
                 value: "embedded",
             },
+            {
+                label: "VR",
+                value: "vr",
+            },
         ]
     }
 });
@@ -79,6 +83,10 @@ export default definePlugin({
                     return { browser: "Discord iOS", vcIcon: 1 };
                 case "embedded":
                     return { browser: "Discord Embedded" };
+                case "vr":
+                    return { browser: "Discord VR" };
+                default:
+                    return null;
             }
         }
 
