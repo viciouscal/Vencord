@@ -157,6 +157,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "mochie",
         id: 1043599230247374869n
     },
+        Etorix: {
+        name: "Etorix",
+        id: 94597845868355584n
+    },
         Drag: {
         name: "dragalt_",
         id: 1189903210564038697n
