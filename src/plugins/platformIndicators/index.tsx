@@ -42,6 +42,7 @@ export interface Session {
 const SessionsStore = findStoreLazy("SessionsStore") as {
     getSessions(): Record<string, Session>;
 };
+
 const { useStatusFillColor } = mapMangledModuleLazy([".5625*", "translate"], {
     useStatusFillColor: filters.byCode(".hex")
 });
@@ -132,9 +133,7 @@ function getPlatformTooltip(platform: DiscordPlatform): string {
 
 const PlatformIcon = ({ platform, status, small }: { platform: DiscordPlatform, status: OnlineStatus; small: boolean; }) => {
     const tooltip = getPlatformTooltip(platform as DiscordPlatform);
-
     const Icon = Icons[platform] ?? Icons.desktop;
-
     return <Icon color={useStatusFillColor(status)} tooltip={tooltip} small={small} />;
 };
 
@@ -163,12 +162,11 @@ function ensureOwnStatus(user: User) {
 }
 
 function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
+    if (Settings.plugins.PlatformIndicators.profileLocation === "next-to-name") return [];
+
     const user = UserStore.getUser(userId);
-
     if (!user || user.bot) return [];
-
     ensureOwnStatus(user);
-
     const status = PresenceStore.getClientStatus(user.id);
     if (!status) return [];
 
@@ -206,13 +204,38 @@ const PlatformIndicator = ({ user, small = false }: { user: User; small?: boolea
     if (!icons.length) return null;
 
     return (
-        <span
-            className="vc-platform-indicator"
-            style={{ gap: "2px" }}
-        >
+        <span className="vc-platform-indicator" style={{ gap: "2px" }}>
             {icons}
         </span>
     );
+};
+
+const badge: ProfileBadge = {
+    getBadges,
+    position: BadgePosition.START,
+};
+
+const indicatorLocations = {
+    list: {
+        description: "In the member list",
+        onEnable: () => addMemberListDecorator("platform-indicator", ({ user }) =>
+            user && !user.bot ? <PlatformIndicator user={user} small={true} /> : null
+        ),
+        onDisable: () => removeMemberListDecorator("platform-indicator")
+    },
+    badges: {
+        description: "In user profiles",
+        onEnable: () => addProfileBadge(badge),
+        onDisable: () => removeProfileBadge(badge)
+    },
+    messages: {
+        description: "Inside messages",
+        onEnable: () => addMessageDecoration("platform-indicator", props => {
+            const user = props.message?.author;
+            return user && !user.bot ? <PlatformIndicator user={props.message?.author} /> : null;
+        }),
+        onDisable: () => removeMessageDecoration("platform-indicator")
+    }
 };
 
 export default definePlugin({
@@ -235,18 +258,48 @@ export default definePlugin({
         });
     },
 
+    _getIcons(userId: string) {
+        if (Settings.plugins.PlatformIndicators.profileLocation === "with-badges") return [];
+        if (!userId) return [];
+        const user = UserStore.getUser(userId);
+        if (!user || user.bot) return [];
+        ensureOwnStatus(user);
+        const status = PresenceStore.getClientStatus(userId);
+        if (!status) return [];
+        return Object.entries(status).map(([platform, st]) => (
+            <PlatformIcon
+                key={platform}
+                platform={platform as DiscordPlatform}
+                status={st as OnlineStatus}
+                small={false}
+            />
+        ));
+    },
+
     patches: [
+        {
+            find: "#{intl::USER_PROFILE_PRONOUNS}",
+            predicate: () => Settings.plugins.PlatformIndicators.badges,
+            replacement: [
+                {
+                    match: /(?<=,\i\]\}\)\),)null!=\i/,
+                    replace: "($&||Vencord.Plugins.plugins[\"PlatformIndicators\"]._getIcons(arguments[0].user?.id)?.length)"
+                },
+                {
+                    match: /(?<=shouldUnderlineOnHover:null.{0,300})children:(\i)/,
+                    replace: "children:[...Vencord.Plugins.plugins[\"PlatformIndicators\"]._getIcons(arguments[0].user?.id),$1]"
+                }
+            ]
+        },
         {
             find: ".Masks.STATUS_ONLINE_MOBILE",
             predicate: () => settings.store.colorMobileIndicator,
             replacement: [
                 {
-                    // Return the STATUS_ONLINE_MOBILE mask if the user is on mobile, no matter the status
                     match: /\.STATUS_TYPING;switch(?=.+?(if\(\i\)return \i\.\i\.Masks\.STATUS_ONLINE_MOBILE))/,
                     replace: ".STATUS_TYPING;$1;switch"
                 },
                 {
-                    // Return the STATUS_ONLINE_MOBILE mask if the user is on mobile, no matter the status
                     match: /switch\(\i\)\{case \i\.\i\.ONLINE:(if\(\i\)return\{[^}]+\})/,
                     replace: "$1;$&"
                 }
@@ -257,17 +310,14 @@ export default definePlugin({
             predicate: () => settings.store.colorMobileIndicator,
             replacement: [
                 {
-                    // Return the AVATAR_STATUS_MOBILE size mask if the user is on mobile, no matter the status
                     match: /\i===\i\.\i\.ONLINE&&(?=.{0,70}\.AVATAR_STATUS_MOBILE_16;)/,
                     replace: ""
                 },
                 {
-                    // Fix sizes for mobile indicators which aren't online
                     match: /(?<=\(\i\.status,)(\i)(?=,\{.{0,15}isMobile:(\i))/,
                     replace: '$2?"online":$1'
                 },
                 {
-                    // Make isMobile true no matter the status
                     match: /(?<=\i&&!\i)&&\i===\i\.\i\.ONLINE/,
                     replace: ""
                 }
@@ -277,10 +327,44 @@ export default definePlugin({
             find: "}isMobileOnline(",
             predicate: () => settings.store.colorMobileIndicator,
             replacement: {
-                // Make isMobileOnline return true no matter what is the user status
                 match: /(?<=\i\[\i\.\i\.MOBILE\])===\i\.\i\.ONLINE/,
                 replace: "!= null"
             }
         }
-    ]
+    ],
+
+    options: {
+        ...Object.fromEntries(
+            Object.entries(indicatorLocations).map(([key, value]) => {
+                return [key, {
+                    type: OptionType.BOOLEAN,
+                    description: `Show indicators ${value.description.toLowerCase()}`,
+                    restartNeeded: true,
+                    default: true
+                }];
+            })
+        ),
+        colorMobileIndicator: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to make the mobile indicator match the color of the user status.",
+            default: true,
+            restartNeeded: true
+        },
+        profileLocation: {
+            type: OptionType.SELECT,
+            description: "Where to show the indicator in user profiles",
+            restartNeeded: true,
+            options: [
+                {
+                    label: "Next to Name",
+                    value: "next-to-name",
+                    default: true
+                },
+                {
+                    label: "With Badges",
+                    value: "with-badges"
+                }
+            ]
+        }
+    }
 });
