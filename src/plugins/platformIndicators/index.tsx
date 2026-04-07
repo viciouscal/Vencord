@@ -18,6 +18,7 @@
 
 import "./style.css";
 
+import { addNicknameIcon, removeNicknameIcon } from "@api/NicknameIcons";
 import { addProfileBadge, BadgePosition, BadgeUserArgs, ProfileBadge, removeProfileBadge } from "@api/Badges";
 import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
@@ -243,54 +244,42 @@ export default definePlugin({
     description: "Adds platform indicators (Desktop, Mobile, Web...) to users",
     tags: ["Appearance"],
     authors: [Devs.kemo, Devs.TheSun, Devs.Nuckyz, Devs.Ven],
-    dependencies: ["MessageDecorationsAPI", "MemberListDecoratorsAPI"],
-    settings,
+    dependencies: ["MessageDecorationsAPI", "MemberListDecoratorsAPI", "NicknameIconsAPI"],
 
     start() {
         Object.entries(indicatorLocations).forEach(([key, value]) => {
             if (settings.store[key]) value.onEnable();
         });
+
+        if (settings.profileLocation === "next-to-name") {
+            addNicknameIcon("PlatformIndicators", ({ userId }) => {
+                const user = UserStore.getUser(userId);
+                if (!user || user.bot) return null;
+                ensureOwnStatus(user);
+                const status = PresenceStore.getClientStatus(userId);
+                if (!status) return null;
+                const icons = Object.entries(status).map(([platform, st]) => (
+                    <PlatformIcon
+                        key={platform}
+                        platform={platform as DiscordPlatform}
+                        status={st as OnlineStatus}
+                        small={false}
+                    />
+                ));
+                if (!icons.length) return null;
+                return <span className="vc-platform-indicator" style={{ gap: "2px" }}>{icons}</span>;
+            }, -1); 
+        }
     },
 
     stop() {
         Object.entries(indicatorLocations).forEach(([_, value]) => {
             value.onDisable();
         });
-    },
-
-    _getIcons(userId: string) {
-        if (Settings.plugins.PlatformIndicators.profileLocation === "with-badges") return [];
-        if (!userId) return [];
-        const user = UserStore.getUser(userId);
-        if (!user || user.bot) return [];
-        ensureOwnStatus(user);
-        const status = PresenceStore.getClientStatus(userId);
-        if (!status) return [];
-        return Object.entries(status).map(([platform, st]) => (
-            <PlatformIcon
-                key={platform}
-                platform={platform as DiscordPlatform}
-                status={st as OnlineStatus}
-                small={false}
-            />
-        ));
+        removeNicknameIcon("PlatformIndicators");
     },
 
     patches: [
-        {
-            find: "#{intl::USER_PROFILE_PRONOUNS}",
-            predicate: () => Settings.plugins.PlatformIndicators.badges,
-            replacement: [
-                {
-                    match: /(?<=,\i\]\}\)\),)null!=\i/,
-                    replace: "($&||Vencord.Plugins.plugins[\"PlatformIndicators\"]._getIcons(arguments[0].user?.id)?.length)"
-                },
-                {
-                    match: /(?<=shouldUnderlineOnHover:null.{0,300})children:(\i)/,
-                    replace: "children:[...Vencord.Plugins.plugins[\"PlatformIndicators\"]._getIcons(arguments[0].user?.id),$1]"
-                }
-            ]
-        },
         {
             find: ".Masks.STATUS_ONLINE_MOBILE",
             predicate: () => settings.store.colorMobileIndicator,
