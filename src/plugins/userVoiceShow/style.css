@@ -16,12 +16,6 @@
 .vc-uvs-profile-speaker {
     width: var(--custom-nickname-icon-size);
     height: var(--custom-nickname-icon-size);
-    display: inline-flex;
-    align-items: center;
-    vertical-align: middle;
-    margin-left: 5px;
-    margin-bottom: 2px;
-    transform: scale(1.1);
 }
 
 .vc-uvs-tooltip-container {
