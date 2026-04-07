@@ -18,6 +18,7 @@
 
 import "./style.css";
 
+import { addNicknameIcon, removeNicknameIcon } from "@api/NicknameIcons";
 import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
 import { definePluginSettings } from "@api/Settings";
@@ -51,50 +52,24 @@ export default definePlugin({
     name: "UserVoiceShow",
     description: "Shows an indicator when a user is in a Voice Channel",
     authors: [Devs.Nuckyz, Devs.LordElias],
-    dependencies: ["MemberListDecoratorsAPI", "MessageDecorationsAPI"],
+    dependencies: ["MemberListDecoratorsAPI", "MessageDecorationsAPI", "NicknameIconsAPI"],
     settings,
 
     patches: [
-        // User Popout, User Profile Modal, Direct Messages Side Profile
-        {
-            find: "#{intl::USER_PROFILE_PRONOUNS}",
-            replacement: {
-                match: /(?<=children:\[\i," ",\i)(?=\])/,
-                replace: ",$self.VoiceChannelIndicator({userId:arguments[0]?.user?.id,isProfile:true})"
-            },
-            predicate: () => settings.store.showInUserProfileModal
-        },
-        // To use without the MemberList decorator API
-        /* // Guild Members List
-        {
-            find: ".lostPermission)",
-            replacement: {
-                match: /\.lostPermission\).+?(?=avatar:)/,
-                replace: "$&children:[$self.VoiceChannelIndicator({userId:arguments[0]?.user?.id})],"
-            },
-            predicate: () => settings.store.showVoiceChannelIndicator
-        },
-        // Direct Messages List
-        {
-            find: "PrivateChannel.renderAvatar",
-            replacement: {
-                match: /#{intl::CLOSE_DM}.+?}\)(?=])/,
-                replace: "$&,$self.VoiceChannelIndicator({userId:arguments[0]?.user?.id})"
-            },
-            predicate: () => settings.store.showVoiceChannelIndicator
-        }, */
-        // Friends List
         {
             find: "null!=this.peopleListItemRef.current",
+            predicate: () => settings.store.showInMemberList,
             replacement: {
                 match: /\.isProvisional.{0,50}?className:\i\.\i,children:\[(?<=isFocused:(\i).+?)/,
                 replace: "$&$self.VoiceChannelIndicator({userId:this?.props?.user?.id,isActionButton:true,shouldHighlight:$1}),"
-            },
-            predicate: () => settings.store.showInMemberList
+            }
         }
     ],
 
     start() {
+        if (settings.store.showInUserProfileModal) {
+            addNicknameIcon("UserVoiceShow", ({ userId }) => <VoiceChannelIndicator userId={userId} isProfile />);
+        }
         if (settings.store.showInMemberList) {
             addMemberListDecorator("UserVoiceShow", ({ user }) => user == null ? null : <VoiceChannelIndicator userId={user.id} />);
         }
@@ -104,6 +79,7 @@ export default definePlugin({
     },
 
     stop() {
+        removeNicknameIcon("UserVoiceShow");
         removeMemberListDecorator("UserVoiceShow");
         removeMessageDecoration("UserVoiceShow");
     },
