@@ -27,6 +27,7 @@ import * as $MessageDecorations from "./MessageDecorations";
 import * as $MessageEventsAPI from "./MessageEvents";
 import * as $MessagePopover from "./MessagePopover";
 import * as $MessageUpdater from "./MessageUpdater";
+import * as $NicknameIcons from "./NicknameIcons";
 import * as $Notices from "./Notices";
 import * as $Notifications from "./Notifications";
 export * as PluginManager from "./PluginManager";
@@ -129,3 +130,7 @@ export const UserSettings = $UserSettings;
  * Don't use this
  */
 export const Themes = $Themes;
+/**
+ * An API allowing you to add icons to the nickname, in profiles.
+ */
+export const NicknameIcons = $NicknameIcons;
