@@ -45,42 +45,34 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "PlatformSpoofer",
     description: "Spoof what platform or device you're on",
-    authors: [Devs.Drag, Devs.viciouscal],
+    authors: [Devs.Drag, Devs.neoarz, Devs.viciouscal],
     settings: settings,
     patches: [
         {
             find: "_doIdentify(){",
-            replacement: {
-                match: /(\[IDENTIFY\].*let.{0,5}=\{.*properties:)(.*),presence/,
-                replace: "$1{...$2,...$self.getPlatform(true)},presence"
-            }
+            replacement: [
+                {
+                    match: /window._ws=null,null!=\i/,
+                    replace: "false"
+                },
+                {
+                    match: /(?<="GatewaySocket"\)\}\),properties:)(\i)/,
+                    replace: "{...$1,...$self.getPlatform(true)}"
+                },
+            ]
         },
-        {
-            find: "#{intl::POPOUT_STAY_ON_TOP}),icon:",
-            replacement: {
-                match: /(?<=CallTile.{0,15}\.memo\((\i)=>\{)/,
-                replace: "$1.platform = $self.getPlatform(false, $1?.participantUserId)?.vcIcon || $1?.platform;"
-            }
-        },
-        {
-            find: '("AppSkeleton");',
-            replacement: {
-                match: /(?<=\.isPlatformEmbedded.{0,50}\i\)\)\}.{0,30})\i\?\i\.\i\.set\(.{0,10}:/,
-                replace: ""
-            }
-        }
     ],
     getPlatform(bypass, userId?: any) {
         const platform = settings.store.platform ?? "desktop";
 
-        if (bypass || userId === UserStore.getCurrentUser().id) {
+        if (bypass) {
             switch (platform) {
                 case "desktop":
-                    return { browser: "Discord Client", vcIcon: 0 };
+                    return { browser: "Discord Client" };
                 case "web":
-                    return { browser: "Chrome", vcIcon: 0 };
+                    return { browser: "Chrome" };
                 case "mobile":
-                    return { browser: "Discord iOS", vcIcon: 1 };
+                    return { browser: "Discord iOS" };
                 case "embedded":
                     return { browser: "Discord Embedded" };
                 case "vr":
