@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { CodeBlock } from "@components/CodeBlock";
 import { Divider } from "@components/Divider";
@@ -124,36 +124,31 @@ const settings = definePluginSettings({
             { label: "Left Click to view the raw content.", value: "Left", default: true },
             { label: "Right click to view the raw content.", value: "Right" }
         ]
-    },
-    messageContextMenu: {
-        description: "Show in message context menu",
-        type: OptionType.BOOLEAN,
-        default: false
     }
 });
 
-function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel" | "Message"): NavContextMenuPatchCallback {
+function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel"): NavContextMenuPatchCallback {
     return (children, props) => {
         const value = props[name.toLowerCase()];
         if (!value) return;
         if (props.label === getIntlMessage("CHANNEL_ACTIONS_MENU_LABEL")) return; // random shit like notification settings
-        const isMessage = name === "Message";
-        if (isMessage && !settings.store.messageContextMenu) return;
 
+        const lastChild = children.at(-1);
+        if (lastChild?.key === "developer-actions") {
+            const p = lastChild.props;
+            if (!Array.isArray(p.children))
+                p.children = [p.children];
+
+            children = p.children;
+        }
 
         // typescript parser goes crazy if this is inline
         const id = `vc-view-${name.toLowerCase()}-raw`;
-        const action = isMessage
-            ? () => openViewRawModalMessage(value)
-            : () => openViewRawModal(JSON.stringify(value, null, 4), name);
-
-        const devContainer = findGroupChildrenByChildId(`devmode-copy-id-${value.id}`, children);
-
-        (devContainer ?? children).splice(-1, 0,
+        children.splice(-1, 0,
             <Menu.MenuItem
                 id={id}
                 label="View Raw"
-                action={action}
+                action={() => openViewRawModal(JSON.stringify(value, null, 4), name)}
                 icon={CopyIcon}
             />
         );
@@ -180,7 +175,6 @@ const devContextCallback: NavContextMenuPatchCallback = (children, { id }: { id:
 export default definePlugin({
     name: "ViewRaw",
     description: "Copy and view the raw content/data of any message, channel or guild",
-    tags: ["Chat", "Developers"],
     authors: [Devs.KingFish, Devs.Ven, Devs.rad, Devs.ImLvna],
     settings,
 
@@ -191,8 +185,7 @@ export default definePlugin({
         "thread-context": MakeContextCallback("Channel"),
         "gdm-context": MakeContextCallback("Channel"),
         "user-context": MakeContextCallback("User"),
-        "dev-context": devContextCallback,
-        "message": MakeContextCallback("Message"),
+        "dev-context": devContextCallback
     },
 
     messagePopoverButton: {

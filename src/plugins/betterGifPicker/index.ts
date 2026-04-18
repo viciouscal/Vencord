@@ -11,7 +11,6 @@ export default definePlugin({
     name: "BetterGifPicker",
     description: "Makes the gif picker open the favourite category by default",
     authors: [Devs.Samwich],
-    tags: ["Emotes", "Customisation"],
     patches: [
         {
             find: "renderHeaderContent(){",

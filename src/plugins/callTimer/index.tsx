@@ -110,9 +110,8 @@ migratePluginToSettings(false, "CallTimer", "AllCallTimers", "allCallTimers");
 migrateSettingsFromPlugin("CallTimer", "AllCallTimers", "showWithoutHover", "showRoleColor", "trackSelf", "showSeconds", "watchLargeGuilds");
 export default definePlugin({
     name: "CallTimer",
-    description: "Adds a timer to vcs",
-    tags: ["Voice", "Utility"],
-    authors: [Devs.Ven],
+    description: "Add call timers for all users in voice channels and in the connection status.",
+    authors: [Devs.Ven, Devs.MaxHerbold, Devs.D3SOX],
     managedStyle: alignedChatInputFix,
     settings,
 
