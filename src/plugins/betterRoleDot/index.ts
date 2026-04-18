@@ -41,8 +41,6 @@ export default definePlugin({
     authors: [Devs.Ven, Devs.AutumnVN],
     description:
         "Copy role colour on RoleDot (accessibility setting) click. Also allows using both RoleDot and coloured names simultaneously",
-    tags: ["Roles", "Appearance"],
-    settings,
 
     patches: [
         {
