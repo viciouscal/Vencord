@@ -22,26 +22,26 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config core.editor true
 
       - name: Add Upstream
         run: |
           git remote add upstream https://github.com/Vendicated/Vencord.git || true
           git fetch upstream
 
-      - name: Backup Custom Files
-        run: |
-          git diff --name-only HEAD upstream/main | grep -v "^src/plugins/" > /tmp/changed_files.txt || true
-          cp -r src/plugins /tmp/my_plugins
+      - name: Backup Custom Plugins
+        run: cp -r src/plugins /tmp/my_plugins
 
-      - name: Rebase onto Upstream
+      - name: Sync with Upstream
         run: |
-          git rebase upstream/main || (
-            git checkout --theirs . &&
-            git restore --staged src/plugins/ &&
-            git checkout HEAD -- src/plugins/ &&
-            git add . &&
-            git rebase --continue
-          )
+          git rebase upstream/main || true
+          while [ -d .git/rebase-merge ] || [ -d .git/rebase-apply ]; do
+            git checkout --theirs . || true
+            git restore --staged src/plugins/ || true
+            git checkout HEAD -- src/plugins/ || true
+            git add .
+            git rebase --continue || git rebase --skip
+          done
 
       - name: Restore Custom Plugins
         run: |
