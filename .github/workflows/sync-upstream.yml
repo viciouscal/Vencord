@@ -1,0 +1,53 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add Upstream
+        run: |
+          git remote add upstream https://github.com/Vendicated/Vencord.git || true
+          git fetch upstream
+
+      - name: Backup Custom Files
+        run: |
+          git diff --name-only HEAD upstream/main | grep -v "^src/plugins/" > /tmp/changed_files.txt || true
+          cp -r src/plugins /tmp/my_plugins
+
+      - name: Rebase onto Upstream
+        run: |
+          git rebase upstream/main || (
+            git checkout --theirs . &&
+            git restore --staged src/plugins/ &&
+            git checkout HEAD -- src/plugins/ &&
+            git add . &&
+            git rebase --continue
+          )
+
+      - name: Restore Custom Plugins
+        run: |
+          cp -r /tmp/my_plugins/* src/plugins/
+          git add src/plugins/
+          git diff --cached --quiet || git commit -m "chore: restore custom plugins after sync"
+
+      - name: Push
+        run: git push origin main --force
