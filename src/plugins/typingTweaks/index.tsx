@@ -114,7 +114,8 @@ migratePluginToSettings(true, "TypingTweaks", "AmITyping", "amITyping");
 export default definePlugin({
     name: "TypingTweaks",
     description: "Show avatars and role colours in the typing indicator",
-    authors: [Devs.zt, Devs.sadan, Devs.MrDiamond],
+    tags: ["Appearance", "Customisation"],
+    authors: [Devs.zt, Devs.sadan],
     settings,
     isModified: true,
 
