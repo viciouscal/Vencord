@@ -155,29 +155,14 @@ function getWordBoundary(origStr: string, offset: number) {
     return (!origStr[offset] || /\s/.test(origStr[offset])) ? "" : " ";
 }
 
-function CannotEmbedNoticeModal({ modalProps, resolve }: { modalProps: RenderModalProps; resolve: (value: boolean) => void; }) {
-    const s = settings.use(["disableEmbedPermissionCheck"]);
-    return (
-        <ConfirmModal
-            {...modalProps}
-            title="Hold on!"
-            subtitle="You are trying to send/edit a message that contains a FakeNitro emoji or sticker, however you do not have permissions to embed links in the current channel. Are you sure you want to send this message? Your FakeNitro items will appear as a link only."
-            confirmText="Send Anyway"
-            cancelText="Cancel"
-            onConfirm={() => resolve(true)}
-            onCloseCallback={() => setImmediate(() => resolve(false))}
-            checkboxProps={{
-                checked: s.disableEmbedPermissionCheck === true,
-                onChange: checked => s.disableEmbedPermissionCheck = checked
-            }}
-        />
-    );
-}
-
-function showCannotEmbedNotice() {
-    return new Promise<boolean>(resolve => {
-        openModal(props => <CannotEmbedNoticeModal modalProps={props} resolve={resolve} />);
-    });
+    return {
+        find: "canUseCustomStickersEverywhere:",
+        replacement: mapping.map(({ func, predicate }) => ({
+            match: new RegExp(String.raw`(?<=${func}:)\i`),
+            replace: "() => true",
+            predicate
+        }))
+    };
 }
 
 export default definePlugin({
@@ -189,34 +174,8 @@ export default definePlugin({
     settings,
 
     patches: [
-        {
-            find: "canUseCustomStickersEverywhere:",
-            replacement: [
-                {
-                    match: /(?<=canUseCustomStickersEverywhere:function\(\i\)\{)/,
-                    replace: "return true;",
-                    predicate: () => settings.store.enableStickerBypass
-                },
-                {
-                    match: /(?<=canUseHighVideoUploadQuality:function\(\i\)\{)/,
-                    replace: "return true;",
-                    predicate: () => settings.store.enableStreamQualityBypass
-                },
-                {
-                    match: /(?<=canStreamQuality:function\(\i,\i\)\{)/,
-                    replace: "return true;",
-                    predicate: () => settings.store.enableStreamQualityBypass
-                },
-                {
-                    match: /(?<=canUseClientThemes:function\(\i\)\{)/,
-                    replace: "return true;"
-                },
-                {
-                    match: /(?<=canUsePremiumAppIcons:function\(\i\)\{)/,
-                    replace: "return true;"
-                }
-            ],
-        },
+        // General bypass patches
+        makeBypassPatches(),
         // Patch the emoji picker in voice calls to not be bypassed by fake nitro
         {
             find: '.getByName("fork_and_knife")',
@@ -289,8 +248,8 @@ export default definePlugin({
             replacement: [
                 {
                     // Overwrite incoming connection settings proto with our local settings
-                    match: /(?<=CONNECTION_OPEN:function\((\i)\){)/,
-                    replace: (_, props) => `$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
+                    match: /function (\i)\((\i)\){(?=.*CONNECTION_OPEN:\1)/,
+                    replace: (m, funcName, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
                 },
                 {
                     // Overwrite non local proto changes with our local settings
@@ -387,7 +346,7 @@ export default definePlugin({
             predicate: () => settings.store.transformEmojis,
             replacement: {
                 // Add the fake nitro emoji notice
-                match: /(?<=emojiDescription:)(\i)(?<=\1=\(\i=>\{.+?\}\)\((\i)\)[,;].+?)/,
+                match: /(?<=emojiDescription:)(\i)(?<=\1=\i\((\i)\).+?)/,
                 replace: (_, reactNode, props) => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!${props}?.fakeNitroNode?.fake)`
             }
         },
