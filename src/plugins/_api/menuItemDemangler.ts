@@ -7,7 +7,6 @@
 import { Devs } from "@utils/constants";
 import { canonicalizeMatch } from "@utils/patches";
 import definePlugin from "@utils/types";
-import { Menu } from "@webpack/common";
 
 // duplicate values have multiple branches with different types. Just include all to be safe
 const nameMap = {
@@ -32,40 +31,38 @@ export default definePlugin({
         {
             find: "Menu API only allows Items",
             replacement: {
-                match: /(?<=(\(\i\.type===(\i\.\i)\).{0,50}?navigable:.+Menu API).+?)}$/s,
-                replace: (_, m) => {
-                    const registerCalls = [] as string[];
+                match: /function.{0,80}type===(\i\.\i)\).{0,50}navigable:.+?Menu API/s,
+                replace: (m, mod) => {
+                    const nameAssignments = [] as string[];
 
-                    const typeCheckRe = canonicalizeMatch(/\(\i\.type===(\i\.\i)\)/g); // if (t.type === m.MenuItem)
-                    const pushTypeRe = /type:"(\w+)"/g; // push({type:"item"})
+                    // if (t.type === m.MenuItem)
+                    const typeCheckRe = canonicalizeMatch(/\(\i\.type===(\i\.\i)\)/g);
+                    // push({type:"item"})
+                    const pushTypeRe = /type:"(\w+)"/g;
 
                     let typeMatch: RegExpExecArray | null;
+                    // for each if (t.type === ...)
                     while ((typeMatch = typeCheckRe.exec(m)) !== null) {
-                        const component = typeMatch[1];
+                        // extract the current menu item
+                        const item = typeMatch[1];
                         // Set the starting index of the second regex to that of the first to start
                         // matching from after the if
                         pushTypeRe.lastIndex = typeCheckRe.lastIndex;
-
                         // extract the first type: "..."
                         const type = pushTypeRe.exec(m)?.[1];
                         if (type && type in nameMap) {
                             const name = nameMap[type];
-                            registerCalls.push(`$self.registerMenuItem("${name}",${component})`);
+                            nameAssignments.push(`Object.defineProperty(${item},"name",{value:"${name}"})`);
                         }
                     }
-
-                    if (registerCalls.length < 6) {
-                        console.warn("[MenuItemDemanglerAPI] Expected to remap 6 items, only remapped", registerCalls.length);
+                    if (nameAssignments.length < 6) {
+                        console.warn("[MenuItemDemanglerAPI] Expected to at least remap 6 items, only remapped", nameAssignments.length);
                     }
 
-                    return `${registerCalls.join(";")};}`;
+                    // Merge all our redefines with the actual module
+                    return `${nameAssignments.join(";")};${m}`;
                 },
             },
         },
     ],
-
-    registerMenuItem(name: string, component: any) {
-        Object.defineProperty(component, "name", { value: name });
-        Menu[name] = component;
-    }
 });

@@ -44,7 +44,7 @@ export default definePlugin({
         {
             find: ".selectPreviousCommandOption(",
             replacement: {
-                match: /(?<=(\i)\.key!==\i\.\i.ENTER\|\|).{0,100}(\(0,\i\.\i\)\(\i\)).{0,100}(?=\|\|\(\i\.preventDefault)/,
+                match: /(?<=(\i)\.which!==\i\.\i.ENTER\|\|).{0,100}(\(0,\i\.\i\)\(\i\)).{0,100}(?=\|\|\(\i\.preventDefault)/,
                 replace: "!$self.shouldSubmit($1,$2)"
             }
         },
