@@ -1638,7 +1638,7 @@ export default definePlugin({
             find: '"primary",preClickCallback:',
             replacement: [
                 {
-                    match: /(?=let{quest:)/,
+                    match: /(?=let{quest:)/g,
                     replace: "const questifyText=$self.getQuestUnacceptedButtonText(arguments[0].quest);"
                 },
                 {
