@@ -48,12 +48,6 @@ export type VoiceRecorder = ComponentType<{
     onRecordingChange?(recording: boolean): void;
 }>;
 
-export interface VoiceMessageProps {
-    src: string;
-    waveform: string;
-}
-export let VoiceMessage: ComponentType<VoiceMessageProps> = () => null;
-
 const VoiceRecorder = IS_DISCORD_DESKTOP ? VoiceRecorderDesktop : VoiceRecorderWeb;
 
 const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => {
@@ -78,21 +72,6 @@ export default definePlugin({
     description: "Allows you to send voice messages like on mobile. To do so, right click the upload button and click Send Voice Message",
     authors: [Devs.Ven, Devs.Vap, Devs.Nickyux],
     settings,
-
-    patches: [
-        {
-            find: "#{intl::PAUSE_VOICE_MESSAGE_A11Y_LABEL}",
-            replacement: {
-                match: /(?<=\i=)(?=\i\.memo\(.{0,50}?=1,onVolumeChange:[^}]+?waveform:[^}]+?playbackCacheKey:)/,
-                replace: "$self.VoiceMessage=",
-            }
-        }
-    ],
-
-    set VoiceMessage(value) {
-        VoiceMessage = value;
-    },
-
     contextMenus: {
         "channel-attach": ctxMenuPatch
     }

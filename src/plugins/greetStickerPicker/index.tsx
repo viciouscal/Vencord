@@ -20,6 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Channel, Message } from "@vencord/discord-types";
+import { findLazy } from "@webpack";
 import { ContextMenuApi, FluxDispatcher, Menu, MessageActions } from "@webpack/common";
 
 enum GreetMode {
@@ -41,7 +42,7 @@ const settings = definePluginSettings({
     unholyMultiGreetEnabled?: boolean;
 }>();
 
-let WELCOME_STICKERS: any;
+const WELCOME_STICKERS = findLazy(m => Array.isArray(m) && m[0]?.name === "Wave");
 
 function greet(channel: Channel, message: Message, stickers: string[]) {
     const options = MessageActions.getSendMessageOptionsForReply({
@@ -163,19 +164,8 @@ export default definePlugin({
                 match: /className:\i\.\i,(?=.{0,40}?"sticker")(?<={channel:\i,message:\i}=(\i).+?)/,
                 replace: "$&onContextMenu:(vcEvent)=>$self.pickSticker(vcEvent, $1),"
             }
-        },
-        {
-            find: '"Wumpus waves hello"',
-            replacement: {
-                match: /(?<==)(?=\[{id:"749054660769218631",format_type:\d,description:"Wumpus waves hello")/,
-                replace: "$self.WELCOME_STICKERS="
-            }
         }
     ],
-
-    set WELCOME_STICKERS(value: any) {
-        WELCOME_STICKERS = value;
-    },
 
     pickSticker(
         event: React.UIEvent,

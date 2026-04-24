@@ -9,10 +9,11 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { hasGuildFeature } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 
 const SummaryStore = findByPropsLazy("allSummaries", "findSummary");
+const createSummaryFromServer = findByCodeLazy(".people)),startId:", ".type}");
 
 const settings = definePluginSettings({
     summaryExpiryThresholdDays: {
@@ -38,7 +39,7 @@ interface Summary {
     unsafe: boolean;
 }
 
-interface ChannelSummary {
+interface ChannelSummaries {
     type: string;
     channel_id: string;
     guild_id: string;
@@ -46,21 +47,6 @@ interface ChannelSummary {
 
     // custom property
     time?: number;
-}
-// TODO: these types are wrong and evil and incorrect
-function createChannelSummaryFromServer(s: Summary, channelId: string): ChannelSummary {
-    return {
-        id: s.id,
-        topic: s.topic,
-        summShort: s.summ_short,
-        people: Array.from(new Set(s.people)),
-        startId: s.start_id,
-        endId: s.end_id,
-        count: s.count,
-        channelId,
-        source: s.source,
-        type: s.type as any,
-    } as any as ChannelSummary;
 }
 
 export default definePlugin({
@@ -84,13 +70,9 @@ export default definePlugin({
             }
         }
     ],
-
     flux: {
         CONVERSATION_SUMMARY_UPDATE(data) {
-            const incomingSummaries: ChannelSummary[] = data.summaries.map((summary: any) => ({
-                ...createChannelSummaryFromServer(summary, undefined!),
-                time: Date.now()
-            }));
+            const incomingSummaries: ChannelSummaries[] = data.summaries.map((summary: any) => ({ ...createSummaryFromServer(summary), time: Date.now() }));
 
             // idk if this is good for performance but it doesnt seem to be a problem in my experience
             DataStore.update("summaries-data", summaries => {

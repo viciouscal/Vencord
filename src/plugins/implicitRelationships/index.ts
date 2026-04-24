@@ -96,8 +96,8 @@ export default definePlugin({
         {
             find: ".REQUEST_GUILD_MEMBERS,",
             replacement: {
-                match: /\.REQUEST_GUILD_MEMBERS,{/,
-                replace: "$&nonce:arguments[1]?.nonce,"
+                match: /\.send\(\i\.\i\.REQUEST_GUILD_MEMBERS,{/,
+                replace: "$&nonce:arguments[1].nonce,"
             }
         },
         {

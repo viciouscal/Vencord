@@ -170,7 +170,7 @@ export default definePlugin({
                     replace: `id:"${ELEMENT_ID}",$&`
                 },
                 {
-                    match: /(?<=null!=(\i)\?.{0,20})\i(?:\.\i)?,{children:\1/, // TODO: (?:\.\i)? is stable compat
+                    match: /(?<=null!=(\i)\?.{0,20})\i\.\i,{children:\1/,
                     replace: "'div',{onClick:e=>e.stopPropagation(),children:$1"
                 }
             ]

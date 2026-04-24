@@ -25,9 +25,9 @@ import { isNonNullish } from "@utils/guards";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { Channel, User } from "@vencord/discord-types";
-import { findByPropsLazy, findCssClassesLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
 import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, Text, useMemo, UserStore } from "@webpack/common";
-import { ComponentType, JSX } from "react";
+import { JSX } from "react";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
 const UserUtils = findByPropsLazy("getGlobalName");
@@ -139,18 +139,10 @@ export default definePlugin({
                     match: /\.openUserProfileModal.+?\)}\)}\)(?<=,(\i)&&(\i)&&(\(0,\i\.jsxs?\)\(\i\.\i,{className:(\i)\.\i}\)).{0,50}?"MUTUAL_FRIENDS".+?)/,
                     replace: (m, hasMutualGuilds, hasMutualFriends, Divider, classes) => "" +
                         `${m},$self.renderDMPageList({user:arguments[0].user,hasDivider:${hasMutualGuilds}||${hasMutualFriends},Divider:${Divider},listStyle:${classes}.list})`
-                },
-                {
-                    match: /(?=function (\i)\(\i\){let{section:\i,header:\i[^}]+?onExpand:)/,
-                    replace: "$self.ExpandableList=$1;"
                 }
             ]
         }
     ],
-
-    set ExpandableList(value: any) {
-        ExpandableList = value;
-    },
 
     getMutualGroupDms(userId: string) {
         try {
