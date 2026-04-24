@@ -18,11 +18,11 @@
 
 import "./style.css";
 
-import { addNicknameIcon, removeNicknameIcon } from "@api/NicknameIcons";
 import { addProfileBadge, BadgePosition, BadgeUserArgs, ProfileBadge, removeProfileBadge } from "@api/Badges";
 import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
-import { definePluginSettings } from "@api/Settings";
+import { addNicknameIcon, removeNicknameIcon } from "@api/NicknameIcons";
+import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { DiscordPlatform, OnlineStatus, User } from "@vencord/discord-types";
@@ -267,7 +267,7 @@ export default definePlugin({
                 ));
                 if (!icons.length) return null;
                 return <span className="vc-platform-indicator" style={{ gap: "2px" }}>{icons}</span>;
-            }, -1); 
+            }, -1);
         }
     },
 

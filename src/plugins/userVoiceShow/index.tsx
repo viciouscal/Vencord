@@ -18,9 +18,9 @@
 
 import "./style.css";
 
-import { addNicknameIcon, removeNicknameIcon } from "@api/NicknameIcons";
 import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
+import { addNicknameIcon, removeNicknameIcon } from "@api/NicknameIcons";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";

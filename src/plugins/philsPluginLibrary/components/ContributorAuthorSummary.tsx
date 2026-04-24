@@ -17,12 +17,12 @@
 */
 
 import { Flex } from "@components/Flex";
+import { Author, Contributor } from "@plugins/philsPluginLibrary/types";
+import { openURL } from "@plugins/philsPluginLibrary/utils";
 import { findByProps } from "@webpack";
 import { Text } from "@webpack/common";
 import React from "react";
 
-import { Author, Contributor } from "../types";
-import { openURL } from "../utils";
 import { AuthorUserSummaryItem } from "./AuthorSummaryItem";
 
 export interface ContributorAuthorSummaryProps {
@@ -67,13 +67,13 @@ export const ContributorAuthorSummary = ({ author, contributors }: ContributorAu
                 <Flex style={{ justifyContent: "center", alignItems: "center", gap: "0.5em" }}>
                     <Text variant="text-sm/normal" style={{ color: "var(--text-muted)" }}>
                         Author: <a
-                            onClick={(e) => {
+                            onClick={e => {
                                 e.preventDefault();
-                                
+
                                 if (e.shiftKey && author.github) {
                                     openURL(author.github);
                                 } else {
-                                    
+
                                     openUserProfile(author.id.toString());
                                 }
                             }}

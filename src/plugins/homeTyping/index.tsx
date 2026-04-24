@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { ColorPicker, Forms, NavigationRouter, SelectedChannelStore, Select, Slider, TypingStore, UserStore, useStateFromStores } from "@webpack/common";
+import { ColorPicker, Forms, NavigationRouter, Select, SelectedChannelStore, Slider, TypingStore, UserStore, useStateFromStores } from "@webpack/common";
 
 const ThreeDots = findComponentByCodeLazy("Math.min(1,Math.max(", "dotRadius:");
 
@@ -384,13 +384,13 @@ ${positionCSS}
 
 function updateNotificationStyles() {
     let styleElement = document.getElementById("vc-typing-notifications-css") as HTMLStyleElement;
-    
+
     if (!styleElement) {
         styleElement = document.createElement("style");
         styleElement.id = "vc-typing-notifications-css";
         document.head.appendChild(styleElement);
     }
-    
+
     styleElement.textContent = generateNotificationCSS();
 }
 
@@ -431,12 +431,12 @@ function createNotificationElement(user: TypingUser) {
     notification.dataset.channelId = user.channelId;
 
     notification.addEventListener("click", () => {
-        
+
         notification.style.opacity = "0";
         notification.style.transition = "opacity 0.2s";
         setTimeout(() => notification.remove(), 200);
-        
-        
+
+
         NavigationRouter.transitionTo(`/channels/@me/${user.channelId}`);
     });
 
@@ -454,13 +454,13 @@ function createNotificationElement(user: TypingUser) {
 
     const status = document.createElement("div");
     status.className = "vc-typing-notification-status";
-    
+
     const typingText = document.createElement("span");
     typingText.textContent = "is typing";
-    
+
     const dots = document.createElement("span");
     dots.className = "vc-typing-dots";
-    
+
     status.appendChild(typingText);
     status.appendChild(dots);
 
@@ -476,7 +476,7 @@ function createNotificationElement(user: TypingUser) {
 function updateNotifications() {
     if (!notificationContainer) return;
 
-    
+
     notificationContainer.className = `vc-typing-notifications-container ${settings.store.notificationPosition}`;
 
     if (!settings.store.showNotifications) {
@@ -484,7 +484,7 @@ function updateNotifications() {
         return;
     }
 
-    
+
     const selectedChannelId = SelectedChannelStore.getChannelId();
 
     const typingUsers = getTypingUsers();
@@ -495,9 +495,9 @@ function updateNotifications() {
     );
     const newIds = new Set(typingUsers.map(u => u.userId));
 
-    
+
     Array.from(notificationContainer.children).forEach((child: any) => {
-        const shouldRemove = !newIds.has(child.dataset.userId) || 
+        const shouldRemove = !newIds.has(child.dataset.userId) ||
                            child.dataset.channelId === selectedChannelId;
         if (shouldRemove) {
             child.style.opacity = "0";
@@ -506,7 +506,7 @@ function updateNotifications() {
         }
     });
 
-    
+
     typingUsers.forEach(user => {
         if (!existingIds.has(user.userId) && user.channelId !== selectedChannelId) {
             const notification = createNotificationElement(user);
@@ -566,13 +566,13 @@ export default definePlugin({
     ],
 
     start() {
-        
+
         updateNotificationStyles();
-        
-        
+
+
         createContainer();
 
-        
+
         updateInterval = setInterval(updateNotifications, 100);
     },
 
@@ -583,8 +583,8 @@ export default definePlugin({
         }
 
         removeContainer();
-        
-        
+
+
         const styleElement = document.getElementById("vc-typing-notifications-css");
         if (styleElement) {
             styleElement.remove();
