@@ -13,7 +13,7 @@ import { getIntlMessage, openUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { findStoreLazy } from "@webpack";
 import { Forms, RelationshipStore, Text, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 import { JSX } from "react";
 
@@ -38,7 +38,7 @@ function getUsername(user: any): string {
 function getAvatarURL(user: any, guildId?: string, size: number = 80): string {
     if (!user) return "";
     try {
-        if (typeof user.getAvatarURL === 'function') {
+        if (typeof user.getAvatarURL === "function") {
             return user.getAvatarURL(guildId, size, true) || "";
         }
         return "";
@@ -84,7 +84,7 @@ function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
                         {getIntlMessage("SPECTATORS", { numViewers: userIds.length })}
                     </Forms.FormTitle>
                     <Flex flexDirection="column" style={{ gap: 6 }}>
-                        {users.map((user) => {
+                        {users.map(user => {
                             if (!user?.id) return null;
                             const avatarUrl = getAvatarURL(user, guildId, 16);
                             return (
@@ -98,8 +98,8 @@ function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
                                         <img
                                             src={avatarUrl}
                                             style={{ borderRadius: 8, width: 16, height: 16 }}
-                                            onError={(e) => {
-                                                e.currentTarget.style.display = 'none';
+                                            onError={e => {
+                                                e.currentTarget.style.display = "none";
                                             }}
                                         />
                                     )}
@@ -146,7 +146,7 @@ export default definePlugin({
         }
     ],
 
-    
+
     WrapperComponent: ErrorBoundary.wrap((props: any) => {
         let stream;
         try {
@@ -193,7 +193,7 @@ export default definePlugin({
                                 {getIntlMessage("SPECTATORS", { numViewers: userIds.length })}
                             </Forms.FormTitle>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                                {users.slice(0, 12).map((user) => {
+                                {users.slice(0, 12).map(user => {
                                     if (!user?.id) return null;
                                     const avatarUrl = getAvatarURL(user, stream.guildId, 80);
                                     const username = getUsername(user);
@@ -212,11 +212,11 @@ export default definePlugin({
                                                         cursor: "pointer",
                                                         objectFit: "cover"
                                                     }}
-                                                    onClick={(e) => {
+                                                    onClick={e => {
                                                         e.preventDefault();
                                                         e.stopPropagation();
                                                         try {
-                                                            
+
                                                             openUserProfile(user.id);
                                                         } catch (error) {
                                                             console.error("[WhosWatching] Error opening profile:", error);
@@ -224,9 +224,9 @@ export default definePlugin({
                                                     }}
                                                     onMouseEnter={onMouseEnter}
                                                     onMouseLeave={onMouseLeave}
-                                                    onError={(e) => {
+                                                    onError={e => {
                                                         e.currentTarget.src = "";
-                                                        e.currentTarget.style.display = 'none';
+                                                        e.currentTarget.style.display = "none";
                                                     }}
                                                 />
                                             )}
@@ -267,7 +267,7 @@ export default definePlugin({
         );
     }),
 
-    
+
     component: function ({ OriginalComponent }) {
         return ErrorBoundary.wrap((props: any) => {
             let stream;

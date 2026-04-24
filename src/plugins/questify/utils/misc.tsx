@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { questIsIgnored, settings } from "@plugins/questify/settings";
 import { classNameFactory } from "@utils/css";
 import { Logger } from "@utils/Logger";
 import { findByPropsLazy } from "@webpack";
 import { FluxDispatcher, RestAPI, UserStore } from "@webpack/common";
 
 import { activeQuestIntervals } from "..";
-import { questIsIgnored, settings } from "../settings";
 import { Quest, QuestStatus, QuestTask, QuestTaskType, RGB } from "./components";
 
 export const q = classNameFactory("questify-");

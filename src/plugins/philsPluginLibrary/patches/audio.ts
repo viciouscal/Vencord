@@ -16,11 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { MicrophoneProfile, MicrophoneStore } from "@plugins/betterMicrophone.desktop/stores";
+import { ProfilableStore, types } from "@plugins/philsPluginLibrary";
 import { Logger } from "@utils/Logger";
 import { lodash } from "@webpack/common";
-
-import { MicrophoneProfile, MicrophoneStore } from "../../betterMicrophone.desktop/stores";
-import { ProfilableStore, types } from "../../philsPluginLibrary";
 
 export function getDefaultAudioTransportationOptions(connection: types.Connection) {
     return {
@@ -39,9 +38,9 @@ export function getReplaceableAudioTransportationOptions(
         ...(voiceBitrateEnabled && voiceBitrate ? { encodingVoiceBitRate: voiceBitrate * 1000 } : {}),
         audioEncoder: {
             ...connection.getCodecOptions("opus").audioEncoder,
-            ...(rateEnabled && rate        ? { rate }    : {}),
-            ...(pacsizeEnabled && pacsize  ? { pacsize } : {}),
-            ...(freqEnabled && freq        ? { freq }    : {}),
+            ...(rateEnabled && rate ? { rate } : {}),
+            ...(pacsizeEnabled && pacsize ? { pacsize } : {}),
+            ...(freqEnabled && freq ? { freq } : {}),
             ...(channelsEnabled && channels ? { channels } : { channels: 1 })
         }
     };

@@ -27,10 +27,10 @@ const settings = definePluginSettings({
         type: OptionType.SELECT,
         description: "Animation Type",
         options: [
-            { label: "Ease",        value: "ease",       default: true },
-            { label: "Linear",      value: "linear"      },
-            { label: "Ease-in",     value: "ease-in"     },
-            { label: "Ease-out",    value: "ease-out"    },
+            { label: "Ease", value: "ease", default: true },
+            { label: "Linear", value: "linear" },
+            { label: "Ease-in", value: "ease-in" },
+            { label: "Ease-out", value: "ease-out" },
             { label: "Ease-in-out", value: "ease-in-out" },
         ],
         onChange: () => applyCSS(),
@@ -57,8 +57,8 @@ function toHex(n: number) {
 }
 
 function buildCSS(): string {
-    const color  = toHex(settings.store.caretColor ?? 0x00b0f4);
-    const ms     = settings.store.transitionDelay ?? 60;
+    const color = toHex(settings.store.caretColor ?? 0x00b0f4);
+    const ms = settings.store.transitionDelay ?? 60;
     const easing = settings.store.animationType ?? "ease";
     return `
 @keyframes vc-blink {
@@ -121,14 +121,14 @@ function applyCaretPosition() {
     }
     if (!rect || rect.height === 0) { el.style.display = "none"; return; }
     const newLeft = rect.right + "px";
-    const newTop  = rect.top   + "px";
+    const newTop = rect.top + "px";
     if (el.style.left !== newLeft || el.style.top !== newTop) {
         if (el.style.display !== "none") stopBlink();
     }
     el.style.display = "block";
-    el.style.left    = newLeft;
-    el.style.top     = rect.top    + "px";
-    el.style.height  = rect.height + "px";
+    el.style.left = newLeft;
+    el.style.top = rect.top + "px";
+    el.style.height = rect.height + "px";
 }
 
 let observer: MutationObserver | null = null;
@@ -153,18 +153,18 @@ const handlers = {
 
 function startListeners() {
     document.addEventListener("selectionchange", handlers.sel);
-    document.addEventListener("focusin",  handlers.focus);
+    document.addEventListener("focusin", handlers.focus);
     document.addEventListener("focusout", handlers.blur);
-    document.addEventListener("keyup",    handlers.key,   true);
-    document.addEventListener("click",    handlers.click, true);
+    document.addEventListener("keyup", handlers.key, true);
+    document.addEventListener("click", handlers.click, true);
 }
 
 function stopListeners() {
     document.removeEventListener("selectionchange", handlers.sel);
-    document.removeEventListener("focusin",  handlers.focus);
+    document.removeEventListener("focusin", handlers.focus);
     document.removeEventListener("focusout", handlers.blur);
-    document.removeEventListener("keyup",    handlers.key,   true);
-    document.removeEventListener("click",    handlers.click, true);
+    document.removeEventListener("keyup", handlers.key, true);
+    document.removeEventListener("click", handlers.click, true);
 }
 
 function applyCSS() {

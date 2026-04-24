@@ -16,14 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
-import definePlugin, { PluginNative } from "@utils/types";
-
-import { addSettingsPanelButton, Emitter, MicrophoneSettingsIcon, removeSettingsPanelButton } from "@plugins/philsPluginLibrary";
 import { PluginInfo } from "@plugins/betterMicrophone.desktop/constants";
 import { openMicrophoneSettingsModal } from "@plugins/betterMicrophone.desktop/modals";
 import { MicrophonePatcher } from "@plugins/betterMicrophone.desktop/patchers";
 import { initMicrophoneStore } from "@plugins/betterMicrophone.desktop/stores";
+import { addSettingsPanelButton, Emitter, MicrophoneSettingsIcon, removeSettingsPanelButton } from "@plugins/philsPluginLibrary";
+import { Devs } from "@utils/constants";
+import definePlugin, { PluginNative } from "@utils/types";
 
 export const Native = VencordNative.pluginHelpers.BetterMicrophone as PluginNative<typeof import("./native")>;
 

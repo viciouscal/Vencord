@@ -31,7 +31,7 @@ interface BlacklistEntry {
 
 let blacklist: BlacklistEntry[] = [];
 let monitorInterval: NodeJS.Timeout | null = null;
-let kickCache = new Set<string>();
+const kickCache = new Set<string>();
 
 const settings = definePluginSettings({
     muteUser: {
@@ -76,21 +76,21 @@ function kickUserWithSettings(guildId: string, userId: string, channelId: string
     if (kickCache.has(cacheKey)) {
         return;
     }
-    
+
     if (!isBlacklisted(userId, channelId)) {
         return;
     }
-    
+
     kickCache.add(cacheKey);
-    
+
     const actions: Promise<any>[] = [];
-    
+
 
     if (settings.store.muteUser || settings.store.deafenUser) {
         const body: any = {};
         if (settings.store.muteUser) body.mute = true;
         if (settings.store.deafenUser) body.deaf = true;
-        
+
         actions.push(
             RestAPI.patch({
                 url: `/guilds/${guildId}/members/${userId}`,
@@ -98,7 +98,7 @@ function kickUserWithSettings(guildId: string, userId: string, channelId: string
             }).catch(() => {})
         );
     }
-    
+
     if (settings.store.disconnectUser) {
         setTimeout(() => {
             RestAPI.patch({
@@ -107,13 +107,13 @@ function kickUserWithSettings(guildId: string, userId: string, channelId: string
             }).catch(() => {});
         }, 100);
     }
-    
+
     Promise.all(actions).then(() => {
         setTimeout(() => kickCache.delete(cacheKey), 1000);
     }).catch(() => {
         kickCache.delete(cacheKey);
     });
-    
+
     console.log("[VCBlacklist] Actions applied to:", userId);
 }
 
@@ -150,20 +150,20 @@ function getUserChannelId(userId: string): string | null {
 function monitorBlacklist() {
     try {
         if (blacklist.length === 0) return;
-        
+
         const allStates = VoiceStateStore.getAllVoiceStates();
         const currentBlacklist = [...blacklist];
-        
+
         for (const entry of currentBlacklist) {
             const { userId, channelId } = entry;
-            
+
             if (!isBlacklisted(userId, channelId)) {
                 continue;
             }
-            
+
             for (const [guildId, users] of Object.entries(allStates)) {
                 const userState = users[userId];
-                
+
                 if (userState && userState.channelId === channelId) {
                     const channel = ChannelStore.getChannel(channelId);
                     if (channel && hasPerms(channelId)) {
@@ -177,7 +177,7 @@ function monitorBlacklist() {
 
 function startMonitoring() {
     if (monitorInterval) return;
-    
+
     const interval = settings.store.monitorSpeed;
     monitorInterval = setInterval(monitorBlacklist, interval);
     console.log(`[VCBlacklist] Monitoring started (${interval}ms)`);
@@ -193,13 +193,13 @@ function stopMonitoring() {
 
 const UserContext: NavContextMenuPatchCallback = (children, { user }) => {
     if (!user || user.id === UserStore.getCurrentUser().id) return;
-    
+
     const channelId = getUserChannelId(user.id);
     if (!channelId) return;
-    
+
     const voiceChannel = ChannelStore.getChannel(channelId);
     if (!voiceChannel || voiceChannel.type !== 2) return;
-    
+
     if (!hasPerms(channelId)) return;
 
     const blacklisted = isBlacklisted(user.id, channelId);
@@ -232,7 +232,7 @@ const UserContext: NavContextMenuPatchCallback = (children, { user }) => {
 
 const ChannelContext: NavContextMenuPatchCallback = (children, { channel }) => {
     if (!channel || channel.type !== 2 || !channel.guild_id) return;
-    
+
     if (!hasPerms(channel.id)) return;
 
     const list = blacklist.filter(e => e.channelId === channel.id);
@@ -241,7 +241,7 @@ const ChannelContext: NavContextMenuPatchCallback = (children, { channel }) => {
     const items = list.map(entry => {
         const user = UserStore.getUser(entry.userId);
         const name = user?.username || entry.userId;
-        
+
         return (
             <Menu.MenuItem
                 key={entry.userId}
@@ -317,10 +317,10 @@ export default definePlugin({
     flux: {
         VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[] }) {
             if (!voiceStates) return;
-            
+
             for (const { userId, channelId } of voiceStates) {
                 if (!channelId || userId === UserStore.getCurrentUser()?.id) continue;
-                
+
                 if (isBlacklisted(userId, channelId)) {
                     const channel = ChannelStore.getChannel(channelId);
                     if (channel && hasPerms(channelId)) {

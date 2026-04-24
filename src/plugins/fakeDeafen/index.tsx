@@ -5,10 +5,9 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { addSettingsPanelButton, DeafenIcon, removeSettingsPanelButton } from "@plugins/philsPluginLibrary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-
-import { addSettingsPanelButton, DeafenIcon, removeSettingsPanelButton } from "../philsPluginLibrary";
 
 export let fakeD = false;
 
@@ -107,16 +106,16 @@ const settings = definePluginSettings({
 function toggleFakeDeafen() {
     fakeD = !fakeD;
     console.log("[FakeDeafen] Toggle state:", fakeD ? "ON" : "OFF");
-    
-    
+
+
     const deafenBtn = document.querySelector('[aria-label="Deafen"]') as HTMLElement;
     if (deafenBtn) {
         deafenBtn.click();
-        
+
         setTimeout(() => deafenBtn.click(), 250);
     }
 
-    
+
     if (fakeD && settings.store.muteUponFakeDeafen) {
         setTimeout(mute, 300);
     }
@@ -140,13 +139,13 @@ function setupKeybindListener() {
     }
 
     keydownListener = (e: KeyboardEvent) => {
-        
+
         const keybindValue = settings.store.useCustomKeybind && settings.store.customKeybind
             ? settings.store.customKeybind
             : settings.store.keybind || "f9";
-        
+
         const keybind = parseKeybind(keybindValue);
-        
+
         const ctrlMatch = keybind.ctrl === (e.ctrlKey || e.metaKey);
         const shiftMatch = keybind.shift === e.shiftKey;
         const altMatch = keybind.alt === e.altKey;
@@ -190,7 +189,7 @@ export default definePlugin({
     },
 
     start() {
-        
+
         if (!settings.store.hideIcon) {
             addSettingsPanelButton({
                 name: "faked",
@@ -200,14 +199,14 @@ export default definePlugin({
             });
         }
 
-        
+
         setupKeybindListener();
     },
 
     stop() {
         removeSettingsPanelButton("faked");
-        
-        
+
+
         if (keydownListener) {
             document.removeEventListener("keydown", keydownListener);
             keydownListener = null;

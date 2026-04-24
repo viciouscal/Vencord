@@ -16,13 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { createDummyUser, types, UserSummaryItem } from "@plugins/philsPluginLibrary";
 import { PluginAuthor } from "@utils/types";
 import { findByProps } from "@webpack";
 import { useEffect, UserUtils, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 import React from "react";
-
-import { createDummyUser, types, UserSummaryItem } from "../../philsPluginLibrary";
 
 export interface AuthorUserSummaryItemProps extends Partial<React.ComponentProps<types.UserSummaryItem>> {
     authors: PluginAuthor[];
@@ -46,9 +45,9 @@ export const AuthorUserSummaryItem = (props: AuthorUserSummaryItemProps) => {
     }, []);
 
     const handleUserClick = (user: User) => {
-        
+
         try {
-            
+
             const UserProfileModals = findByProps("open", "openUserProfileModal");
             if (UserProfileModals?.open) {
                 UserProfileModals.open(user.id);
@@ -59,7 +58,7 @@ export const AuthorUserSummaryItem = (props: AuthorUserSummaryItemProps) => {
         }
 
         try {
-            
+
             const { openUserProfileModal } = findByProps("openUserProfileModal");
             if (openUserProfileModal) {
                 openUserProfileModal({ userId: user.id });
@@ -70,7 +69,7 @@ export const AuthorUserSummaryItem = (props: AuthorUserSummaryItemProps) => {
         }
 
         try {
-            
+
             if ((window as any).DiscordNative?.userProfile) {
                 (window as any).DiscordNative.userProfile.open(user.id);
                 return;
@@ -84,7 +83,7 @@ export const AuthorUserSummaryItem = (props: AuthorUserSummaryItemProps) => {
 
     return (
         <div style={{ display: "flex", gap: "0.5em", alignItems: "center" }}>
-            {users.map((user) => (
+            {users.map(user => (
                 <div
                     key={user.id}
                     onClick={() => handleUserClick(user as User)}

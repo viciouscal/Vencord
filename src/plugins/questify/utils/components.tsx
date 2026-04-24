@@ -5,11 +5,11 @@
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { settings } from "@plugins/questify/settings";
 import { findComponentByCodeLazy } from "@webpack";
 import { SearchableSelect, useState } from "@webpack/common";
 import { JSX } from "react";
 
-import { settings } from "../settings";
 import { formatLowerBadge } from "./misc";
 
 // GuildlessServerListItem's built-in pill does not support unread state.
