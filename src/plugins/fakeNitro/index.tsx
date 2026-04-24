@@ -22,8 +22,8 @@ import { ApngBlendOp, ApngDisposeOp, parseAPNG } from "@utils/apng";
 import { Devs } from "@utils/constants";
 import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
-import definePlugin, { OptionType } from "@utils/types";
-import type { Emoji, Message, RenderModalProps, Sticker } from "@vencord/discord-types";
+import definePlugin, { OptionType, Patch } from "@utils/types";
+import type { Emoji, Message, Sticker } from "@vencord/discord-types";
 import { StickerFormatType } from "@vencord/discord-types/enums";
 import { findByCodeLazy, findByPropsLazy, proxyLazyWebpack } from "@webpack";
 import { ChannelStore, ConfirmModal,DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, openModal, Parser, PermissionsBits, PermissionStore, StickersStore, UploadHandler, UserSettingsActionCreators, UserSettingsProtoStore, UserStore } from "@webpack/common";
@@ -151,9 +151,14 @@ const hasExternalStickerPerms = (channelId: string) => hasPermission(channelId, 
 const hasEmbedPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.EMBED_LINKS);
 const hasAttachmentPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.ATTACH_FILES);
 
-function getWordBoundary(origStr: string, offset: number) {
-    return (!origStr[offset] || /\s/.test(origStr[offset])) ? "" : " ";
-}
+function makeBypassPatches(): Omit<Patch, "plugin"> {
+    const mapping: Array<{ func: string, predicate?: () => boolean; }> = [
+        { func: "canUseCustomStickersEverywhere", predicate: () => settings.store.enableStickerBypass },
+        { func: "canUseHighVideoUploadQuality", predicate: () => settings.store.enableStreamQualityBypass },
+        { func: "canStreamQuality", predicate: () => settings.store.enableStreamQualityBypass },
+        { func: "canUseClientThemes" },
+        { func: "canUsePremiumAppIcons" }
+    ];
 
     return {
         find: "canUseCustomStickersEverywhere:",

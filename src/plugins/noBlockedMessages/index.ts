@@ -62,26 +62,19 @@ export default definePlugin({
                 }
             ]
         },
-        {
-            find: '"MessageStore"',
+        ...[
+            '"MessageStore"',
+            '"ReadStateStore"'
+        ].map(find => ({
+            find,
             predicate: () => settings.store.ignoreMessages,
             replacement: [
                 {
-                    match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
-                    replace: (_, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
+                    match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
+                    replace: (_, _funcName, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
                 }
             ]
-        },
-        {
-            find: '"ReadStateStore"',
-            predicate: () => settings.store.ignoreMessages,
-            replacement: [
-                {
-                    match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
-                    replace: (_, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
-                }
-            ]
-        }
+        }))
     ],
 
     shouldIgnoreMessage(message: Message) {
