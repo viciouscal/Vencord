@@ -18,11 +18,8 @@
 
 import "./style.css";
 
-import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
-import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
-import { addNicknameIcon, removeNicknameIcon } from "@api/NicknameIcons";
 import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 import { VoiceChannelIndicator } from "./components";
@@ -51,38 +48,36 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "UserVoiceShow",
     description: "Shows an indicator when a user is in a Voice Channel",
-    authors: [Devs.Nuckyz, Devs.LordElias],
+    tags: ["Voice", "Appearance", "Friends"],
     dependencies: ["MemberListDecoratorsAPI", "MessageDecorationsAPI", "NicknameIconsAPI"],
+    authors: [Devs.Nuckyz, Devs.LordElias, EquicordDevs.omaw],
     settings,
+    renderNicknameIcon({ userId }) {
+        if (!settings.store.showInUserProfileModal) return null;
+        return (
+            <VoiceChannelIndicator userId={userId} isProfile />
+        );
+    },
+    renderMemberListDecorator({ user }) {
+        if (!settings.store.showInMemberList) return null;
+        return user == null ? null : <VoiceChannelIndicator userId={user.id} />;
 
+    },
+    renderMessageDecoration({ message }) {
+        if (!settings.store.showInMessages) return null;
+        return message?.author == null ? null : <VoiceChannelIndicator userId={message.author.id} isMessageIndicator />;
+    },
     patches: [
+        // Friends List
         {
             find: "null!=this.peopleListItemRef.current",
-            predicate: () => settings.store.showInMemberList,
             replacement: {
                 match: /\.isProvisional.{0,50}?className:\i\.\i,children:\[(?<=isFocused:(\i).+?)/,
                 replace: "$&$self.VoiceChannelIndicator({userId:this?.props?.user?.id,isActionButton:true,shouldHighlight:$1}),"
-            }
+            },
+            predicate: () => settings.store.showInMemberList
         }
     ],
-
-    start() {
-        if (settings.store.showInUserProfileModal) {
-            addNicknameIcon("UserVoiceShow", ({ userId }) => <VoiceChannelIndicator userId={userId} isProfile />);
-        }
-        if (settings.store.showInMemberList) {
-            addMemberListDecorator("UserVoiceShow", ({ user }) => user == null ? null : <VoiceChannelIndicator userId={user.id} />);
-        }
-        if (settings.store.showInMessages) {
-            addMessageDecoration("UserVoiceShow", ({ message }) => message?.author == null ? null : <VoiceChannelIndicator userId={message.author.id} />);
-        }
-    },
-
-    stop() {
-        removeNicknameIcon("UserVoiceShow");
-        removeMemberListDecorator("UserVoiceShow");
-        removeMessageDecoration("UserVoiceShow");
-    },
 
     VoiceChannelIndicator
 });
