@@ -3,7 +3,9 @@
  * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-
+/*
+x
+*/
 import { findByCodeLazy, findLazy } from "@webpack";
 
 let defaultSounds: null | string[] = null;
