@@ -30,12 +30,11 @@ export default definePlugin({
     description: "Join voice chats via double click instead of single click",
     authors: [Devs.Ven, Devs.D3SOX],
     patches: [
-        // Stage Channels & Voice Channels
-        // the find is for stage channels, but it also handles voice
-        // channels because they're both in the same concatenated module
-        // the find for voice channels was `.handleVoiceStatusClick`
-        {
-            find: ".handleClickChat",
+        ...[
+            ".handleVoiceStatusClick", // voice channels
+            ".handleClickChat" // stage channels
+        ].map(find => ({
+            find,
             // hack: these are not React onClick, it is a custom prop handled by Discord
             // thus, replacing this with onDoubleClick won't work, and you also cannot check
             // e.detail since instead of the event they pass the channel.
@@ -46,10 +45,10 @@ export default definePlugin({
                     replace: "onClick:()=>{$self.schedule(()=>{this.handleClick()},this)",
                 },
             ]
-        },
+        })),
         {
             // channel mentions
-            find: 'className:"channelMention",children:[null!=',
+            find: 'className:"channelMention",children',
             replacement: {
                 match: /onClick:(\i)(?=,.{0,30}className:"channelMention".+?(\i)\.inContent)/,
                 replace: (_, onClick, props) => ""
