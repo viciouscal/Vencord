@@ -25,6 +25,7 @@ import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccesso
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
 import { addMessageClickListener, addMessagePreEditListener, addMessagePreSendListener, removeMessageClickListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
+import { addNicknameIcon, removeNicknameIcon } from "@api/NicknameIcons";
 import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { traceFunction } from "@debug/Tracer";
@@ -239,6 +240,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     if (renderMessageDecoration) addMessageDecoration(name, renderMessageDecoration);
     if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory);
     if (messagePopoverButton) addMessagePopoverButton(name, messagePopoverButton.render, messagePopoverButton.icon);
+    if (renderNicknameIcon) addNicknameIcon(name, renderNicknameIcon);
 
     return true;
 }, p => `startPlugin ${p.name}`);
@@ -300,6 +302,8 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     if (renderMessageDecoration) removeMessageDecoration(name);
     if (renderMessageAccessory) removeMessageAccessory(name);
     if (messagePopoverButton) removeMessagePopoverButton(name);
+    if (renderNicknameIcon) removeNicknameIcon(name);
+    
 
     return true;
 }, p => `stopPlugin ${p.name}`);
@@ -333,6 +337,7 @@ export const initPluginManager = onlyOnce(function init() {
                 logger.warn(error);
                 return;
             }
+            
 
             settings[d].enabled = true;
             dep.isDependency = true;
