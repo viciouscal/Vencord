@@ -50,7 +50,7 @@ export default definePlugin({
     description: "Shows an indicator when a user is in a Voice Channel",
     tags: ["Voice", "Appearance", "Friends"],
     dependencies: ["MemberListDecoratorsAPI", "MessageDecorationsAPI", "NicknameIconsAPI"],
-    authors: [Devs.Nuckyz, Devs.LordElias, EquicordDevs.omaw],
+    authors: [Devs.Nuckyz, Devs.LordElias],
     settings,
     renderNicknameIcon({ userId }) {
         if (!settings.store.showInUserProfileModal) return null;
