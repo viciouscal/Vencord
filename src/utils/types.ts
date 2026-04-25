@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { AudioProcessor } from "@api/AudioPlayer";
 import { ProfileBadge } from "@api/Badges";
 import { ChatBarButtonData } from "@api/ChatButtons";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
@@ -225,6 +226,8 @@ export interface PluginDef {
     renderMessageDecoration?: MessageDecorationFactory;
 
     renderMemberListDecorator?: MemberListDecoratorFactory;
+    renderNicknameIcon?: NicknameIconFactory;
+    audioProcessor?: AudioProcessor;
 }
 
 export const enum StartAt {
