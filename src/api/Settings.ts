@@ -16,462 +16,377 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AudioProcessor } from "@api/AudioPlayer";
-import type { ProfileBadge } from "@api/Badges";
-import type { ChatBarButtonData } from "@api/ChatButtons";
-import type { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { HeaderBarButtonData } from "@api/HeaderBar";
-import type { MemberListDecoratorFactory } from "@api/MemberListDecorators";
-import type { MessageAccessoryFactory } from "@api/MessageAccessories";
-import type { MessageDecorationFactory } from "@api/MessageDecorations";
-import type { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
-import type { MessagePopoverButtonData } from "@api/MessagePopover";
-import type { NicknameIconFactory } from "@api/NicknameIcons";
-import { ProfileCollectionFactory } from "@api/ProfileCollections";
-import type { UserAreaButtonData } from "@api/UserArea";
-import type { Command, FluxEvents } from "@vencord/discord-types";
-import type { ReactNode } from "react";
-import type { LiteralUnion } from "type-fest";
+import { SettingsStore as SettingsStoreClass } from "@shared/SettingsStore";
+import { Logger } from "@utils/Logger";
+import { mergeDefaults } from "@utils/mergeDefaults";
+import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
+import { React, useEffect } from "@webpack/common";
 
-// exists to export default definePlugin({...})
-export default function definePlugin<P extends PluginDef>(p: P & Record<PropertyKey, any>) {
-    return p as typeof p & Plugin;
+import plugins from "~plugins";
+
+const logger = new Logger("Settings");
+
+export type ThemeActivationMode = "always" | "light" | "dark";
+
+export interface SettingsPluginUiElement {
+    enabled: boolean;
+    // TODO
+    /** not implemented for now */
+    order?: number;
+}
+export type SettingsPluginUiElements = {
+    /** id will be whatever id the element was registered with. Usually, but not always, the plugin name */
+    [id: string]: SettingsPluginUiElement;
+};
+
+export interface Settings {
+    autoUpdate: boolean;
+    autoUpdateNotification: boolean;
+    useQuickCss: boolean;
+    eagerPatches: boolean;
+    enabledThemes: string[];
+    enabledThemeLinks: string[];
+    enableOnlineThemes: boolean;
+    pinnedThemes: string[];
+    themeNames: Record<string, string>;
+    themeActivationModes: Partial<Record<string, ThemeActivationMode>>;
+    enableReactDevtools: boolean;
+    themeLinks: string[];
+    mainWindowFrameless: boolean;
+    frameless: boolean;
+    transparent: boolean;
+    winCtrlQ: boolean;
+    macosVibrancyStyle:
+    | "content"
+    | "fullscreen-ui"
+    | "header"
+    | "hud"
+    | "menu"
+    | "popover"
+    | "selection"
+    | "sidebar"
+    | "titlebar"
+    | "tooltip"
+    | "under-page"
+    | "window"
+    | undefined;
+    disableMinSize: boolean;
+    winNativeTitleBar: boolean;
+    plugins: {
+        [plugin: string]: {
+            enabled: boolean;
+            [setting: string]: any;
+        };
+    };
+
+    uiElements: {
+        messagePopoverButtons: SettingsPluginUiElements;
+        chatBarButtons: SettingsPluginUiElements;
+    },
+
+    notifications: {
+        timeout: number;
+        position: "top-right" | "bottom-right";
+        useNative: "always" | "never" | "not-focused";
+        missed: boolean;
+        logLimit: number;
+    };
+
+    cloud: {
+        authenticated: boolean;
+        url: string;
+        settingsSync: boolean;
+        settingsSyncVersion: number;
+    };
+
+    ignoreResetWarning: boolean;
+
+    userCssVars: {
+        [themeId: string]: {
+            [varName: string]: string;
+        };
+    };
 }
 
-export function makeRange(start: number, end: number, step = 1) {
-    const ranges: number[] = [];
-    for (let value = start; value <= end; value += step) {
-        ranges.push(Math.round(value * 100) / 100);
+const DefaultSettings: Settings = {
+    autoUpdate: true,
+    autoUpdateNotification: true,
+    useQuickCss: true,
+    themeLinks: [],
+    eagerPatches: false, // Eagerly patching no longer works due to module factories with the same id being able to have different sources now.
+    enabledThemes: [],
+    enabledThemeLinks: [],
+    enableOnlineThemes: true,
+    pinnedThemes: [],
+    themeNames: {},
+    themeActivationModes: {},
+    enableReactDevtools: false,
+    mainWindowFrameless: false,
+    frameless: false,
+    transparent: false,
+    winCtrlQ: false,
+    macosVibrancyStyle: undefined,
+    disableMinSize: false,
+    winNativeTitleBar: false,
+    plugins: {},
+
+    uiElements: {
+        chatBarButtons: {},
+        messagePopoverButtons: {}
+    },
+
+    notifications: {
+        timeout: 5000,
+        position: "bottom-right",
+        useNative: "not-focused",
+        missed: true,
+        logLimit: 50
+    },
+
+    cloud: {
+        authenticated: false,
+        url: "https://cloud.equicord.org/",
+        settingsSync: false,
+        settingsSyncVersion: 0
+    },
+
+    ignoreResetWarning: false,
+
+    userCssVars: {}
+};
+
+const settings = !IS_REPORTER ? VencordNative.settings.get() : {} as Settings;
+mergeDefaults(settings, DefaultSettings);
+
+export const SettingsStore = new SettingsStoreClass(settings, {
+    readOnly: true,
+    getDefaultValue({
+        target,
+        key,
+        path
+    }) {
+        const v = target[key];
+        if (!plugins) return v; // plugins not initialised yet. this means this path was reached by being called on the top level
+
+        if (path === "plugins" && key in plugins)
+            return target[key] = {
+                enabled: IS_REPORTER || plugins[key].required || plugins[key].enabledByDefault || false
+            };
+
+        // Since the property is not set, check if this is a plugin's setting and if so, try to resolve
+        // the default value.
+        if (path.startsWith("plugins.")) {
+            const plugin = path.slice("plugins.".length);
+            if (plugin in plugins) {
+                const setting = plugins[plugin].options?.[key];
+                if (!setting) return v;
+
+                if ("default" in setting)
+                    // normal setting with a default value
+                    return (target[key] = setting.default);
+
+                if (setting.type === OptionType.SELECT) {
+                    const def = setting.options.find(o => o.default);
+                    if (def)
+                        target[key] = def.value;
+                    return def?.value;
+                }
+            }
+        }
+        return v;
     }
-    return ranges;
+});
+
+if (!IS_REPORTER) {
+    SettingsStore.addGlobalChangeListener((_, path) => {
+        SettingsStore.plain.cloud.settingsSyncVersion = Date.now();
+        VencordNative.settings.set(SettingsStore.plain, path);
+    });
 }
 
-export const PluginTags = [
-    "Accessibility",
-    "Activity",
-    "Appearance",
-    "Chat",
-    "Commands",
-    "Console",
-    "Customisation",
-    "Developers",
-    "Emotes",
-    "Friends",
-    "Fun",
-    "Media",
-    "Notifications",
-    "Organisation",
-    "Privacy",
-    "Reactions",
-    "Roles",
-    "Servers",
-    "Shortcuts",
-    "Utility",
-    "Voice"
-] as const;
+/**
+ * Same as {@link Settings} but unproxied. You should treat this as readonly,
+ * as modifying properties on this will not save to disk or call settings
+ * listeners.
+ * WARNING: default values specified in plugin.options will not be ensured here. In other words,
+ * settings for which you specified a default value may be uninitialised. If you need proper
+ * handling for default values, use {@link Settings}
+ */
+export const PlainSettings = settings;
+/**
+ * A smart settings object. Altering props automagically saves
+ * the updated settings to disk.
+ * This recursively proxies objects. If you need the object non proxied, use {@link PlainSettings}
+ */
+export const Settings = SettingsStore.store;
 
-export type PluginTag = typeof PluginTags[number];
+/**
+ * Settings hook for React components. Returns a smart settings
+ * object that automagically triggers a rerender if any properties
+ * are altered
+ * @param paths An optional list of paths to whitelist for rerenders
+ * @returns Settings
+ */
+// TODO: Representing paths as essentially "string[].join('.')" wont allow dots in paths, change to "paths?: string[][]" later
+export function useSettings(paths?: UseSettings<Settings>[]) {
+    const [, forceUpdate] = React.useReducer(() => ({}), {});
 
-export type ReplaceFn = (match: string, ...groups: string[]) => string;
+    useEffect(() => {
+        if (paths) {
+            paths.forEach(p => {
+                if (p.endsWith(".*")) {
+                    SettingsStore.addPrefixChangeListener(p.slice(0, -2), forceUpdate);
+                } else {
+                    SettingsStore.addChangeListener(p, forceUpdate);
+                }
+            });
 
-export interface PatchReplacement {
-    /** The match for the patch replacement. If you use a string it will be implicitly converted to a RegExp */
-    match: string | RegExp;
-    /** The replacement string or function which returns the string for the patch replacement */
-    replace: string | ReplaceFn;
-    /** Do not warn if this replacement did no changes */
-    noWarn?: boolean;
-    /**
-     * A function which returns whether this patch replacement should be applied.
-     * This is ran before patches are registered, so if this returns false, the patch will never be registered.
-     */
-    predicate?(): boolean;
-    /** The minimum build number for this patch to be applied */
-    fromBuild?: number;
-    /** The maximum build number for this patch to be applied */
-    toBuild?: number;
+            return () => paths.forEach(p => {
+                if (p.endsWith(".*")) {
+                    SettingsStore.removePrefixChangeListener(p.slice(0, -2), forceUpdate);
+                } else {
+                    SettingsStore.removeChangeListener(p, forceUpdate);
+                }
+            });
+        } else {
+            SettingsStore.addGlobalChangeListener(forceUpdate);
+            return () => SettingsStore.removeGlobalChangeListener(forceUpdate);
+        }
+    }, [paths]);
+
+    return SettingsStore.store;
 }
 
-export interface Patch {
-    plugin: string;
-    /** A string or RegExp which is only include/matched in the module code you wish to patch. Prefer only using a RegExp if a simple string test is not enough */
-    find: string | RegExp;
-    /** The replacement(s) for the module being patched */
-    replacement: PatchReplacement | PatchReplacement[];
-    /** Whether this patch should apply to multiple modules */
-    all?: boolean;
-    /** Do not warn if this patch did no changes */
-    noWarn?: boolean;
-    /** Only apply this set of replacements if all of them succeed. Use this if your replacements depend on each other */
-    group?: boolean;
-    /**
-     * A function which returns whether this patch replacement should be applied.
-     * This is ran before patches are registered, so if this returns false, the patch will never be registered.
-     */
-    predicate?(): boolean;
-    /** The minimum build number for this patch to be applied */
-    fromBuild?: number;
-    /** The maximum build number for this patch to be applied */
-    toBuild?: number;
+export function migratePluginSettings(name: string, ...oldNames: string[]) {
+    const { plugins } = SettingsStore.plain;
+    if (name in plugins) return;
+
+    for (const oldName of oldNames) {
+        if (oldName in plugins) {
+            logger.info(`Migrating settings from old name ${oldName} to ${name}`);
+            plugins[name] = plugins[oldName];
+            delete plugins[oldName];
+            SettingsStore.markAsChanged();
+            break;
+        }
+    }
 }
 
-export interface PluginAuthor {
-    name: string;
-    id: BigInt;
+export function migratePluginSetting(pluginName: string, newSetting: string, oldSetting: string) {
+    const settings = SettingsStore.plain.plugins[pluginName];
+    if (!settings) return;
+
+    if (!Object.hasOwn(settings, oldSetting) || Object.hasOwn(settings, newSetting)) return;
+
+    logger.info(`Migrating plugin setting from ${oldSetting} to ${newSetting} on ${pluginName}`);
+    settings[newSetting] = settings[oldSetting];
+    delete settings[oldSetting];
+    SettingsStore.markAsChanged();
 }
 
-export interface Plugin extends PluginDef {
-    patches?: Patch[];
-    started: boolean;
-    isDependency?: boolean;
+export function migratePluginToSettings(deleteOldSettings: boolean, newName: string, oldName: string, ...settingNames: string[]) {
+    const { plugins } = SettingsStore.plain;
+    const newPlugin = plugins[newName];
+    const oldPlugin = plugins[oldName];
+
+    if (newPlugin && oldPlugin?.enabled) {
+        for (const settingName of settingNames) {
+            logger.info(`Migrating plugin to setting from old name ${oldName} to ${newName} as ${settingName}`);
+            newPlugin[settingName] = true;
+        }
+
+        newPlugin.enabled = true;
+        if (deleteOldSettings) delete plugins[oldName];
+        SettingsStore.markAsChanged();
+    }
 }
 
-export type IconComponent = (props: IconProps & Record<string, any>) => ReactNode;
-export type IconProps = { height?: number | string; width?: number | string; className?: string; };
-export interface PluginDef {
-    name: string;
-    description: string;
-    /** Additional search terms that will bring up your plugin */
-    searchTerms?: string[];
-    tags?: PluginTag[];
-    authors: PluginAuthor[];
-    start?(): void;
-    stop?(): void;
-    patches?: Omit<Patch, "plugin">[];
-    /**
-     * List of commands that your plugin wants to register
-     */
-    commands?: Command[];
-    /**
-     * A list of other plugins that your plugin depends on.
-     * These will automatically be enabled and loaded before your plugin
-     * Generally these will be API plugins
-     */
-    dependencies?: string[],
-    /**
-     * Whether this plugin is required and forcefully enabled
-     */
-    required?: boolean;
-    /**
-     * Whether this plugin should be hidden from the user
-     */
-    hidden?: boolean;
-    /**
-     * Whether this plugin should be enabled by default, but can be disabled
-     */
-    enabledByDefault?: boolean;
-    /**
-     * Whether enabling or disabling this plugin requires a restart. Defaults to true if the plugin has patches.
-     */
-    requiresRestart?: boolean;
-    /**
-     * When to call the start() method
-     * @default StartAt.WebpackReady
-     */
-    startAt?: StartAt,
-    /**
-     * Which parts of the plugin can be tested by the reporter. Defaults to all parts
-     */
-    reporterTestable?: number;
-    /**
-     * Optionally provide settings that the user can configure in the Plugins tab of settings.
-     * @deprecated Use `settings` instead
-     */
-    // TODO: Remove when everything is migrated to `settings`
-    options?: Record<string, PluginOptionsItem>;
-    /**
-     * Optionally provide settings that the user can configure in the Plugins tab of settings.
-     */
-    settings?: DefinedSettings;
-    /**
-     * Allows you to specify a custom Component that will be rendered in your
-     * plugin's settings page
-     */
-    settingsAboutComponent?: React.ComponentType<{}>;
-    /**
-     * Allows you to subscribe to Flux events
-     */
-    flux?: Partial<{
-        [E in LiteralUnion<FluxEvents, string>]: (event: any) => void | Promise<void>;
-    }>;
-    /**
-     * Allows you to manipulate context menus
-     */
-    contextMenus?: Record<string, NavContextMenuPatchCallback>;
-    /**
-     * Allows you to add custom actions to the Vencord Toolbox.
-     *
-     * Can either be an object mapping labels to action functions or a Function returning Menu components.
-     * Please note that you can only use Menu components.
-     *
-     * @example
-     * toolboxActions: {
-     *   "Click Me": () => alert("Hi")
-     * }
-     */
-    toolboxActions?: Record<string, () => void> | (() => ReactNode);
+export function migrateSettingToPlugin(newName: string, oldName: string, settingName: string) {
+    const { plugins } = SettingsStore.plain;
+    const newPlugin = plugins[newName];
+    const oldPlugin = plugins[oldName];
 
-    /**
-     * Managed style to automatically enable and disable when the plugin is enabled or disabled
-     */
-    managedStyle?: string;
-
-    userProfileBadge?: ProfileBadge;
-    userProfileBadges?: ProfileBadge[];
-
-    messagePopoverButton?: MessagePopoverButtonData;
-    chatBarButton?: ChatBarButtonData;
-
-    onMessageClick?: MessageClickListener;
-    onBeforeMessageSend?: MessageSendListener;
-    onBeforeMessageEdit?: MessageEditListener;
-
-    renderMessageAccessory?: MessageAccessoryFactory;
-    renderMessageDecoration?: MessageDecorationFactory;
-
-    renderMemberListDecorator?: MemberListDecoratorFactory;
-
-    // Custom
-    renderNicknameIcon?: NicknameIconFactory;
-    headerBarButton?: HeaderBarButtonData;
-    audioProcessor?: AudioProcessor;
-    userAreaButton?: UserAreaButtonData;
-    renderProfileCollection?: ProfileCollectionFactory;
-
-    /**
-     * A Vencord plugin that is modified for extra features in Equicord
-     */
-    isModified?: boolean;
+    if (newPlugin && oldPlugin?.enabled && oldPlugin?.[settingName]) {
+        logger.info(`Migrating setting ${settingName} from ${oldName} to seperate plugin ${newName}`);
+        delete oldPlugin[settingName];
+        newPlugin.enabled = true;
+        SettingsStore.markAsChanged();
+    }
 }
 
-export const enum StartAt {
-    /** Right away, as soon as Vencord initialised */
-    Init = "Init",
-    /** On the DOMContentLoaded event, so once the document is ready */
-    DOMContentLoaded = "DOMContentLoaded",
-    /** Once Discord's core webpack modules have finished loading, so as soon as things like react and flux are available */
-    WebpackReady = "WebpackReady"
+export function migrateSettingsFromPlugin(newPlugin: string, oldPlugin: string, ...settings: string[]) {
+    const { plugins } = SettingsStore.plain;
+    const oldSettings = plugins[oldPlugin];
+    const newSettings = plugins[newPlugin];
+    if (!oldSettings || !newSettings) return;
+
+    for (const setting of settings) {
+        if (!Object.hasOwn(oldSettings, setting)) continue;
+        if (Object.hasOwn(newSettings, setting)) continue;
+
+        logger.info(`Migrating plugin setting "${setting}" from ${oldPlugin} to ${newPlugin}`);
+
+        newSettings[setting] = oldSettings[setting];
+        delete oldSettings[setting];
+    }
+
+    SettingsStore.markAsChanged();
 }
 
-export const enum ReporterTestable {
-    None = 1 << 1,
-    Start = 1 << 2,
-    Patches = 1 << 3,
-    FluxEvents = 1 << 4
+export function migrateOldSettingToNewPlugin(newPlugin: string, newSetting: string, oldPlugin: string, oldSetting: string,) {
+    const { plugins } = SettingsStore.plain;
+    const oldSettings = plugins[oldPlugin];
+    const newSettings = plugins[newPlugin];
+    if (!oldSettings || !newSettings) return;
+
+    if (!Object.hasOwn(oldSettings, oldSetting) || Object.hasOwn(newSettings, newSetting)) return;
+
+    logger.info(`Migrating plugin setting "${oldSetting}" from ${oldPlugin} to "${newSetting}" on ${newPlugin}`);
+
+    newSettings[newSetting] = oldSettings[oldSetting];
+    delete oldSettings[oldSetting];
+    SettingsStore.markAsChanged();
 }
 
-export function defineDefault<T = any>(value: T) {
-    return value;
-}
-
-export const enum OptionType {
-    STRING,
-    NUMBER,
-    BIGINT,
-    BOOLEAN,
-    SELECT,
-    SLIDER,
-    COMPONENT,
-    CUSTOM
-}
-
-export type SettingsDefinition = Record<string, PluginSettingDef>;
-export type SettingsChecks<D extends SettingsDefinition> = {
-    [K in keyof D]?: D[K] extends PluginSettingComponentDef ? IsDisabled<DefinedSettings<D>> :
-    (IsDisabled<DefinedSettings<D>> & IsValid<PluginSettingType<D[K]>, DefinedSettings<D>>);
-};
-
-export type PluginSettingDef =
-    (PluginSettingCommon & PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">) |
-    (PluginSettingComponentDef & Omit<PluginSettingCommon, "description" | "placeholder">) | ((
-        | PluginSettingStringDef
-        | PluginSettingNumberDef
-        | PluginSettingBooleanDef
-        | PluginSettingSelectDef
-        | PluginSettingSliderDef
-        | PluginSettingBigIntDef
-    ) & PluginSettingCommon);
-
-export interface PluginSettingCommon {
-    description: string;
-    placeholder?: string;
-    onChange?(newValue: any): void;
-    /**
-     * Whether changing this setting requires a restart
-     */
-    restartNeeded?: boolean;
-    componentProps?: Record<string, any>;
-    /**
-     * Hide this setting from the settings UI
-     */
-    hidden?: boolean;
-    /**
-     * Set this if the setting only works on Browser or Desktop, not both
-     */
-    target?: "WEB" | "DESKTOP" | "BOTH";
-}
-
-interface IsDisabled<D = unknown> {
-    /**
-     * Checks if this setting should be disabled
-     */
-    disabled?(this: D): boolean;
-}
-
-interface IsValid<T, D = unknown> {
-    /**
-     * Prevents the user from saving settings if this is false or a string
-     */
-    isValid?(this: D, value: T): boolean | string;
-}
-
-export interface PluginSettingStringDef {
-    type: OptionType.STRING;
-    default?: string;
-    /** Whether to use a multiline text area */
-    multiline?: boolean;
-}
-export interface PluginSettingNumberDef {
-    type: OptionType.NUMBER;
-    default?: number;
-}
-export interface PluginSettingBigIntDef {
-    type: OptionType.BIGINT;
-    default?: BigInt;
-}
-export interface PluginSettingBooleanDef {
-    type: OptionType.BOOLEAN;
-    default?: boolean;
-}
-
-export interface PluginSettingSelectDef {
-    type: OptionType.SELECT;
-    options: readonly PluginSettingSelectOption[];
-}
-
-export interface PluginSettingSelectOption {
-    label: string;
-    value: string | number | boolean;
-    default?: boolean;
-}
-
-export interface PluginSettingCustomDef {
-    type: OptionType.CUSTOM;
-    default?: any;
-}
-
-export interface PluginSettingSliderDef {
-    type: OptionType.SLIDER;
-    /**
-     * All the possible values in the slider. Needs at least two values.
-     */
-    markers: number[];
-    /**
-     * Default value to use
-     */
-    default: number;
-    /**
-     * If false, allow users to select values in-between your markers.
-     */
-    stickToMarkers?: boolean;
-}
-
-export interface IPluginOptionComponentProps {
-    /**
-     * Run this when the value changes.
-     *
-     * NOTE: The user will still need to click save to apply these changes.
-     */
-    setValue(newValue: any): void;
-    /**
-     * The options object
-     */
-    option: PluginSettingComponentDef;
-}
-
-export interface PluginSettingComponentDef {
-    type: OptionType.COMPONENT;
-    component: (props: IPluginOptionComponentProps) => ReactNode | Promise<ReactNode>;
-    default?: any;
-}
-
-/** Maps a `PluginSettingDef` to its value type */
-type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStringDef ? string :
-    O extends PluginSettingNumberDef ? number :
-    O extends PluginSettingBigIntDef ? BigInt :
-    O extends PluginSettingBooleanDef ? boolean :
-    O extends PluginSettingSelectDef ? O["options"][number]["value"] :
-    O extends PluginSettingSliderDef ? number :
-    O extends PluginSettingComponentDef ? O extends { default: infer Default; } ? Default : any :
-    O extends PluginSettingCustomDef ? O extends { default: infer Default; } ? Default : any :
-    never;
-
-type PluginSettingDefaultType<O extends PluginSettingDef> = O extends PluginSettingSelectDef ? (
-    O["options"] extends { default?: boolean; }[] ? O["options"][number]["value"] : undefined
-) : O extends { default: infer T; } ? T : undefined;
-
-type SettingsStore<D extends SettingsDefinition> = {
-    [K in keyof D]: PluginSettingType<D[K]> | PluginSettingDefaultType<D[K]>;
-};
-
-/** An instance of defined plugin settings */
-export interface DefinedSettings<
-    Def extends SettingsDefinition = SettingsDefinition,
-    Checks extends SettingsChecks<Def> = {},
+export function definePluginSettings<
+    Def extends SettingsDefinition,
+    Checks extends SettingsChecks<Def>,
     PrivateSettings extends object = {}
-> {
-    /** Shorthand for `Vencord.Settings.plugins.PluginName`, but with typings */
-    store: SettingsStore<Def> & PrivateSettings;
-    /** Shorthand for `Vencord.PlainSettings.plugins.PluginName`, but with typings */
-    plain: SettingsStore<Def> & PrivateSettings;
-    /**
-     * React hook for getting the settings for this plugin
-     * @param filter optional filter to avoid rerenders for irrelevent settings
-     */
-    use<F extends Extract<keyof Def | keyof PrivateSettings, string>>(filter?: F[]): Pick<SettingsStore<Def> & PrivateSettings, F>;
-    /** Definitions of each setting */
-    def: Def;
-    /** Setting methods with return values that could rely on other settings */
-    checks: Checks;
-    /**
-     * Name of the plugin these settings belong to,
-     * will be an empty string until plugin is initialized
-     */
-    pluginName: string;
+>(def: Def, checks?: Checks) {
+    const definedSettings: DefinedSettings<Def, Checks, PrivateSettings> = {
+        get store() {
+            if (!definedSettings.pluginName) throw new Error("Cannot access settings before plugin is initialized");
+            return Settings.plugins[definedSettings.pluginName] as any;
+        },
+        get plain() {
+            if (!definedSettings.pluginName) throw new Error("Cannot access settings before plugin is initialized");
+            return PlainSettings.plugins[definedSettings.pluginName] as any;
+        },
+        use: settings => useSettings((
+            settings
+                ? settings.map(name => `plugins.${definedSettings.pluginName}.${name}`)
+                : [`plugins.${definedSettings.pluginName}.*`]
+        ) as UseSettings<Settings>[]).plugins[definedSettings.pluginName] as any,
+        def,
+        checks: checks ?? {} as any,
+        pluginName: "",
 
-    withPrivateSettings<T extends object>(): DefinedSettings<Def, Checks, T>;
+        withPrivateSettings<T extends object>() {
+            return this as DefinedSettings<Def, Checks, T>;
+        }
+    };
+
+    return definedSettings;
 }
 
-export type PartialExcept<T, R extends keyof T> = Partial<T> & Required<Pick<T, R>>;
+type UseSettings<T extends object> = ResolveUseSettings<T>[keyof T];
 
-export type IpcRes<V = any> = { ok: true; value: V; } | { ok: false, error: any; };
-
-/* -------------------------------------------- */
-/*             Legacy Options Types             */
-/* -------------------------------------------- */
-
-export type PluginOptionBase = PluginSettingCommon & IsDisabled;
-export type PluginOptionsItem =
-    | PluginOptionString
-    | PluginOptionNumber
-    | PluginOptionBoolean
-    | PluginOptionSelect
-    | PluginOptionSlider
-    | PluginOptionComponent
-    | PluginOptionCustom;
-export type PluginOptionString = PluginSettingStringDef & PluginSettingCommon & IsDisabled & IsValid<string>;
-export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDef) & PluginSettingCommon & IsDisabled & IsValid<number | BigInt>;
-export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon & IsDisabled & IsValid<boolean>;
-export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
-export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
-export type PluginOptionComponent = PluginSettingComponentDef & Omit<PluginSettingCommon, "description" | "placeholder">;
-export type PluginOptionCustom = PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">;
-
-export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {
-    [key in keyof PluginExports]:
-    PluginExports[key] extends (event: Electron.IpcMainInvokeEvent, ...args: infer Args) => infer Return
-    ? (...args: Args) => Return extends Promise<any> ? Return : Promise<Return>
+type ResolveUseSettings<T extends object> = {
+    [Key in keyof T]:
+    Key extends string
+    ? T[Key] extends Record<string, unknown>
+    // @ts-expect-error "Type instantiation is excessively deep and possibly infinite"
+    ? `${Key}.*` | (ResolveUseSettings<T[Key]> extends Record<string, string> ? `${Key}.${ResolveUseSettings<T[Key]>[keyof T[Key]]}` : never)
+    : Key
     : never;
 };
-
-export type AllOrNothing<T> = T | { [K in keyof T]?: never; };
