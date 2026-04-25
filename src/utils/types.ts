@@ -25,6 +25,7 @@ import { MessageDecorationFactory } from "@api/MessageDecorations";
 import { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
 import { MessagePopoverButtonData } from "@api/MessagePopover";
 import { Command, FluxEvents } from "@vencord/discord-types";
+import type { NicknameIconFactory } from "@api/NicknameIcons";
 import { ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
 
