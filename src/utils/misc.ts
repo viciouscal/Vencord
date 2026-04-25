@@ -16,9 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ChannelStore, GuildMemberStore } from "@webpack/common";
-
-import { EQUICORD_HELPERS, EquicordDevsById, GUILD_ID, SUPPORT_CHANNEL_ID, VencordDevsById } from "./constants";
+import { DevsById } from "./constants";
 
 /**
  * Calls .join(" ") on the arguments
@@ -77,13 +75,8 @@ export function identity<T>(value: T): T {
     return value;
 }
 
-export const isPluginDev = (id: string) => Object.hasOwn(VencordDevsById, id);
-export const shouldShowContributorBadge = (id: string) => isPluginDev(id) && VencordDevsById[id].badge !== false;
-
-export const isEquicordPluginDev = (id: string) => Object.hasOwn(EquicordDevsById, id);
-export const shouldShowEquicordContributorBadge = (id: string) => isEquicordPluginDev(id) && EquicordDevsById[id].badge !== false;
-
-export const isAnyPluginDev = (id: string) => Object.hasOwn(VencordDevsById, id) || Object.hasOwn(EquicordDevsById, id);
+export const isPluginDev = (id: string) => Object.hasOwn(DevsById, id);
+export const shouldShowContributorBadge = (id: string) => isPluginDev(id) && DevsById[id].badge !== false;
 
 export function pluralise(amount: number, singular: string, plural = singular + "s") {
     return amount === 1 ? `${amount} ${singular}` : `${amount} ${plural}`;
@@ -103,27 +96,6 @@ export function tryOrElse<T>(func: () => T, fallback: T): T {
     } catch {
         return fallback;
     }
-}
-
-export function isEquicordGuild(id: string | null | undefined, isGuildId: boolean = false): boolean {
-    if (!id) return false;
-    if (isGuildId) return id === GUILD_ID;
-    const channel = ChannelStore.getChannel(id);
-    if (!channel) return false;
-    return channel.guild_id === GUILD_ID;
-}
-
-export function isSupportChannel(channelId: string | null | undefined): boolean {
-    if (!channelId) return false;
-    return channelId === SUPPORT_CHANNEL_ID;
-}
-
-export function isEquicordSupport(userId: string | null | undefined): boolean {
-    if (!userId) return false;
-
-    const member = GuildMemberStore.getMember(GUILD_ID, userId);
-    if (!member) return false;
-    return member.roles.includes(EQUICORD_HELPERS) || false;
 }
 
 export function removeFromArray<T>(arr: T[], predicate: (e: T) => boolean) {
