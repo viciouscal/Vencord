@@ -7,8 +7,7 @@
 import { findByCodeLazy, findLazy } from "@webpack";
 
 let defaultSounds: null | string[] = null;
-const findDefaultSounds = findLazy(module => module.resolve && module.id && module.keys().some(key => key.endsWith(".mp3"))
-);
+const findDefaultSounds = findLazy(module => module.resolve && module.id && module.keys().some(key => key.endsWith(".mp3")), false);
 const AudioPlayerConstructor = findByCodeLazy("could not play audio");
 
 export type AudioProcessor = (data: PreprocessAudioData) => void;
