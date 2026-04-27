@@ -48,7 +48,7 @@ function SpotifyActivityToggleButton({ iconForeground, hideTooltips, nameplate }
         return () => { forceUpdate = null; };
     }, []);
 
-    if (!isLoaded || !spotifyId || location !== "PANEL" && isPluginEnabled(vencordToolbox.name)) return null;
+    if (!isLoaded || !spotifyId || (location !== "PANEL" && isPluginEnabled(vencordToolbox?.name))) return null;
 
     return (
         <UserAreaButton
@@ -80,7 +80,7 @@ const settings = definePluginSettings({
             { label: "Vencord Toolbox", value: "TOOLBOX" }
         ],
         get hidden() {
-            return !isPluginEnabled(vencordToolbox.name);
+            return !isPluginEnabled(vencordToolbox?.name);
         }
     },
 });
@@ -101,7 +101,7 @@ export default definePlugin({
     toolboxActions() {
         const { location } = settings.use(["location"]);
 
-        if (!spotifyId || location !== "TOOLBOX") return null;
+        if (!spotifyId || location !== "TOOLBOX" || !isLoaded) return null;
 
         return (
             <Menu.MenuItem
@@ -121,16 +121,20 @@ export default definePlugin({
 
     flux: {
         async CONNECTION_OPEN() {
-            const { body } = await RestAPI.get({ url: Constants.Endpoints.CONNECTIONS });
-            if (!body) return;
+            isLoaded = false;
+            try {
+                const { body } = await RestAPI.get({ url: Constants.Endpoints.CONNECTIONS });
+                if (!body) return;
 
-            const spotifyConn = body.find((c: { type: string; }) => c.type === "spotify");
-            if (spotifyConn) {
-                spotifyId = spotifyConn.id;
-                showActivity = spotifyConn.show_activity;
+                const spotifyConn = body.find((c: { type: string; }) => c.type === "spotify");
+                if (spotifyConn) {
+                    spotifyId = spotifyConn.id;
+                    showActivity = spotifyConn.show_activity;
+                }
+            } finally {
+                isLoaded = true;
+                forceUpdate?.();
             }
-            isLoaded = true;
-            forceUpdate?.();
         }
     },
 });
