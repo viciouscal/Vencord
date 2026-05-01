@@ -50,6 +50,14 @@
     font-size: 14px;
 }
 
+.questify-form-warning {
+    margin: 12px 0 8px;
+    padding: 10px 12px;
+    border-left: 3px solid var(--status-danger);
+    border-radius: 4px;
+    background-color: color-mix(in srgb, var(--status-danger) 12%, transparent);
+}
+
 .questify-select > div {
     border-radius: 3px;
     min-height: 43px;
@@ -354,4 +362,9 @@
 .questify-quest-item-restyle > :nth-child(2) [class*="container"] {
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
+}
+
+/* Prevent completion confetti from covering quest buttons */
+div[id^="quest-tile-"] div[class^="confetti__"] {
+    pointer-events: none;
 }
