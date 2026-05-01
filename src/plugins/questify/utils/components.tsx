@@ -5,13 +5,14 @@
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { settings } from "@plugins/questify/settings";
 import { findComponentByCodeLazy } from "@webpack";
 import { SearchableSelect, useState } from "@webpack/common";
 import { JSX } from "react";
 
+import { settings } from "../settings";
 import { formatLowerBadge } from "./misc";
 
+// Requires GuildlessServerListItemComponent export patch in index.tsx
 // GuildlessServerListItem's built-in pill does not support unread state.
 export const GuildlessServerListItemComponent = findComponentByCodeLazy("tooltip:", "lowerBadgeSize:");
 export const GuildedServerListItemPillComponent = findComponentByCodeLazy('"pill":"empty"');
@@ -22,13 +23,28 @@ export const QuestTile = findComponentByCodeLazy(".rowIndex,trackGuildAndChannel
 
 export class ActiveQuestIntervalsMap extends Map<string, { progressTimeout: NodeJS.Timeout; rerenderTimeout: NodeJS.Timeout; progress: number; type: string; }> {
     set(key: string, value: { progressTimeout: NodeJS.Timeout; rerenderTimeout: NodeJS.Timeout; progress: number; type: string; }): this {
+        const { resumeQuestIDs } = settings.store;
+
+        settings.store.resumeQuestIDs = {
+            watch: resumeQuestIDs.watch.filter((id: string) => id !== key),
+            play: resumeQuestIDs.play.filter((id: string) => id !== key),
+            achievement: resumeQuestIDs.achievement.filter((id: string) => id !== key),
+        };
+
         settings.store.resumeQuestIDs[value.type].push(key);
+
         return super.set(key, value);
     }
 
     delete(key: string): boolean {
-        const types = Object.keys(settings.def.resumeQuestIDs.default);
-        for (const type of types) { settings.store.resumeQuestIDs[type] = settings.store.resumeQuestIDs[type].filter((id: string) => id !== key); }
+        const { resumeQuestIDs } = settings.store;
+
+        settings.store.resumeQuestIDs = {
+            watch: resumeQuestIDs.watch.filter((id: string) => id !== key),
+            play: resumeQuestIDs.play.filter((id: string) => id !== key),
+            achievement: resumeQuestIDs.achievement.filter((id: string) => id !== key),
+        };
+
         return super.delete(key);
     }
 }
