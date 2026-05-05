@@ -55,6 +55,26 @@ export function isPluginEnabled(p: string) {
     ) ?? false;
 }
 
+export function isSettingHidden(settings: DefinedSettings, setting: PluginSettingDef) {
+    if (!("hidden" in setting)) return false;
+
+    return typeof setting.hidden === "function"
+        ? setting.hidden.call(settings)
+        : Boolean(setting.hidden);
+}
+
+export function isSettingDisabled(settings: DefinedSettings, setting: PluginSettingDef) {
+    if (!("disabled" in setting)) return false;
+
+    return typeof setting.disabled === "function"
+        ? setting.disabled.call(settings)
+        : Boolean(setting.disabled);
+}
+
+export function hasAnyVisibleSettings({ settings }: Plugin) {
+    return !!settings && Object.values(settings.def).some(s => !isSettingHidden(settings, s));
+}
+
 export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string, pluginPath = `Vencord.Plugins.plugins[${JSON.stringify(pluginName)}]`) {
     // TODO: this causes crashes
     if (pluginName === "Vesktop" && newPatch.find === ".STREAMING_AUTO_STREAMER_MODE,") return;
@@ -321,10 +341,6 @@ export const initPluginManager = onlyOnce(function init() {
 
     const neededApiPlugins = new Set<string>();
 
-    // First round-trip to mark and force enable dependencies
-    //
-    // FIXME: might need to revisit this if there's ever nested (dependencies of dependencies) dependencies since this only
-    // goes for the top level and their children, but for now this works okay with the current API plugins
     for (const p of pluginsValues) if (isPluginEnabled(p.name)) {
         p.dependencies?.forEach(d => {
             const dep = Plugins[d];
@@ -353,7 +369,6 @@ export const initPluginManager = onlyOnce(function init() {
         if (p.messagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
         if (p.userProfileBadge) neededApiPlugins.add("BadgeAPI");
         if (p.renderNicknameIcon) neededApiPlugins.add("NicknameIconsAPI");
-        
 
         for (const key of pluginKeysToBind) {
             p[key] &&= p[key].bind(p) as any;
