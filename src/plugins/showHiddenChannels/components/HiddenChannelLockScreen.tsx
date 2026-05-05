@@ -17,8 +17,11 @@
 */
 
 import { isPluginEnabled } from "@api/PluginManager";
+<<<<<<< HEAD
 import { Settings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
+=======
+>>>>>>> upstream/main
 import ErrorBoundary from "@components/ErrorBoundary";
 import PermissionsViewerPlugin from "@plugins/permissionsViewer";
 import openRolesAndUsersPermissionsModal from "@plugins/permissionsViewer/components/RolesAndUsersPermissions";
@@ -146,7 +149,7 @@ function HiddenChannelLockScreen({ channel }: { channel: Channel; }) {
             });
         }
 
-        if (Settings.plugins.PermissionsViewer.enabled) {
+        if (isPluginEnabled(PermissionsViewerPlugin.name)) {
             setPermissions(sortPermissionOverwrites(Object.values(permissionOverwrites).map(overwrite => ({
                 type: overwrite.type,
                 id: overwrite.id,
