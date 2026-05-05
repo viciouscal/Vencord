@@ -193,6 +193,11 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Average React Enjoyer",
         id: 1004904120056029256n
     },
+    koish1: {
+        name: "koish1",
+        id: 291089948709486593n,
+        badge: false,
+    },
     adryd: {
         name: "adryd",
         id: 0n
