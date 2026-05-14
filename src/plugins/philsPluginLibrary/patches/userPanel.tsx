@@ -28,6 +28,8 @@ export interface PanelButton {
     tooltipText?: string,
     icon?: IconComponent;
     onClick?: () => void;
+    /** Right-click: e.g. quick toggles without opening full plugin settings */
+    onContextMenu?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
 const settingsPanelButtonsSubscriptions = new Set<React.DispatchWithoutAction>();
@@ -61,18 +63,20 @@ export const ButtonsSettingsPanel = () => {
             const splicedButtons =
                 settingsPanelButtonsClone
                     .splice(0, 3)
-                    .map(({ icon, tooltipText, onClick }, index) =>
+                    .map(({ icon, tooltipText, onClick, onContextMenu }, index) =>
                         tooltipText
                             ? <SettingsPanelTooltipButton
                                 key={`tooltip-button-${index}`} // Add a unique key here
                                 tooltipProps={{ text: tooltipText }}
                                 icon={icon}
                                 onClick={onClick}
+                                onContextMenu={onContextMenu}
                             />
                             : <SettingsPanelButton
                                 key={`button-${index}`} // Add a unique key here
                                 icon={icon}
                                 onClick={onClick}
+                                onContextMenu={onContextMenu}
                             />
                     );
 
