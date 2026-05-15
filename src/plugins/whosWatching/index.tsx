@@ -77,16 +77,15 @@ export default definePlugin({
         {
             find: ".Masks.STATUS_SCREENSHARE,width:32",
             replacement: {
-                match: /jsx\)\((\i\.\i),{mask:/,
-                replace: "jsx)($self.component({OriginalComponent:$1}),{mask:"
+                match: /\((\i\.\i)(?=,{mask:\i\.\i\.Masks\.STATUS_SCREENSHARE)/,
+                replace: "($self.component({OriginalComponent:$1})"
             }
         },
-        { 
-            predicate: () => settings.store.showPanel,
-            find: "this.renderVoicePanelIntroduction",
+        {
+            find: ",setIsForceShowSharingPopout:",
             replacement: {
-                match: /(let{(?:channel:\i,)?canGoLive.{0,1500}\()"div"(?=,{(?:ref:this\.ref,)?className:\i(?:\.body|\(\)\(|\.\i))/,
-                replace: "$1$self.WrapperComponent"
+                match: /"div"(?=.{0,50}stream:\i,canGoLive:\i)/,
+                replace: "$self.WrapperComponent"
             }
         }
     ],
