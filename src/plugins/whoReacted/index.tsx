@@ -38,7 +38,7 @@ interface ReactionProps {
 
 let Scroll: any = null;
 const queue = new Queue();
-let reactions: Record<string, ReactionCacheEntry>;
+let reactions: Record<string, ReactionCacheEntry> = {};
 
 function fetchReactions(msg: Message, emoji: ReactionEmoji, type: number) {
     const key = emoji.name + (emoji.id ? `:${emoji.id}` : "");
@@ -129,6 +129,7 @@ function ReactionUsers({ message, emoji, type }: ReactionProps) {
 export default definePlugin({
     name: "WhoReacted",
     description: "Renders the avatars of users who reacted to a message",
+    tags: ["Reactions", "Chat", "Appearance"],
     authors: [Devs.Ven, Devs.KannaDev, Devs.newwares],
 
     patches: [
@@ -142,8 +143,8 @@ export default definePlugin({
         {
             find: '"MessageReactionsStore"',
             replacement: {
-                match: /function (\i)\(\){(\i)={}(?=.*CONNECTION_OPEN:\1)/,
-                replace: "$&;$self.reactions=$2;"
+                match: /CONNECTION_OPEN:function\(\){(\i)={}/,
+                replace: "$&;$self.reactions=$1;"
             }
         },
         {

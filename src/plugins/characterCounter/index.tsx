@@ -35,6 +35,7 @@ export default definePlugin({
     name: "CharacterCounter",
     description: "Adds a character counter to the chat input",
     authors: [Devs.thororen],
+    tags: ["Utility"],
     settings,
     patches: [
         {
@@ -49,8 +50,8 @@ export default definePlugin({
         {
             find: "#{intl::PREMIUM_MESSAGE_LENGTH_UPSELL_TOOLTIP}",
             replacement: {
-                match: /return \i\?\i\(\):\i\(\)(?<=#{intl::PREMIUM_MESSAGE_LENGTH_UPSELL_TOOLTIP_WITHOUT_LINK}.{0,200}?)/,
-                replace: "return null"
+                match: /(?<=\.PREMIUM_UPSELL\);)(?=.{0,50}\.PREMIUM_UPSELL_VIEWED)/,
+                replace: "return null;"
             }
         }
     ],
