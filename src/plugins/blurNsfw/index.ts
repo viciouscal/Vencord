@@ -50,6 +50,7 @@ function setCss() {
 export default definePlugin({
     name: "BlurNSFW",
     description: "Blur attachments in NSFW channels until hovered",
+    tags: ["Privacy", "Appearance"],
     authors: [Devs.Ven],
     settings,
 
