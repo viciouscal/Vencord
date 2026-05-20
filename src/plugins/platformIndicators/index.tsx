@@ -229,8 +229,18 @@ export default definePlugin({
 
     start() {
         Object.entries(indicatorLocations).forEach(([key, value]) => {
-            if (settings.store[key]) value.onEnable();
-        });
+    if (key === "badges") {
+        if (
+            settings.store[key] &&
+            settings.store.profileLocation === "with-badges"
+        ) {
+            value.onEnable();
+        }
+        return;
+    }
+
+    if (settings.store[key]) value.onEnable();
+});
 
         if (settings.store.profileLocation === "next-to-name") {
             addNicknameIcon("PlatformIndicators", ({ userId }) => {
