@@ -907,7 +907,7 @@ export default definePlugin({
             });
 
             if (hasBypass && !s.disableEmbedPermissionCheck && !hasEmbedPerms(channelId)) {
-                if (!await showCannotEmbedNotice()) {
+                if (!await  showCannotEmbedNotice()) {
                     return { cancel: true };
                 }
             }

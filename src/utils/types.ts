@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AudioProcessor } from "@api/AudioPlayer";
 import type { ProfileBadge } from "@api/Badges";
 import type { ChatBarButtonData } from "@api/ChatButtons";
 import type { NavContextMenuPatchCallback } from "@api/ContextMenu";
@@ -234,7 +233,6 @@ export interface PluginDef {
     // Custom
     renderNicknameIcon?: NicknameIconFactory;
     headerBarButton?: HeaderBarButtonData;
-    audioProcessor?: AudioProcessor;
     userAreaButton?: UserAreaButtonData;
     renderProfileCollection?: ProfileCollectionFactory;
 
