@@ -374,8 +374,8 @@ export default definePlugin({
             find: "QUESTS_BAR,questId",
             predicate: () => !getQuestifySettings().disableQuestsEverything && hasEnabledAutoCompleteQuestTypes(),
             replacement: {
-                match: /(?<=SELECT&&!\i&&!\i,\i=\i\.\i\.useConfig\({location:\i\.\i\.QUESTS_BAR}\),\i=\(0,\i\.\i\)\((\i)\);)(if\()(.{0,300}?let (\i)=null;return )/,
-                replace: 'const questifyButton=$self.enrolledIncompleteButton({quest:$1,size:"sm"});$2!questifyButton&&$3questifyButton?$4=questifyButton:'
+                match: /(?<=SELECT&&!\i&&!\i,(\i)=null;)(return )(\i\?\i=\(0,\i.\i\)\(\i,{quest:(\i))/,
+                replace: "const questifyButton=$self.enrolledIncompleteButton({quest:$4,size:\"sm\"});$2questifyButton?$1=questifyButton:$3"
             }
         },
         {
@@ -388,7 +388,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".rowIndex,trackGuildAndChannelMetadata",
+            find: "return`quest-tile-",
             group: true,
             predicate: () => !getQuestifySettings().disableQuestsEverything,
             replacement: [
@@ -431,7 +431,7 @@ export default definePlugin({
             ]
         },
         {
-            find: ".rowIndex,trackGuildAndChannelMetadata",
+            find: "return`quest-tile-",
             group: true,
             predicate: () => !getQuestifySettings().disableQuestsEverything,
             replacement: [
