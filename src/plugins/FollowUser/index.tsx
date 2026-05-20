@@ -107,23 +107,6 @@ interface VoiceState {
     requestToSpeakTimestamp: string | null;
 }
 
-function getFollowedIds(): string[] {
-    try {
-        const raw = settings.store.followUserIds;
-        if (!raw) return [];
-        const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
-    } catch {
-        return [];
-    }
-}
-
-function setFollowedIds(ids: string[]) {
-    settings.store.followUserIds = JSON.stringify(ids);
-}
-
-const MAX_FOLLOWED = 2;
-
 export const settings = definePluginSettings({
     executeOnFollow: {
         type: OptionType.BOOLEAN,
@@ -155,12 +138,12 @@ export const settings = definePluginSettings({
         restartNeeded: false,
         default: false
     },
-    followUserIds: {
+    followUserId: {
         type: OptionType.STRING,
-        description: "Followed User IDs (JSON array, managed via context menu)",
+        description: "Followed User ID",
         restartNeeded: false,
-        hidden: true,
-        default: "[]",
+        hidden: true, // Managed via context menu and indicator
+        default: "",
     },
     channelFull: {
         type: OptionType.BOOLEAN,
@@ -192,114 +175,91 @@ interface VoiceStateMember {
 }
 
 function getChannelId(userId: string) {
-    if (!userId) return null;
+    if (!userId) {
+        return null;
+    }
     try {
         const states = VoiceStateStore.getAllVoiceStates();
         for (const users of Object.values(states)) {
-            if (users[userId]) return users[userId].channelId ?? null;
+            if (users[userId]) {
+                return users[userId].channelId ?? null;
+            }
         }
     } catch (e) { }
     return null;
 }
 
-function triggerFollow(
-    userId: string,
-    userChannelId: string | null = getChannelId(userId)
-) {
-    const myChanId = SelectedChannelStore.getVoiceChannelId();
-    const username = UserStore.getUser(userId)?.username ?? userId;
-
-    if (userChannelId) {
-        if (userChannelId !== myChanId) {
-            const channel = ChannelStore.getChannel(userChannelId);
-            const voiceStates = VoiceStateStore.getVoiceStatesForChannel(userChannelId);
-            const memberCount = voiceStates ? Object.keys(voiceStates).length : null;
-            if (channel.type === 1 || PermissionStore.can(CONNECT, channel)) {
-                if (
-                    channel.userLimit !== 0 &&
-                    memberCount !== null &&
-                    memberCount >= channel.userLimit &&
-                    !PermissionStore.can(PermissionsBits.MOVE_MEMBERS, channel)
-                ) {
+function triggerFollow(userChannelId: string | null = getChannelId(settings.store.followUserId)) {
+    if (settings.store.followUserId) {
+        const myChanId = SelectedChannelStore.getVoiceChannelId();
+        if (userChannelId) {
+            // join when not already in the same channel
+            if (userChannelId !== myChanId) {
+                const channel = ChannelStore.getChannel(userChannelId);
+                const voiceStates = VoiceStateStore.getVoiceStatesForChannel(userChannelId);
+                const memberCount = voiceStates ? Object.keys(voiceStates).length : null;
+                if (channel.type === 1 || PermissionStore.can(CONNECT, channel)) {
+                    if (channel.userLimit !== 0 && memberCount !== null && memberCount >= channel.userLimit && !PermissionStore.can(PermissionsBits.MOVE_MEMBERS, channel)) {
+                        Toasts.show({
+                            message: "Channel is full",
+                            id: Toasts.genId(),
+                            type: Toasts.Type.FAILURE
+                        });
+                        return;
+                    }
+                    ChannelActions.selectVoiceChannel(userChannelId);
                     Toasts.show({
-                        message: `Channel is full (following ${username})`,
+                        message: "Followed user into a new voice channel",
+                        id: Toasts.genId(),
+                        type: Toasts.Type.SUCCESS
+                    });
+                } else {
+                    Toasts.show({
+                        message: "Insufficient permissions to enter in the voice channel",
                         id: Toasts.genId(),
                         type: Toasts.Type.FAILURE
                     });
-                    return;
                 }
-                ChannelActions.selectVoiceChannel(userChannelId);
+            } else {
                 Toasts.show({
-                    message: `Followed ${username} into a new voice channel`,
+                    message: "You are already in the same channel",
+                    id: Toasts.genId(),
+                    type: Toasts.Type.FAILURE
+                });
+            }
+        } else if (myChanId) {
+            // if not in a voice channel and the setting is on disconnect
+            if (settings.store.followLeave) {
+                ChannelActions.disconnect();
+                Toasts.show({
+                    message: "Followed user left, disconnected",
                     id: Toasts.genId(),
                     type: Toasts.Type.SUCCESS
                 });
             } else {
                 Toasts.show({
-                    message: `Insufficient permissions to enter ${username}'s voice channel`,
+                    message: "Followed user left, but not following disconnect",
                     id: Toasts.genId(),
                     type: Toasts.Type.FAILURE
                 });
             }
         } else {
             Toasts.show({
-                message: `You are already in the same channel as ${username}`,
+                message: "Followed user is not in a voice channel",
                 id: Toasts.genId(),
                 type: Toasts.Type.FAILURE
             });
         }
-    } else if (myChanId) {
-        if (settings.store.followLeave) {
-            ChannelActions.disconnect();
-            Toasts.show({
-                message: `${username} left, disconnected`,
-                id: Toasts.genId(),
-                type: Toasts.Type.SUCCESS
-            });
-        } else {
-            Toasts.show({
-                message: `${username} left, but not following disconnect`,
-                id: Toasts.genId(),
-                type: Toasts.Type.FAILURE
-            });
-        }
-    } else {
-        Toasts.show({
-            message: `${username} is not in a voice channel`,
-            id: Toasts.genId(),
-            type: Toasts.Type.FAILURE
-        });
-    }
-}
-
-function triggerFollowAll() {
-    for (const uid of getFollowedIds()) {
-        triggerFollow(uid);
     }
 }
 
 function toggleFollow(userId: string) {
-    const ids = getFollowedIds();
-    if (ids.includes(userId)) {
-        setFollowedIds(ids.filter(id => id !== userId));
-        const username = UserStore.getUser(userId)?.username ?? userId;
-        Toasts.show({
-            message: `Unfollowed ${username}`,
-            id: Toasts.genId(),
-            type: Toasts.Type.SUCCESS
-        });
+    if (settings.store.followUserId === userId) {
+        settings.store.followUserId = "";
     } else {
-        if (ids.length >= MAX_FOLLOWED) {
-            Toasts.show({
-                message: `You can only follow up to ${MAX_FOLLOWED} users at once`,
-                id: Toasts.genId(),
-                type: Toasts.Type.FAILURE
-            });
-            return;
-        }
-        setFollowedIds([...ids, userId]);
+        settings.store.followUserId = userId;
         if (settings.store.executeOnFollow) {
-            triggerFollow(userId);
+            triggerFollow();
         }
     }
 }
@@ -312,11 +272,8 @@ interface UserContextProps {
 
 const UserContext: NavContextMenuPatchCallback = (children, { user }: UserContextProps) => {
     if (!user || user.id === UserStore.getCurrentUser().id) return;
-    const ids = getFollowedIds();
-    const isFollowed = ids.includes(user.id);
-
-    const atLimit = !isFollowed && ids.length >= MAX_FOLLOWED;
-    const label = isFollowed ? "Unfollow User" : atLimit ? `Follow User (max ${MAX_FOLLOWED})` : "Follow User";
+    const isFollowed = settings.store.followUserId === user.id;
+    const label = isFollowed ? "Unfollow User" : "Follow User";
     const icon = isFollowed ? UnfollowIcon : FollowIcon;
 
     children.splice(-1, 0, (
@@ -324,33 +281,17 @@ const UserContext: NavContextMenuPatchCallback = (children, { user }: UserContex
             <Menu.MenuItem
                 id="follow-user"
                 label={label}
-                action={() => !atLimit && toggleFollow(user.id)}
+                action={() => toggleFollow(user.id)}
                 icon={icon}
-                disabled={atLimit}
             />
-            {ids.length >= 2 && (
-                <Menu.MenuItem
-                    id="unfollow-all-users"
-                    label="Unfollow All"
-                    action={() => {
-                        setFollowedIds([]);
-                        Toasts.show({
-                            message: "Unfollowed all users",
-                            id: Toasts.genId(),
-                            type: Toasts.Type.SUCCESS
-                        });
-                    }}
-                    icon={UnfollowIcon}
-                />
-            )}
         </Menu.MenuGroup>
     ));
 };
 
 export default definePlugin({
     name: "FollowUser",
-    description: "Adds a follow option in the user context menu to always be in the same VC as them (supports up to 2 users)",
-    authors: [Devs.D3SOX,Devs.Phzzy],
+    description: "Adds a follow option in the user context menu to always be in the same VC as them",
+    authors: [Devs.D3SOX],
 
     settings,
 
@@ -370,91 +311,85 @@ export default definePlugin({
 
     flux: {
         VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
-            if (settings.store.onlyManualTrigger) return;
-
-            const followedIds = getFollowedIds();
-            if (!followedIds.length) return;
-
+            if (settings.store.onlyManualTrigger || !settings.store.followUserId) {
+                return;
+            }
             for (const { userId, channelId, oldChannelId } of voiceStates) {
-                if (channelId === oldChannelId) continue;
+                if (channelId !== oldChannelId) {
+                    const isMe = userId === UserStore.getCurrentUser().id;
+                    // move back if the setting is on and you were moved
+                    if (settings.store.autoMoveBack && isMe && channelId && oldChannelId) {
+                        triggerFollow();
+                        continue;
+                    }
 
-                const isMe = userId === UserStore.getCurrentUser().id;
+                    // rejoin if the setting is on and you disconnected yourself
+                    if (settings.store.autoRejoin && isMe && !channelId && oldChannelId) {
+                        triggerFollow();
+                        continue;
+                    }
 
-                if (settings.store.autoMoveBack && isMe && channelId && oldChannelId) {
-                    triggerFollowAll();
-                    continue;
-                }
 
-                if (settings.store.autoRejoin && isMe && !channelId && oldChannelId) {
-                    triggerFollowAll();
-                    continue;
-                }
-
-                if (
-                    settings.store.channelFull &&
-                    !isMe &&
-                    !channelId &&
-                    oldChannelId &&
-                    oldChannelId !== SelectedChannelStore.getVoiceChannelId()
-                ) {
-                    const channel = ChannelStore.getChannel(oldChannelId);
-                    const channelVoiceStates = VoiceStateStore.getVoiceStatesForChannel(oldChannelId);
-                    const memberCount = channelVoiceStates ? Object.keys(channelVoiceStates).length : null;
-                    if (
-                        channel.userLimit !== 0 &&
-                        memberCount !== null &&
-                        memberCount === channel.userLimit - 1 &&
-                        !PermissionStore.can(PermissionsBits.MOVE_MEMBERS, channel)
-                    ) {
-                        const usersInChannel = Object.values(channelVoiceStates).map(x => x.userId);
-                        if (followedIds.some(fid => usersInChannel.includes(fid))) {
-                            const targetId = followedIds.find(fid => usersInChannel.includes(fid))!;
-                            triggerFollow(targetId, oldChannelId);
-                            continue;
+                    // if you're not in the channel of the followed user and it is no longer full, join
+                    if (settings.store.channelFull && !isMe && !channelId && oldChannelId && oldChannelId !== SelectedChannelStore.getVoiceChannelId()) {
+                        const channel = ChannelStore.getChannel(oldChannelId);
+                        const channelVoiceStates = VoiceStateStore.getVoiceStatesForChannel(oldChannelId);
+                        const memberCount = channelVoiceStates ? Object.keys(channelVoiceStates).length : null;
+                        if (channel.userLimit !== 0 && memberCount !== null && memberCount === (channel.userLimit - 1) && !PermissionStore.can(PermissionsBits.MOVE_MEMBERS, channel)) {
+                            const users = Object.values(channelVoiceStates).map(x => x.userId);
+                            if (users.includes(settings.store.followUserId)) {
+                                triggerFollow(oldChannelId);
+                                continue;
+                            }
                         }
                     }
-                }
 
-                const isFollowed = followedIds.includes(userId);
-                if (!isFollowed) continue;
+                    const isFollowed = settings.store.followUserId === userId;
+                    if (!isFollowed) {
+                        continue;
+                    }
 
-                if (channelId) {
-                    triggerFollow(userId, channelId);
-                } else if (oldChannelId) {
-                    triggerFollow(userId, null);
+                    if (channelId) {
+                        // move or join new channel -> also join
+                        triggerFollow(channelId);
+                    } else if (oldChannelId) {
+                        // leave -> disconnect
+                        triggerFollow(null);
+                    }
                 }
             }
         },
     },
 
     FollowIndicator() {
-        const { plugins: { FollowUser: { followUserIds } } } = useSettings(["plugins.FollowUser.followUserIds"]);
+        const { plugins: { FollowUser: { followUserId } } } = useSettings(["plugins.FollowUser.followUserId"]);
+        if (followUserId) {
+            return (
+                <HeaderBarIcon
+                    tooltip={`Following ${UserStore.getUser(followUserId).username} (click to trigger manually, right-click to unfollow)`}
+                    icon={UnfollowIcon}
+                    onClick={() => {
+                        triggerFollow();
+                    }}
+                    onContextMenu={() => {
+                        settings.store.followUserId = "";
+                    }}
+                />
+            );
+        }
 
-        let ids: string[] = [];
-        try { ids = JSON.parse(followUserIds ?? "[]"); } catch { }
-
-        if (!ids.length) return null;
-
-        const names = ids.map(id => UserStore.getUser(id)?.username ?? id).join(" & ");
-
-        return (
-            <HeaderBarIcon
-                tooltip={`Following ${names} (click to trigger manually, right-click to unfollow all)`}
-                icon={UnfollowIcon}
-                onClick={() => triggerFollowAll()}
-                onContextMenu={() => setFollowedIds([])}
-            />
-        );
+        return null;
     },
 
     addIconToToolBar(e: { toolbar: React.ReactNode[] | React.ReactNode; }) {
         if (Array.isArray(e.toolbar)) {
             return e.toolbar.push(
                 <ErrorBoundary noop={true} key="follow-indicator">
-                    <this.FollowIndicator />
+                    <this.FollowIndicator/>
                 </ErrorBoundary>
             );
         }
+
         e.toolbar = [
             <ErrorBoundary noop={true} key="follow-indicator">
                 <this.FollowIndicator />
