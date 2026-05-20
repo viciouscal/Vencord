@@ -382,11 +382,22 @@ export const initPluginManager = onlyOnce(function init() {
 
     for (const p of pluginsValues) {
         if (p.settings) {
-            p.settings.pluginName = p.name;
+            p.options ??= {};
 
-            for (const [key, def] of Object.entries(p.settings.def)) {
-                if (def.onChange)
-                    SettingsStore.addChangeListener(`plugins.${p.name}.${key}`, def.onChange);
+            p.settings.pluginName = p.name;
+            for (const name in p.settings.def) {
+                const def = p.settings.def[name];
+                const checks = p.settings.checks?.[name];
+                p.options[name] = { ...def, ...checks };
+            }
+        }
+
+        if (p.options) {
+            for (const name in p.options) {
+                const opt = p.options[name];
+                if (opt.onChange != null) {
+                    SettingsStore.addChangeListener(`plugins.${p.name}.${name}`, opt.onChange);
+                }
             }
         }
 
