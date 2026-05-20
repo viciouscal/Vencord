@@ -64,7 +64,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "stealingweed",
         id: 1058459294640648192n
     },
-    pluck: {
+    Phzzy: {
         name: "pluckerpilple",
         id: 375402345971974147n
     },
