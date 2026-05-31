@@ -43,3 +43,9 @@
     display: flex;
     gap: 6px;
 }
+
+.vc-uvs-profile-speaker {
+    display: inline-flex !important;
+    order: 999 !important;
+    margin-left: 6px !important;
+}
