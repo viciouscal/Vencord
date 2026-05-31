@@ -4,12 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./styles.css";
-
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
 import { PlainSettings, Settings } from "@api/Settings";
 import { ErrorBoundary } from "@components/index";
 import definePlugin, { StartAt } from "@utils/types";
+import { Devs } from "@utils/constants";
 import { findComponentByCodeLazy, onceReady } from "@webpack";
 import type { JSX } from "react";
 
@@ -22,16 +21,16 @@ import { rerenderQuests, useQuestRerender } from "./settings/rerender";
 import { disposeRestartTracking, initializeRestartTracking, promptToRestartIfDirty, setRestartDirty } from "./settings/restartTracking";
 import { settings } from "./settings/store";
 import { getSettingsModalOpen, initialQuestDataFetched, setInitialQuestDataFetched, setSettingsModalOpen } from "./state";
+import managedStyle from "./styles.css?managed";
 import { AudioPlayer } from "./utils/audio";
 import { canAutoCompleteQuest, getActiveAutoCompletes, getQuestAutoCompleteProgress, getQuestButtonProps, getQuestPanelSubtitleText, hasEnabledAutoCompleteQuestTypes, processQuestForAutoComplete, resumeInterruptedAutoCompletes, setHeartbeatStackTracePatchSucceeded, setVideoProgressStackTracePatchSucceeded, stopAllAutoCompletes, stopAutoCompletesForRunningGames, stopQuestAutoComplete } from "./utils/completion";
 import { canOpenDevToolsWindow, fetchAndDispatchQuests, openDevToolsWindow, snakeToCamel } from "./utils/fetching";
 import { normalizeQuestName } from "./utils/filtering";
 import { notifyQuestCompletion, QL } from "./utils/logging";
-import { getQuestPanelOverride, getQuestPanelPercentComplete, shouldForceQuestPanelVisible } from "./utils/questState";
+import { getQuestEmbedProgress, getQuestPanelOverride, getQuestPanelPercentComplete, shouldForceQuestPanelVisible } from "./utils/questState";
 import { getLastFilterChoices, getLastSortChoice, getQuestTileClasses, getQuestTileStyle, setLastFilterChoices, setLastSortChoice, shouldPreloadQuestAssets, sortQuests } from "./utils/questTiles";
 import { type Quest, QuestStore, type QuestUserStatus } from "./utils/types";
 import { formatLowerBadge, QUEST_PAGE } from "./utils/ui";
-import { Devs } from "@utils/constants";
 
 let isSwitchingAccount = false;
 let didAttemptAutoCompleteResume = false;
@@ -101,6 +100,7 @@ export default definePlugin({
     authors: [Devs.Etorix],
     dependencies: ["ServerListAPI"],
     startAt: StartAt.Init, // Needed in order to beat Read All Messages to inserting above the server list.
+    managedStyle,
     settings,
 
     canOpenDevToolsWindow,
@@ -112,6 +112,7 @@ export default definePlugin({
     getLastFilterChoices,
     getLastSortChoice,
     getQuestAutoCompleteProgress,
+    getQuestEmbedProgress,
     getQuestButtonProps,
     getQuestPanelOverride,
     getQuestPanelPercentComplete,
@@ -233,8 +234,8 @@ export default definePlugin({
             find: "QUEST_HOME)},[]),",
             predicate: () => !getQuestifySettings().disableQuestsEverything && getQuestifySettings().disableSponsoredBanner,
             replacement: {
-                match: /(?<=(\i),isLoading:(\i)}=\(0,\i.\i\)\(\i\);)/,
-                replace: "if(true){$1=null;$2=false;};"
+                match: /(?<=,{questHomeHero:(\i),isLoading:(\i)}=.{0,300}?ORBS_BALANCE_MENU}\)},\[\]\);)/,
+                replace: "$1=null;$2=false;"
             }
         },
         {
@@ -244,7 +245,7 @@ export default definePlugin({
             predicate: () => !getQuestifySettings().disableQuestsEverything && getQuestifySettings().disableOrbsAndQuestsBadges,
             replacement: [
                 {
-                    match: /(badges:\i)/,
+                    match: /(,\{badges:\i)(?=,displayProfile:\i)/,
                     replace: '$1.filter(badge=>!["quest_completed","orb_profile_badge"].includes(badge.id))',
                 }
             ]
@@ -281,7 +282,7 @@ export default definePlugin({
             find: ",{progressTextAnimation:",
             predicate: () => !getQuestifySettings().disableQuestsEverything,
             replacement: {
-                match: /(let{percentComplete:.{0,115}?children:\i}=)(\i)/,
+                match: /(let{percentComplete:.{0,115}?children:\i,useAltStyle:\i=!1}=)(\i)/,
                 replace: "const questifyProgress=$self.getQuestPanelPercentComplete({...$2,quest:$2.children?.props?.quest});$1Object.assign({},$2,questifyProgress??{})"
             }
         },
@@ -316,11 +317,11 @@ export default definePlugin({
             predicate: () => !getQuestifySettings().disableQuestsEverything && hasEnabledAutoCompleteQuestTypes(),
             replacement: [
                 {
-                    match: /(async function \i\(\i,\i\)\{await \i\.\i\.post\(\{url:\i\.\i\.QUESTS_VIDEO_PROGRESS.{0,200}?stack_trace:)Error\(\)\.stack\?\?""/,
+                    match: /(async function \i\(\i,\i\)\{await \i\.\i\.post\(\{url:\i\.\i\.QUESTS_VIDEO_PROGRESS.{0,250}?stack_trace:)Error\(\)\.stack\?\?""/,
                     replace: '$self.setVideoProgressStackTracePatchSucceeded();$1""'
                 },
                 {
-                    match: /(async function \i\(\i\)\{let\{questId:\i,streamKey:\i.{0,350}?stack_trace:)Error\(\)\.stack\?\?""/,
+                    match: /(async function \i\(\i\)\{let\{questId:\i,streamKey:\i.{0,450}?stack_trace:)Error\(\)\.stack\?\?""/,
                     replace: '$self.setHeartbeatStackTracePatchSucceeded();$1""'
                 }
             ]
@@ -343,7 +344,7 @@ export default definePlugin({
                 {
                     // Set the initial filters and update the filters and sort method when they change.
                     match: /(get\(\i\)\)\?\?)(\i,\[)(\i)(\]\),\i=\i.useCallback\((\i)=>{)(.{0,60}?useCallback\((\i)=>{)/,
-                    replace: "$1$self.getLastFilterChoices()??$2$3$4$self.setLastSortChoice($5);$6$self.setLastFilterChoices($7);$self.rerenderQuests();"
+                    replace: "$1$self.getLastFilterChoices()??$2$3,questRerenderTrigger$4$self.setLastSortChoice($5);$6$self.setLastFilterChoices($7);$self.rerenderQuests();"
                 },
                 {
                     // Update the last used sort and filter choices when the toggle setting for either is changed.
@@ -364,7 +365,7 @@ export default definePlugin({
                 },
                 {
                     // Overwrite button props for ENROLLED/INCOMPLETE Quests.
-                    match: /(?<=let{quest:\i,taskType:\i,surface:\i.{0,150}?size:\i}=\i;return)(.{0,300}?taskType:\i,size:\i,analyticsCtxQuestContent:\i,analyticsCtxSourceQuestContent:\i}\))/,
+                    match: /(?<=let{quest:\i,taskType:\i,surface:\i.{0,150}?size:\i}=\i;return)(.{0,300}?,size:\i,surface:\i,analyticsCtxQuestContent:\i,analyticsCtxSourceQuestContent:\i}\))/,
                     replace: " $self.enrolledIncompleteButton(arguments[0])||($1)"
                 }
             ]
@@ -427,6 +428,33 @@ export default definePlugin({
                     // Force the CTA-aware complete branch.
                     match: /(?<=analyticsCtxQuestContentRowIndex:\i}\)}\):\i&&\i)(.{0,200}?fullWidth:!0}\)}\):)(\i.enabled.{0,50}?CLAIMED\)&&\i.\i.has\(\i\))(\?\i=)(\i)/,
                     replace: "&&false$1((arguments[0].quest.config.ctaConfig&&arguments[0].quest.userStatus?.completedAt)||($2))$3(true||$4)"
+                },
+                {
+                    // Prefer the CTA + progress button branch when Questify can complete the Quest.
+                    match: /(?<="data-migration-pending":.{0,400}?enabledQuestStates.has\(\i\)\?)/,
+                    replace: "!$self.canAutoCompleteQuest(arguments[0].quest)&&"
+                }
+            ]
+        },
+        {
+            find: "EMBED_DESKTOP}),",
+            group: true,
+            predicate: () => !getQuestifySettings().disableQuestsEverything,
+            replacement: [
+                {
+                    // Subscribes each Quest message embed to Questify's manual rerender trigger.
+                    match: /(?<=function \i\(\i\){)(?=let\{quest:\i,location:\i,questContentPosition:\i,sourceQuestContent:)/,
+                    replace: "void $self.useQuestRerender();"
+                },
+                {
+                    // Overrides the progress tracking for Quest embeds.
+                    match: /(?<=\{completedRatio:\i,completedRatioDisplay:\i\}=)(\(0,\i\.\i\)\((\i)\))/,
+                    replace: "Object.assign({},$1,$self.getQuestEmbedProgress($2)??{})"
+                },
+                {
+                    // Adds Questify tile classes and inline CSS variables.
+                    match: /(?<=className:)(\i\(\)\(\i.\i,\i.\i\)(?=,onMouseEnter:\i))/,
+                    replace: "$self.getQuestTileClasses($1,arguments[0].quest),style:$self.getQuestTileStyle(arguments[0].quest)"
                 }
             ]
         },
@@ -497,8 +525,8 @@ export default definePlugin({
                 },
                 {
                     // Bypasses Discord's memo cache while the Questify sort is active.
-                    match: /(if\(\i\.current\.length>0&&\i\.current===\i\.length&&\i\.current===\i\.sortMethod&&\i\.current===\i\.filters&&\i\.current===\i)(\)return \i\.current;)/,
-                    replace: "$1&&arguments[1]?.sortMethod!==\"questify\"$2"
+                    match: /(?<=if\()(?=\i\.current\.length>0&&\i\.current===)/,
+                    replace: "arguments[1]?.sortMethod!==\"questify\"&&"
                 },
                 {
                     // If we already applied Questify's sort, skip further sorting.
@@ -507,8 +535,8 @@ export default definePlugin({
                 },
                 {
                     // Recomputes Discord's Quest list memo when Questify settings or rerenders change.
-                    match: /(?<=\.id\);return \i\.current=\i,\i\.current=\i\.sortMethod,\i\.current=\i\.filters,\i\.current=\i\.length,\i\.current=\i,\i\},\[)(\i,\i,\i)(?=\]\)\))/,
-                    replace: "$1,questRerenderTrigger,questifySorted"
+                    match: /(?=]\)\),\i=\(\i=\i.useMemo\(\(\)=>\i.filter)/,
+                    replace: ",questRerenderTrigger,questifySorted"
                 }
             ]
         },
