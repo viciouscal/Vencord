@@ -219,8 +219,6 @@ export interface PluginDef {
     renderMessageDecoration?: MessageDecorationFactory;
 
     renderMemberListDecorator?: MemberListDecoratorFactory;
-
-    // NicknameIcons API
     renderNicknameIcon?: NicknameIconFactory;
 }
 
@@ -395,7 +393,7 @@ type SettingsStore<D extends SettingsDefinition> = {
 };
 
 /** An instance of defined plugin settings */
-export interface DefinedSettings
+export interface DefinedSettings<
     Def extends SettingsDefinition = SettingsDefinition,
     PrivateSettings extends object = {}
 > {
