@@ -22,11 +22,11 @@ The cutest Discord client mod
 
 ## Installing / Uninstalling
 
-Visit https://vencord.dev/download
+Visit https://vencordar.com/download
 
 ## Join our Support/Community Server
 
-https://discord.gg/D9uwnFnqmd
+https://discord.gg/FzRwqfKd7g
 
 ## Sponsors
 
