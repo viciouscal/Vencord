@@ -27,7 +27,7 @@ const VoiceStateStore: VoiceStateStore = findStoreLazy("VoiceStateStore");
 let pullList: string[] = [];
 let lastMyChannelId: string | null = null;
 let monitorInterval: NodeJS.Timeout | null = null;
-const pullCache = new Map<string, number>(); // userId -> timestamp
+const pullCache = new Map<string, number>(); 
 
 const settings = definePluginSettings({});
 
@@ -78,7 +78,7 @@ function pullUserInstant(guildId: string, userId: string, targetChannelId: strin
     const cacheKey = `${userId}-${targetChannelId}`;
     const lastPull = pullCache.get(cacheKey);
 
-    // Don't pull same user to same channel within 5 seconds (increased from 2)
+    
     if (lastPull && (now - lastPull) < 5000) {
         return;
     }
@@ -93,7 +93,7 @@ function pullUserInstant(guildId: string, userId: string, targetChannelId: strin
 
 function monitorAndPull() {
     try {
-        // Get my current channel
+        
         const myChannelId = getMyChannelId();
 
         if (!myChannelId) {
@@ -101,16 +101,16 @@ function monitorAndPull() {
             return;
         }
 
-        // Update last known channel
+        
         lastMyChannelId = myChannelId;
 
         const channel = ChannelStore.getChannel(myChannelId);
         if (!channel || !hasMovePerm(myChannelId)) return;
 
-        // Get all voice states
+        
         const allStates = VoiceStateStore.getAllVoiceStates();
 
-        // Pull anyone not in my channel
+        
         for (const userId of pullList) {
             let userChannelId: string | null = null;
 
@@ -121,7 +121,7 @@ function monitorAndPull() {
                 }
             }
 
-            // If user is in a different channel, pull them
+            
             if (userChannelId && userChannelId !== myChannelId) {
                 pullUserInstant(channel.guild_id, userId, myChannelId);
                 console.log("[PullUser] Monitor pulled:", userId);
@@ -133,7 +133,7 @@ function monitorAndPull() {
 function startMonitoring() {
     if (monitorInterval) return;
 
-    // Check every 1 second to avoid Discord rate limiting
+    
     monitorInterval = setInterval(monitorAndPull, 1000);
     console.log("[PullUser] Monitoring started (1000ms)");
 }
@@ -277,7 +277,7 @@ export default definePlugin({
                         console.log("[PullUser] Flux detected move to:", newChannel);
                         lastMyChannelId = newChannel;
 
-                        // Instant pull on flux event
+                        
                         monitorAndPull();
                     } else if (!newChannel) {
                         lastMyChannelId = null;
