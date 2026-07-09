@@ -28,7 +28,7 @@ export interface PanelButton {
     tooltipText?: string,
     icon?: IconComponent;
     onClick?: () => void;
-    /** Right-click: e.g. quick toggles without opening full plugin settings */
+    
     onContextMenu?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
