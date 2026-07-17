@@ -55,8 +55,8 @@ export default definePlugin({
                     replace: "$self.DecorationGridItem=$1;",
                 },
                 {
-                    match: /(?<==)\i=>{let{user:\i,avatarDecoration/,
-                    replace: "$self.DecorationGridDecoration=$&",
+                    match: /(?<=(?:(\i)=)?)(?:\i=>|function (\i)\(\i\)){let{user:\i,avatarDecoration/,
+                    replace: (m, arrowFunctionName, functionName) => `$self.DecorationGridDecoration=${arrowFunctionName ?? functionName}${arrowFunctionName ? "" : ";"}${m}`,
                 },
                 // Remove NEW label from decor avatar decorations
                 {
