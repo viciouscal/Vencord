@@ -55,6 +55,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "viciouscal",
         id: 883820228360929320n
     },
+    mar: {
+        name: "mar",
+        id: 672868164161372171n
+    },
     unknown: {
         name: "unknown",
         id: 400538965041741825n,

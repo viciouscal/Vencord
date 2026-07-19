@@ -1,0 +1,8 @@
+{
+  "name": "سيرفر",
+  "description": "تغيير زر عرض المحتوى الخام لأي رسالة",
+  "settings": {
+    "clickMethod": "Change the button to view the raw content/data of any message.",
+    "messageContextMenu": "Show in message context menu"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "AlwaysTrust",
+  "description": "إزالة نافذة النطاق غير الموثوق عند فتح الروابط",
+  "settings": {
+    "domain": "Remove the untrusted domain popup when opening links",
+    "file": "Remove the"
+  }
+}

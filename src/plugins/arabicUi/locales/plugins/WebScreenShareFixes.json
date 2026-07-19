@@ -1,0 +1,4 @@
+{
+  "name": "WebScreenShareFixes",
+  "description": "إزالة حد معدل البت 2500kbps على Chromium و Vesktop"
+}

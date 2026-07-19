@@ -1,0 +1,8 @@
+{
+  "name": "QuickReply",
+  "description": "تفعيل الإشارة في الرد افتراضياً",
+  "settings": {
+    "shouldMention": "Ping reply by default",
+    "ignoreBlockedAndIgnored": "Ignore messages by blocked/ignored users when navigating"
+  }
+}

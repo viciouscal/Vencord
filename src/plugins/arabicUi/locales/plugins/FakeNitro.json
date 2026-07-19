@@ -1,0 +1,17 @@
+{
+  "name": "Fakeنيترو",
+  "description": "إرسال ايموجي مزيفة (تجاوز صلاحية الايموجي المخصصة أيضاً)",
+  "settings": {
+    "enableEmojiBypass": "Allows sending fake ايموجيز (also bypasses missing permission to use custom ايموجيز)",
+    "emojiSize": "Size of the ايموجيز when sending",
+    "transformEmojis": "Whether to transform fake ايموجيز into real ones",
+    "enableStickerBypass": "Allows sending fake ستيكرات (also bypasses missing permission to use ستيكرات)",
+    "stickerSize": "Size of the ستيكرات when sending",
+    "transformStickers": "Whether to transform fake ستيكرات into real ones",
+    "transformCompoundSentence": "Whether to transform fake ستيكرات and ايموجيز in compound sentences (sentences with more content than just the fake ايموجي or ستيكر link)",
+    "enableStreamQualityBypass": "Allow streaming in نيترو quality",
+    "useHyperLinks": "Whether to use hyperlinks when sending fake ايموجيز and ستيكرات",
+    "hyperLinkText": "What text the hyperlink should use. {{NAME}} will be replaced with the ايموجي/ستيكر name.",
+    "disableEmbedPermissionCheck": "Whether to disable the embed permission check when sending fake ايموجيز and ستيكرات"
+  }
+}

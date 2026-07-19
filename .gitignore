@@ -21,5 +21,8 @@ lerna-debug.log*
 
 src/userplugins
 
+scripts/arabicUi/_plugin_strings.json
+src/plugins/arabicUi/locales/discord/en-text/_dedupe_report.json
+
 ExtensionCache/
 /settings

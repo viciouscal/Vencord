@@ -1,0 +1,7 @@
+{
+  "name": "UnlockedAvatarZoom",
+  "description": "مضاعف التكبير",
+  "settings": {
+    "zoomMultiplier": "Zoom multiplier"
+  }
+}

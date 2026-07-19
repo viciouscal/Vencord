@@ -1,0 +1,9 @@
+{
+  "name": "TypingTweaks",
+  "description": "إظهار الصور الرمزية في مؤشر الكتابة",
+  "settings": {
+    "showAvatars": "Show avatars in the typing indicator",
+    "showRoleColors": "Show role colors in the typing indicator",
+    "alternativeFormatting": "Show a more useful message when several users are typing"
+  }
+}

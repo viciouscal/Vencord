@@ -1,0 +1,7 @@
+{
+  "name": "Volumeبوستer",
+  "description": "مضاعف الصوت",
+  "settings": {
+    "multiplier": "Volume Multiplier"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "NotificationVolume",
+  "description": "مستوى صوت الإشعارات",
+  "settings": {
+    "notificationVolume": "Notification volume"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "PlatformIndicators",
+  "description": "في قائمة الأعضاء",
+  "settings": {
+    "list": "In the member list",
+    "badges": "In user profiles, as بادجز",
+    "messages": "Inside messages",
+    "colorMobileIndicator": "Whether to make the mobile indicator match the color of the user status.",
+    "profileLocation": "Where to show the indicator in user profiles"
+  }
+}

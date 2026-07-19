@@ -23,6 +23,7 @@ import { hasAnyVisibleSettings, isSettingHidden } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { getPluginDisplayDescription, getPluginDisplayName } from "@plugins/arabicUi/engine/pluginStrings";
 import { debounce } from "@shared/debounce";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { classNameFactory } from "@utils/css";
@@ -173,7 +174,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             size="lg"
             title={
                 <div className={cl("header")}>
-                    <BaseText tag="h1" weight="semibold" size="lg">{plugin.name}</BaseText>
+                    <BaseText tag="h1" weight="semibold" size="lg">{getPluginDisplayName(plugin)}</BaseText>
                     {!pluginMeta.userPlugin && (
                         <div className="vc-settings-modal-links">
                             <WebsiteButton
@@ -191,7 +192,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             subtitle={
                 <div className={cl("info")}>
                     <div>
-                        <Forms.FormText>{plugin.description}</Forms.FormText>
+                        <Forms.FormText>{getPluginDisplayDescription(plugin)}</Forms.FormText>
                         {!!plugin.tags?.length && <PluginTags tags={plugin.tags} />}
                     </div>
                 </div>

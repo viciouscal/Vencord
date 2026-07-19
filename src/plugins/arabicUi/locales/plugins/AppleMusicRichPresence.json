@@ -1,0 +1,22 @@
+{
+  "name": "AppleMusicRichPresence",
+  "description": "نوع النشاط",
+  "settings": {
+    "activityType": "Which type of activity",
+    "statusDisplayType": "Show the track / artist name in the member list",
+    "refreshInterval": "The interval between activity refreshes",
+    "enableTimestamps": "Whether or not to enable timestamps",
+    "enableButtons": "Whether or not to enable buttons",
+    "nameString": "Activity name format string",
+    "detailsString": "Activity details format string",
+    "stateString": "Activity state format string",
+    "detailsLink": "Activity details link",
+    "stateLink": "Activity state link",
+    "largeImageType": "Activity assets large image type",
+    "largeTextString": "Activity assets large text format string",
+    "largeImageLink": "Activity assets large image link",
+    "smallImageType": "Activity assets small image type",
+    "smallTextString": "Activity assets small text format string",
+    "smallImageLink": "Activity assets small image link"
+  }
+}

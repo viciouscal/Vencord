@@ -1,0 +1,13 @@
+{
+  "name": "ImageZoom",
+  "description": "حفظ قيم التكبير وحجم العدسة",
+  "settings": {
+    "saveZoomValues": "Whether to save zoom and lens size values",
+    "invertScroll": "Invert scroll",
+    "nearestNeighbour": "Use Nearest Neighbour Interpolation when scaling images",
+    "square": "Make the lens square",
+    "zoom": "Zoom of the lens",
+    "size": "Radius / Size of the lens",
+    "zoomSpeed": "How fast the zoom / lens size changes"
+  }
+}

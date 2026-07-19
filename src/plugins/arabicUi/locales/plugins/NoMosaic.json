@@ -1,0 +1,7 @@
+{
+  "name": "NoMosaic",
+  "description": "تشغيل الفيديوهات بدون نافذة العرض الدوّار",
+  "settings": {
+    "inlineVideo": "Play videos without carousel modal"
+  }
+}

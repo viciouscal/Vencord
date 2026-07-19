@@ -1,0 +1,9 @@
+{
+  "name": "OnePingPerDM",
+  "description": "اختر نوع الرسائل الخاصة المتأثرة",
+  "settings": {
+    "channelToAffect": "Select the type of خاص for the بلوقن to affect",
+    "allowMentions": "Receive audio pings for @mentions",
+    "allowEveryone": "Receive audio pings for @everyone and @here in group خاص"
+  }
+}

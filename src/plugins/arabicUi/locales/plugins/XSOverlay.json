@@ -1,0 +1,20 @@
+{
+  "name": "XSOverlay",
+  "description": "منفذ WebSocket",
+  "settings": {
+    "webSocketPort": "Websocket port",
+    "preferUDP": "Enable if you use an older build of XSOverlay unable to connect through websockets. This setting is ignored on web.",
+    "botNotifications": "Allow بوت notifications",
+    "serverNotifications": "Allow سيرفر notifications",
+    "dmNotifications": "Allow Direct Message notifications",
+    "groupDmNotifications": "Allow Group خاص notifications",
+    "callNotifications": "Allow call notifications",
+    "pingColor": "User mention color",
+    "channelPingColor": "Channel mention color",
+    "soundPath": "Notification sound",
+    "timeout": "Notification duration",
+    "lengthBasedTimeout": "Extend duration with message length",
+    "opacity": "Notif opacity",
+    "volume": "Volume"
+  }
+}

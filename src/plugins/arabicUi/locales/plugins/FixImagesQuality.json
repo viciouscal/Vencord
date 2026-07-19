@@ -1,0 +1,7 @@
+{
+  "name": "FixImagesQuality",
+  "description": "تحميل الصورة الأصلية في الدردشة. تحذير: اقرأ التنبيهات أعلاه",
+  "settings": {
+    "originalImagesInChat": "Also load the original image in Chat. WARNING: Read the caveats above"
+  }
+}

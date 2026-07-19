@@ -1,0 +1,7 @@
+{
+  "name": "ShowTimeoutDuration",
+  "description": "طريقة عرض مدة الإيقاف المؤقت",
+  "settings": {
+    "displayStyle": "How to display the تايم اوت duration"
+  }
+}

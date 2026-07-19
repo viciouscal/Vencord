@@ -1,0 +1,7 @@
+{
+  "name": "فينكوردToolbox",
+  "description": "إظهار قائمة الإضافات في صندوق الأدوات",
+  "settings": {
+    "showPluginMenu": "Show the بلوقنز menu in the toolbox"
+  }
+}

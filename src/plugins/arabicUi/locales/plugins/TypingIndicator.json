@@ -1,0 +1,10 @@
+{
+  "name": "TypingIndicator",
+  "description": "إظهار مؤشر الكتابة للقناة المحددة حالياً",
+  "settings": {
+    "includeCurrentChannel": "Whether to show the typing indicator for the currently selected channel",
+    "includeMutedChannels": "Whether to show the typing indicator for ميوتd channels.",
+    "includeBlockedUsers": "Whether to show the typing indicator for blocked users.",
+    "indicatorMode": "How should the indicator be displayed?"
+  }
+}

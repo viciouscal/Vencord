@@ -1,0 +1,10 @@
+{
+  "name": "MessageLinkEmbeds",
+  "description": "لون خلفية الرسائل في التضمينات الغنية",
+  "settings": {
+    "messageBackgroundColor": "Background color for messages in rich embeds",
+    "automodEmbeds": "Use automod embeds instead of rich embeds",
+    "listMode": "Whether to use ID list as blacklist or whitelist",
+    "idList": "سيرفر/channel/user IDs to blacklist or whitelist"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "CopyEmojiMarkdown",
+  "description": "نسخ حرف Unicode بدلاً من :الاسم: للايموجي الافتراضية",
+  "settings": {
+    "copyUnicode": "Copy the raw unicode character instead of :name: for default ايموجيز (👽)"
+  }
+}

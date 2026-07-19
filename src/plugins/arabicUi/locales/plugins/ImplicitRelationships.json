@@ -1,0 +1,7 @@
+{
+  "name": "ImplicitRelationships",
+  "description": "ترتيب العلاقات الضمنية حسب القرب منك",
+  "settings": {
+    "sortByAffinity": "Whether to sort implicit relationships by their affinity to you."
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "ShowHiddenChannels",
+  "description": "إخفاء غير المقروء",
+  "settings": {
+    "hideUnreads": "Hide Unreads",
+    "showMode": "The mode used to display hidden channels.",
+    "defaultAllowedUsersAndRolesDropdownState": "Whether the allowed users and roles dropdown on hidden channels should be open by default"
+  }
+}

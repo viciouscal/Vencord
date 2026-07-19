@@ -1,0 +1,14 @@
+{
+  "name": "BetterFolders",
+  "description": "عرض سيرفرات المجلد في شريط جانبي مخصص",
+  "settings": {
+    "sidebar": "Display سيرفرات from folder on dedicated sidebar",
+    "sidebarAnim": "Animate opening the folder sidebar",
+    "closeAllFolders": "Close all folders when selecting a سيرفر not in a folder",
+    "closeAllHomeButton": "Close all folders when clicking on the home button",
+    "closeOthers": "Close other folders when opening a folder",
+    "forceOpen": "Force a folder to open when switching to a سيرفر of that folder",
+    "keepIcons": "Keep showing سيرفر icons in the primary سيرفر bar folder when it",
+    "showFolderIcon": "Show the folder icon above the folder سيرفرات in the BetterFolders sidebar"
+  }
+}

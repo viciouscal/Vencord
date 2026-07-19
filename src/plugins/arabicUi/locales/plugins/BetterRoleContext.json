@@ -1,0 +1,7 @@
+{
+  "name": "BetterRoleContext",
+  "description": "تنسيق الملف لعرض أيقونات الأدوار",
+  "settings": {
+    "roleIconFileFormat": "File format to use when viewing role icons"
+  }
+}

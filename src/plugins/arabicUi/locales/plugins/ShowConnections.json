@@ -1,0 +1,8 @@
+{
+  "name": "ShowConnections",
+  "description": "حجم الأيقونة (بكسل)",
+  "settings": {
+    "iconSize": "Icon size",
+    "iconSpacing": "Icon margin"
+  }
+}

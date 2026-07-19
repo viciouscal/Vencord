@@ -1,0 +1,7 @@
+{
+  "name": "GreetStickerPicker",
+  "description": "اختيار وضع الترحيب",
+  "settings": {
+    "replacement": "Wumpus waves hello"
+  }
+}

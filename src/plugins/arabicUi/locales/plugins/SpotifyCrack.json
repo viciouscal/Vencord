@@ -1,0 +1,8 @@
+{
+  "name": "سبوتفايCrack",
+  "description": "تعطيل الإيقاف التلقائي لـ سبوتفاي",
+  "settings": {
+    "noSpotifyAutoPause": "تعطيل الإيقاف التلقائي لـ سبوتفاي",
+    "keepSpotifyActivityOnIdle": "Keep سبوتفاي activity playing when idling"
+  }
+}

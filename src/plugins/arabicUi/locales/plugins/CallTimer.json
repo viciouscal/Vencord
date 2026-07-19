@@ -1,0 +1,7 @@
+{
+  "name": "CallTimer",
+  "description": "تنسيق المؤقت. أي تنسيق moment.js صالح",
+  "settings": {
+    "format": "The timer format. This can be any valid moment.js format"
+  }
+}

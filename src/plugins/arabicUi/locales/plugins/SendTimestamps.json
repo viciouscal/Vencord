@@ -1,0 +1,7 @@
+{
+  "name": "SendTimestamps",
+  "description": "استبدال الطوابع الزمنية في محتوى الرسائل",
+  "settings": {
+    "replaceMessageContents": "استبدال الطوابع الزمنية في محتوى الرسائل"
+  }
+}

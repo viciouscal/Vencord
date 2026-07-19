@@ -1,0 +1,10 @@
+{
+  "name": "NoReplyMention",
+  "description": "قائمة معرّفات المستخدمين للسماح أو الإعفاء من الإشعارات",
+  "settings": {
+    "userList": "List of user ids to allow or exempt pings for",
+    "roleList": "List of role ids to allow or exempt pings for",
+    "shouldPingListed": "Behaviour",
+    "inverseShiftReply": "Invert دسكورد"
+  }
+}
