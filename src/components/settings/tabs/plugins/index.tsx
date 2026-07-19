@@ -19,11 +19,12 @@
 import "./styles.css";
 
 import * as DataStore from "@api/DataStore";
-import { isPluginEnabled } from "@api/PluginManager";
+import { isPluginEnabled, isSeparatePluginListEnabled, setSeparatePluginListEnabled, subscribeClientPlugins } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
 import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { FormSwitch } from "@components/FormSwitch";
 import { HeadingTertiary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
@@ -35,7 +36,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
 import { PluginTag, PluginTags } from "@utils/types";
-import { Button, ConfirmModal,lodash, openModal, Parser, React, SearchableSelect, Select, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
+import { Button, ConfirmModal, lodash, openModal, Parser, React, SearchableSelect, Select, TextInput, Tooltip, useEffect, useMemo, useReducer, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
@@ -115,7 +116,10 @@ function ExcludedPluginsList({ search }: { search: string; }) {
 }
 
 function PluginSettings() {
-    const settings = useSettings();
+    useSettings(["plugins.*"]);
+    const [, rerender] = useReducer(x => x + 1, 0);
+    useEffect(() => subscribeClientPlugins(rerender), []);
+
     const changeRef = useRef<ChangeList<string>>(null);
     const changes = changeRef.current ??= new ChangeList<string>();
 
@@ -229,12 +233,12 @@ function PluginSettings() {
 
         if (!pluginFilter(p)) continue;
 
-        const isRequired = p.required || p.isDependency || depMap[p.name]?.some(d => settings.plugins[d].enabled);
+        const isRequired = p.required || p.isDependency || depMap[p.name]?.some(isPluginEnabled);
 
         if (isRequired) {
             const tooltipText = p.required || !depMap[p.name]
                 ? "This plugin is required for Vencord to function."
-                : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
+                : makeDependencyList(depMap[p.name]?.filter(isPluginEnabled));
 
             requiredPlugins.push(
                 <Tooltip text={tooltipText} key={p.name}>
@@ -266,6 +270,18 @@ function PluginSettings() {
     return (
         <SettingsTab>
             <ReloadRequiredCard required={changes.hasChanges} />
+
+            {IS_DISCORD_DESKTOP && (
+                <FormSwitch
+                    title="Separate plugin list"
+                    description="Keep which plugins are enabled local to this install. Their settings still sync."
+                    value={isSeparatePluginListEnabled()}
+                    onChange={enabled => {
+                        setSeparatePluginListEnabled(enabled);
+                        changes.handleChange("Separate plugin list");
+                    }}
+                />
+            )}
 
             <UIElementsButton />
 

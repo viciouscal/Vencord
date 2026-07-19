@@ -5,8 +5,7 @@
  */
 
 import { showNotice } from "@api/Notices";
-import { hasAnyVisibleSettings, isPluginEnabled, pluginRequiresRestart, startDependenciesRecursive, startPlugin, stopPlugin } from "@api/PluginManager";
-import { Settings } from "@api/Settings";
+import { hasAnyVisibleSettings, isPluginEnabled, pluginRequiresRestart, setPluginEnabled, startDependenciesRecursive, startPlugin, stopPlugin } from "@api/PluginManager";
 import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
 import { Plugin } from "@utils/types";
@@ -23,8 +22,6 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 }
 
 export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
-    const settings = Settings.plugins[plugin.name];
-
     const isEnabled = () => isPluginEnabled(plugin.name);
 
     function toggleEnabled() {
@@ -42,7 +39,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
 
             if (restartNeeded) {
                 // If any dependencies have patches, don't start the plugin yet.
-                settings.enabled = true;
+                setPluginEnabled(plugin.name, true);
                 onRestartNeeded(plugin.name, "enabled");
                 return;
             }
@@ -50,21 +47,21 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
 
         // if the plugin requires a restart, don't use stopPlugin/startPlugin. Wait for restart to apply changes.
         if (pluginRequiresRestart(plugin)) {
-            settings.enabled = !wasEnabled;
+            setPluginEnabled(plugin.name, !wasEnabled);
             onRestartNeeded(plugin.name, "enabled");
             return;
         }
 
         // If the plugin is enabled, but hasn't been started, then we can just toggle it off.
         if (wasEnabled && !plugin.started) {
-            settings.enabled = !wasEnabled;
+            setPluginEnabled(plugin.name, !wasEnabled);
             return;
         }
 
         const result = wasEnabled ? stopPlugin(plugin) : startPlugin(plugin);
 
         if (!result) {
-            settings.enabled = false;
+            setPluginEnabled(plugin.name, false);
 
             const msg = `Error while ${wasEnabled ? "stopping" : "starting"} plugin ${plugin.name}`;
             showToast(msg, Toasts.Type.FAILURE, {
@@ -74,7 +71,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             return;
         }
 
-        settings.enabled = !wasEnabled;
+        setPluginEnabled(plugin.name, !wasEnabled);
     }
 
     return (

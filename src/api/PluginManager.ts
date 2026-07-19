@@ -29,6 +29,7 @@ import { addNicknameIcon, removeNicknameIcon } from "@api/NicknameIcons";
 import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { traceFunction } from "@debug/Tracer";
+import { localStorage } from "@utils/localStorage";
 import { Logger } from "@utils/Logger";
 import { onlyOnce } from "@utils/onlyOnce";
 import { canonicalizeFind, canonicalizeReplacement } from "@utils/patches";
@@ -43,15 +44,78 @@ const logger = new Logger("PluginManager", "#a6d189");
 
 export const PMLogger = logger;
 
+const CLIENT_PLUGINS_KEY = "Vencord_clientPlugins";
+
+interface ClientPlugins {
+    enabled: boolean;
+    plugins: Record<string, boolean>;
+}
+
+function loadClientPlugins(): ClientPlugins {
+    if (!IS_DISCORD_DESKTOP || IS_REPORTER) return { enabled: false, plugins: {} };
+
+    try {
+        const data = JSON.parse(localStorage.getItem(CLIENT_PLUGINS_KEY) ?? "null");
+        if (typeof data?.enabled === "boolean" && data.plugins && typeof data.plugins === "object")
+            return { enabled: data.enabled, plugins: data.plugins };
+    } catch { }
+
+    return { enabled: false, plugins: {} };
+}
+
+let clientPlugins = loadClientPlugins();
+const clientPluginsListeners = new Set<() => void>();
+
+function saveClientPlugins() {
+    localStorage.setItem(CLIENT_PLUGINS_KEY, JSON.stringify(clientPlugins));
+    clientPluginsListeners.forEach(l => l());
+}
+
+export function isSeparatePluginListEnabled() {
+    return IS_DISCORD_DESKTOP && !IS_REPORTER && clientPlugins.enabled;
+}
+
+export function subscribeClientPlugins(cb: () => void) {
+    clientPluginsListeners.add(cb);
+    return () => void clientPluginsListeners.delete(cb);
+}
+
+export function setPluginEnabled(p: string, enabled: boolean) {
+    if (isSeparatePluginListEnabled()) {
+        clientPlugins.plugins[p] = enabled;
+        saveClientPlugins();
+    } else {
+        (Settings.plugins[p] ??= { enabled }).enabled = enabled;
+    }
+}
+
+export function setSeparatePluginListEnabled(enabled: boolean) {
+    if (!IS_DISCORD_DESKTOP) return;
+
+    if (enabled && !Object.keys(clientPlugins.plugins).length) {
+        const plugins: Record<string, boolean> = {};
+        for (const name in Plugins)
+            plugins[name] = Settings.plugins[name].enabled;
+        clientPlugins.plugins = plugins;
+    }
+
+    clientPlugins.enabled = enabled;
+    saveClientPlugins();
+}
+
 /** Whether we have subscribed to flux events of all the enabled plugins when FluxDispatcher was ready */
 let enabledPluginsSubscribedFlux = false;
 const subscribedFluxEventsPlugins = new Set<string>();
 
 export function isPluginEnabled(p: string) {
+    const enabled = isSeparatePluginListEnabled()
+        ? clientPlugins.plugins[p] ?? Plugins[p]?.enabledByDefault ?? false
+        : Settings.plugins[p]?.enabled;
+
     return (
         Plugins[p]?.required ||
         Plugins[p]?.isDependency ||
-        Settings.plugins[p]?.enabled
+        enabled
     ) ?? false;
 }
 
@@ -132,17 +196,16 @@ export const startAllPlugins = traceFunction("startAllPlugins", function startAl
 });
 
 export function startDependenciesRecursive(p: Plugin) {
-    const settings = Settings.plugins;
     let restartNeeded = false;
     const failures: string[] = [];
 
     p.dependencies?.forEach(d => {
-        if (!settings[d].enabled) {
+        if (!isPluginEnabled(d)) {
             const dep = Plugins[d];
             startDependenciesRecursive(dep);
 
             // If the plugin has patches, don't start the plugin, just enable it.
-            settings[d].enabled = true;
+            setPluginEnabled(d, true);
             dep.isDependency = true;
 
             if (pluginRequiresRestart(dep)) {
@@ -331,7 +394,6 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
 
 export const initPluginManager = onlyOnce(function init() {
     const pluginsValues = Object.values(Plugins);
-    const settings = Settings.plugins;
 
     const pluginKeysToBind: Array<keyof PluginDef & `${"on" | "render"}${string}`> = [
         "onBeforeMessageEdit", "onBeforeMessageSend", "onMessageClick",
@@ -356,7 +418,7 @@ export const initPluginManager = onlyOnce(function init() {
                 return;
             }
 
-            settings[d].enabled = true;
+            setPluginEnabled(d, true);
             dep.isDependency = true;
         });
 
@@ -377,7 +439,7 @@ export const initPluginManager = onlyOnce(function init() {
 
     for (const p of neededApiPlugins) {
         Plugins[p].isDependency = true;
-        settings[p].enabled = true;
+        setPluginEnabled(p, true);
     }
 
     for (const p of pluginsValues) {
