@@ -96,7 +96,7 @@ function enrolledIncompleteButton(args: { quest: Quest, size: string; }): JSX.El
 export default definePlugin({
     name: "Questify",
     description: "Enhance specific Quest features, disable annoyances, or completely remove Quests.",
-    authors: [{ name: "Etorix", id: 94597845868355584n }],
+    authors: [Devs.Etorix],
     dependencies: ["ServerListAPI"],
     startAt: StartAt.Init, // Needed in order to beat Read All Messages to inserting above the server list.
     managedStyle,
