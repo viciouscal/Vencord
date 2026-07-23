@@ -4,12 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { playAudio } from "@api/AudioPlayer";
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
 import { PlainSettings, Settings } from "@api/Settings";
 import { ErrorBoundary } from "@components/index";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
-import { Devs } from "@utils/constants";
+import type { Quest, QuestUserStatus } from "@vencord/discord-types";
 import { findComponentByCodeLazy, onceReady } from "@webpack";
+import { QuestStore } from "@webpack/common";
 import type { JSX } from "react";
 
 import { disguiseHomeButton, QuestButton, showQuestButton } from "./components/questButton";
@@ -22,14 +25,12 @@ import { disposeRestartTracking, initializeRestartTracking, promptToRestartIfDir
 import { settings } from "./settings/store";
 import { getSettingsModalOpen, initialQuestDataFetched, setInitialQuestDataFetched, setSettingsModalOpen } from "./state";
 import managedStyle from "./styles.css?managed";
-import { AudioPlayer } from "./utils/audio";
 import { canAutoCompleteQuest, getActiveAutoCompletes, getQuestAutoCompleteProgress, getQuestButtonProps, getQuestPanelSubtitleText, hasEnabledAutoCompleteQuestTypes, processQuestForAutoComplete, resumeInterruptedAutoCompletes, setHeartbeatStackTracePatchSucceeded, setVideoProgressStackTracePatchSucceeded, stopAllAutoCompletes, stopAutoCompletesForRunningGames, stopQuestAutoComplete } from "./utils/completion";
 import { canOpenDevToolsWindow, fetchAndDispatchQuests, openDevToolsWindow, snakeToCamel } from "./utils/fetching";
 import { normalizeQuestName } from "./utils/filtering";
 import { notifyQuestCompletion, QL } from "./utils/logging";
 import { getQuestEmbedProgress, getQuestPanelOverride, getQuestPanelPercentComplete, shouldForceQuestPanelVisible } from "./utils/questState";
 import { getLastFilterChoices, getLastSortChoice, getQuestTileClasses, getQuestTileStyle, setLastFilterChoices, setLastSortChoice, shouldPreloadQuestAssets, sortQuests } from "./utils/questTiles";
-import { type Quest, QuestStore, type QuestUserStatus } from "./utils/types";
 import { formatLowerBadge, QUEST_PAGE } from "./utils/ui";
 
 let isSwitchingAccount = false;
@@ -97,8 +98,9 @@ function enrolledIncompleteButton(args: { quest: Quest, size: string; }): JSX.El
 export default definePlugin({
     name: "Questify",
     description: "Enhance specific Quest features, disable annoyances, or completely remove Quests.",
-    authors: [Devs.Etorix],
-    dependencies: ["ServerListAPI"],
+    tags: ["Appearance", "Customisation", "Privacy", "Utility"],
+    authors: [EquicordDevs.Etorix],
+    dependencies: ["AudioPlayerAPI", "ServerListAPI"],
     startAt: StartAt.Init, // Needed in order to beat Read All Messages to inserting above the server list.
     managedStyle,
     settings,
@@ -137,30 +139,6 @@ export default definePlugin({
 
     patches: [
         {
-            find: "could not play audio",
-            group: true,
-            predicate: () => !getQuestifySettings().disableQuestsEverything && !Settings.plugins.AudioPlayerAPI?.enabled,
-            replacement: [
-                {
-                    // Enables external audio sources for playing audio.
-                    match: /(?<=new Audio;\i\.src=)/,
-                    replace: "this.name.startsWith('https')?this.name:"
-                },
-                {
-                    // Adds an optional callback to the audio player. This is needed to detect
-                    // when the audio has finished playing as playWithListener() relies on a duration
-                    // variable which is never present.
-                    match: /(constructor\(\i,\i,\i,\i)(\){)/,
-                    replace: "$1,callback$2this.callback=callback||null,"
-                },
-                {
-                    // Makes use of the callback if provided.
-                    match: /(?<=.onended=\(\)=>)(this.destroyAudio\(\))/,
-                    replace: "{this.callback?this.callback():null;$1;}"
-                }
-            ]
-        },
-        {
             // Prevent color picker modal and dummy Quest button context menu modal
             // from force scrolling back up to the top of the settings when closed.
             find: ",NodeFilter.SHOW_ELEMENT,{acceptNode:function(",
@@ -192,7 +170,7 @@ export default definePlugin({
             find: '("ActivityStatus"),',
             predicate: () => getQuestifySettings().disableQuestsEverything || getQuestifySettings().disableMembersListPromo,
             replacement: {
-                match: /(,hasQuest:)(?=\i=!1)/,
+                match: /,hasQuest:(?=\i=!1)/,
                 replace: ",questifyInvalid1:"
             }
         },
@@ -252,7 +230,7 @@ export default definePlugin({
         },
         {
             // Overrides the account panel Quest popup and progress display.
-            find: "QUESTS_BAR,questId",
+            find: "collapsed-with-rewards\":\"collapsed-without-rewards",
             predicate: () => getQuestifySettings().disableAccountPanelPromo || !getQuestifySettings().disableAccountPanelQuestProgress,
             replacement: {
                 match: /(?<=function\(\){)(let (\i)=\(0,\i.\i\)\(\);)/,
@@ -305,7 +283,7 @@ export default definePlugin({
                     replace: "$1+($2>=1e6?0.8:$2>=1e3?0.4:0)"
                 },
                 {
-                    match: /(?<=children:\i.to\(\i=>`\${\i)(.toFixed\(0\))/,
+                    match: /(?<=children:\i.to\(\i=>`\${\i).toFixed\(0\)/,
                     replace: ".toLocaleString(undefined,{maximumFractionDigits:0})"
                 }
             ]
@@ -360,7 +338,7 @@ export default definePlugin({
             replacement: [
                 {
                     // Overwrite button props for UNENROLLED Quests.
-                    match: /(?<=onClick:(\(\)=>{.[^}]+}),text:(\i),icon:\i,fullWidth:!0)/,
+                    match: /(?<=onClick:\(\)=>{.[^}]+},text:\i,icon:\i,fullWidth:!0)/,
                     replace: ",...($self.getQuestButtonProps(arguments[0])??{})"
                 },
                 {
@@ -372,7 +350,7 @@ export default definePlugin({
         },
         {
             // Overwrite button props for Quest bar.
-            find: "QUESTS_BAR,questId",
+            find: "collapsed-with-rewards\":\"collapsed-without-rewards",
             predicate: () => !getQuestifySettings().disableQuestsEverything && hasEnabledAutoCompleteQuestTypes(),
             replacement: {
                 match: /(?<=SELECT&&!\i&&!\i,(\i)=null;)(return )(\i\?\i=\(0,\i.\i\)\(\i,{quest:(\i))/,
@@ -389,55 +367,34 @@ export default definePlugin({
             }
         },
         {
-            find: "return`quest-tile-",
+            find: "QUEST_HOME_TILE_HEADER_WATCH_VIDEO})},",
             group: true,
             predicate: () => !getQuestifySettings().disableQuestsEverything,
             replacement: [
                 {
-                    // Alias the selected platform dropdown state before exposing CTA buttons.
-                    match: /(?<=var \i;)(?=let \i,\i,{quest:\i,questContent:)/,
-                    replace: "let questifySelectedPlatformDropdownVisible;"
+                    // Prefer the auto-complete CTA over the console platform selector.
+                    match: /(\i===\i\.\i\.ENROLLED&&)(?=\(0,\i\.\i\)\((\i)\))/,
+                    replace: "$1!$self.canAutoCompleteQuest($2)&&"
                 },
                 {
-                    // Prevent the platform selector if the Quest is auto-completable.
-                    match: /(?<=ACCEPTED,\i=)(?=\i&&)/,
-                    replace: "!$self.canAutoCompleteQuest(arguments[0].quest)&&"
+                    // Prefer the auto-complete CTA over the desktop-only external-link row.
+                    match: /(\(\i===\i\.\i\.ENROLLED\|\|\i===\i\.\i\.INCOMPLETE\)&&)(?=\(0,\i\.\i\)\((\i)\))/,
+                    replace: "$1!$self.canAutoCompleteQuest($2)&&"
                 },
                 {
-                    // Prevent the platform selector if the Quest is auto-completable.
-                    match: /(?<=SELECT,\i=)(?=\i&&)/,
-                    replace: "questifySelectedPlatformDropdownVisible=!$self.canAutoCompleteQuest(arguments[0].quest)&&"
+                    // Let completed/claimed Quests with CTAs use the generalized CTA row.
+                    match: /(\(\i===\i\.\i\.COMPLETED\|\|\i===\i\.\i\.CLAIMED\)&&)(?=\(0,\i\.\i\)\((\i)\))/,
+                    replace: "$1!$2.config.ctaConfig&&"
                 },
                 {
-                    // Always expose the CTA button when available instead of only for videos and activities,
-                    // unless the selected platform dropdown is already taking the secondary slot.
-                    match: /(?<=wrap:!1,children:\[)(\i&&[^?]+)/,
-                    replace: "((!!arguments[0].quest.config.ctaConfig&&!questifySelectedPlatformDropdownVisible)||($1))"
-                },
-                {
-                    // Let completed/claimed expired Quests with CTAs use the CTA-aware completed branch.
-                    match: /(return\()(?=\i.enabled&&\i===\i\.\i\.EXPIRED_CLAIMABLE&&\i\.\i\.has\(\i\))/,
-                    replace: "$1!arguments[0].quest.config.ctaConfig&&"
-                },
-                {
-                    // Let completed/claimed expired Quests with CTAs use the CTA-aware completed branch.
-                    match: /(?<=\):\i\?\i=)(\i)(?=\?\(0,\i\.jsx\)\(\i,\{quest:\i,sourceQuestContent:\i,onClick:\i,text:\i\}\):)/,
-                    replace: "(arguments[0].quest.config.ctaConfig||$1)"
-                },
-                {
-                    // Force the CTA-aware complete branch.
-                    match: /(?<=analyticsCtxQuestContentRowIndex:\i}\)}\):\i&&\i)(.{0,200}?fullWidth:!0}\)}\):)(\i.enabled.{0,50}?CLAIMED\)&&\i.\i.has\(\i\))(\?\i=)(\i)/,
-                    replace: "&&false$1((arguments[0].quest.config.ctaConfig&&arguments[0].quest.userStatus?.completedAt)||($2))$3(true||$4)"
-                },
-                {
-                    // Prefer the CTA + progress button branch when Questify can complete the Quest.
-                    match: /(?<="data-migration-pending":.{0,400}?enabledQuestStates.has\(\i\)\?)/,
-                    replace: "!$self.canAutoCompleteQuest(arguments[0].quest)&&"
+                    // Always expose the external CTA when the Quest has one configured.
+                    match: /(?<=wrap:!1,children:\[)(\i)(?=&&\(0,\i\.jsx\)\(\i,\{quest:(\i))/,
+                    replace: "($2.config.ctaConfig||$1)"
                 }
             ]
         },
         {
-            find: "EMBED_DESKTOP}),",
+            find: 'STEP_2_CLICKED_INTERNAL,"quest_embed_card_footer',
             group: true,
             predicate: () => !getQuestifySettings().disableQuestsEverything,
             replacement: [
@@ -459,7 +416,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "return`quest-tile-",
+            find: "QUEST_HOME_TILE_HEADER_WATCH_VIDEO})},",
             group: true,
             predicate: () => !getQuestifySettings().disableQuestsEverything,
             replacement: [
@@ -553,8 +510,19 @@ export default definePlugin({
             ]
         },
         {
+            // Allow non-shareable Quests to embed in chat and to have
+            // their share URLs copyable from the embed context menu.
+            find: "NOT_SHAREABLE}function",
+            group: true,
+            predicate: () => !getQuestifySettings().disableQuestsEverything,
+            replacement: {
+                match: /(?<=return )(?=\i.sharePolicy!==\i.\i.NOT_SHAREABLE)/,
+                replace: "true||"
+            }
+        },
+        {
             // Adds a maxDigits prop to the LowerBadge component which allows for not truncating, or for truncating at a specific threshold.
-            find: ".INTERACTIVE_TEXT_ACTIVE.css,shape",
+            find: ".BADGE_NOTIFICATION_BACKGROUND.css,disableColor",
             group: true,
             replacement: [
                 {
@@ -616,10 +584,10 @@ export default definePlugin({
                 }
 
                 if (getQuestifySettings().questCompletedAlertSound) {
-                    AudioPlayer(
+                    playAudio(
                         getQuestifySettings().questCompletedAlertSound,
-                        Math.max(0, Math.min(100, getQuestifySettings().questCompletedAlertVolume)) / 100
-                    ).play();
+                        { volume: Math.max(0, Math.min(100, getQuestifySettings().questCompletedAlertVolume)) }
+                    );
                 }
             }
         },
