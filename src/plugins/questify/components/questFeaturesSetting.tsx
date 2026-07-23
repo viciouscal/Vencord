@@ -25,6 +25,7 @@ type QuestModifySettingKey =
     | "autoCompleteQuestsSimultaneously"
     | "resumeInterruptedQuests"
     | "completeVideoQuestsQuicker"
+    | "preventVideoQuestsPausing"
     | "makeMobileVideoQuestsDesktopCompatible";
 
 interface QuestDisableOption {
@@ -134,6 +135,7 @@ export function QuestFeaturesSetting(): JSX.Element {
         "autoCompleteQuestsSimultaneously",
         "autoCompleteQuestTypes",
         "completeVideoQuestsQuicker",
+        "preventVideoQuestsPausing",
     ]);
 
     const selectedDisableValues = disableFeatureOptions
@@ -297,6 +299,19 @@ export function QuestFeaturesSetting(): JSX.Element {
                             text: "Discord allows Video Quests to be completed once 24 seconds less than the duration of the video has passed since you enrolled into the Quest."
                                 + "\n\nThis means that if a Video Quest is 24 seconds or less, or if you enroll in a Video Quest and return later to complete it, it can be completed immediately."
                                 + "\n\nThis setting will only apply to auto-completing Video Quests and relies on the auto-complete setting below. Manually completing Video Quests will still require waiting the full duration and is not dependent on enrollment time."
+                        }}
+                    />
+                    <SettingsSubtleSwitch
+                        disabled={questFeatures.disableQuestsEverything || !questFeatures.allowChangingDangerousSettings}
+                        checked={questFeatures.preventVideoQuestsPausing}
+                        label="Prevent Video Quests from pausing when losing focus:"
+                        onChange={checked => updateModifyValue("preventVideoQuestsPausing", checked)}
+                        bottomSpacing="5"
+                        tooltip={{
+                            position: "top",
+                            text: "Discord forces you to be tabbed into the client for Video Quests to play their video."
+                                + "\n\nThis setting prevents the video from pausing and allows completion to progress as normal."
+                                + "\n\nThis setting applies only to manually completing Video Quests."
                         }}
                     />
                     <SettingsSubtleSwitch
