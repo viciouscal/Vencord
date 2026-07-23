@@ -4,15 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { playAudio } from "@api/AudioPlayer";
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
 import { PlainSettings, Settings } from "@api/Settings";
 import { ErrorBoundary } from "@components/index";
-import { EquicordDevs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
-import type { Quest, QuestUserStatus } from "@vencord/discord-types";
 import { findComponentByCodeLazy, onceReady } from "@webpack";
-import { QuestStore } from "@webpack/common";
 import type { JSX } from "react";
 
 import { disguiseHomeButton, QuestButton, showQuestButton } from "./components/questButton";
@@ -25,12 +21,14 @@ import { disposeRestartTracking, initializeRestartTracking, promptToRestartIfDir
 import { settings } from "./settings/store";
 import { getSettingsModalOpen, initialQuestDataFetched, setInitialQuestDataFetched, setSettingsModalOpen } from "./state";
 import managedStyle from "./styles.css?managed";
+import { AudioPlayer } from "./utils/audio";
 import { canAutoCompleteQuest, getActiveAutoCompletes, getQuestAutoCompleteProgress, getQuestButtonProps, getQuestPanelSubtitleText, hasEnabledAutoCompleteQuestTypes, processQuestForAutoComplete, resumeInterruptedAutoCompletes, setHeartbeatStackTracePatchSucceeded, setVideoProgressStackTracePatchSucceeded, stopAllAutoCompletes, stopAutoCompletesForRunningGames, stopQuestAutoComplete } from "./utils/completion";
 import { canOpenDevToolsWindow, fetchAndDispatchQuests, openDevToolsWindow, snakeToCamel } from "./utils/fetching";
 import { normalizeQuestName } from "./utils/filtering";
 import { notifyQuestCompletion, QL } from "./utils/logging";
 import { getQuestEmbedProgress, getQuestPanelOverride, getQuestPanelPercentComplete, shouldForceQuestPanelVisible } from "./utils/questState";
 import { getLastFilterChoices, getLastSortChoice, getQuestTileClasses, getQuestTileStyle, setLastFilterChoices, setLastSortChoice, shouldPreloadQuestAssets, sortQuests } from "./utils/questTiles";
+import { type Quest, QuestStore, type QuestUserStatus } from "./utils/types";
 import { formatLowerBadge, QUEST_PAGE } from "./utils/ui";
 
 let isSwitchingAccount = false;
@@ -98,9 +96,8 @@ function enrolledIncompleteButton(args: { quest: Quest, size: string; }): JSX.El
 export default definePlugin({
     name: "Questify",
     description: "Enhance specific Quest features, disable annoyances, or completely remove Quests.",
-    tags: ["Appearance", "Customisation", "Privacy", "Utility"],
-    authors: [EquicordDevs.Etorix],
-    dependencies: ["AudioPlayerAPI", "ServerListAPI"],
+    authors: [{ name: "Etorix", id: 94597845868355584n }],
+    dependencies: ["ServerListAPI"],
     startAt: StartAt.Init, // Needed in order to beat Read All Messages to inserting above the server list.
     managedStyle,
     settings,
@@ -139,6 +136,30 @@ export default definePlugin({
 
     patches: [
         {
+            find: "could not play audio",
+            group: true,
+            predicate: () => !getQuestifySettings().disableQuestsEverything && !Settings.plugins.AudioPlayerAPI?.enabled,
+            replacement: [
+                {
+                    // Enables external audio sources for playing audio.
+                    match: /(?<=new Audio;\i\.src=)/,
+                    replace: "this.name.startsWith('https')?this.name:"
+                },
+                {
+                    // Adds an optional callback to the audio player. This is needed to detect
+                    // when the audio has finished playing as playWithListener() relies on a duration
+                    // variable which is never present.
+                    match: /(constructor\(\i,\i,\i,\i)(\){)/,
+                    replace: "$1,callback$2this.callback=callback||null,"
+                },
+                {
+                    // Makes use of the callback if provided.
+                    match: /(?<=.onended=\(\)=>)(this.destroyAudio\(\))/,
+                    replace: "{this.callback?this.callback():null;$1;}"
+                }
+            ]
+        },
+        {
             // Prevent color picker modal and dummy Quest button context menu modal
             // from force scrolling back up to the top of the settings when closed.
             find: ",NodeFilter.SHOW_ELEMENT,{acceptNode:function(",
@@ -170,7 +191,7 @@ export default definePlugin({
             find: '("ActivityStatus"),',
             predicate: () => getQuestifySettings().disableQuestsEverything || getQuestifySettings().disableMembersListPromo,
             replacement: {
-                match: /,hasQuest:(?=\i=!1)/,
+                match: /(,hasQuest:)(?=\i=!1)/,
                 replace: ",questifyInvalid1:"
             }
         },
@@ -202,7 +223,7 @@ export default definePlugin({
             predicate: () => getQuestifySettings().disableQuestsEverything,
             replacement: [
                 {
-                    match: /(?<="family-center"\):null,)/,
+                    match: /(?<="family-center"\)(?:&&undefined)?:null,)/,
                     replace: "null&&"
                 }
             ]
@@ -283,7 +304,7 @@ export default definePlugin({
                     replace: "$1+($2>=1e6?0.8:$2>=1e3?0.4:0)"
                 },
                 {
-                    match: /(?<=children:\i.to\(\i=>`\${\i).toFixed\(0\)/,
+                    match: /(?<=children:\i.to\(\i=>`\${\i)(.toFixed\(0\))/,
                     replace: ".toLocaleString(undefined,{maximumFractionDigits:0})"
                 }
             ]
@@ -303,6 +324,24 @@ export default definePlugin({
                     replace: '$self.setHeartbeatStackTracePatchSucceeded();$1""'
                 }
             ]
+        },
+        {
+            // Prevent Video Quests from pausing on lost focus.
+            find: "[QV] | Pausing video | playerState:",
+            predicate: () => !getQuestifySettings().disableQuestsEverything && getQuestifySettings().preventVideoQuestsPausing,
+            replacement: {
+                match: /(?<=setCaptionEnabled\),)({focused:)(\i)/,
+                replace: "$2=true,$1questifyFocused"
+            }
+        },
+        {
+            // Prevent Video Quests from pausing on lost focus.
+            find: ",listenForHlsErrors:!1",
+            predicate: () => !getQuestifySettings().disableQuestsEverything && getQuestifySettings().preventVideoQuestsPausing,
+            replacement: {
+                match: /(?<=pauseOnLostVisibility:)!\i/,
+                replace: "false",
+            }
         },
         {
             find: "QUEST_HOME)},[]),",
@@ -338,7 +377,7 @@ export default definePlugin({
             replacement: [
                 {
                     // Overwrite button props for UNENROLLED Quests.
-                    match: /(?<=onClick:\(\)=>{.[^}]+},text:\i,icon:\i,fullWidth:!0)/,
+                    match: /(?<=onClick:(\(\)=>{.[^}]+}),text:(\i),icon:\i,fullWidth:!0)/,
                     replace: ",...($self.getQuestButtonProps(arguments[0])??{})"
                 },
                 {
@@ -392,6 +431,17 @@ export default definePlugin({
                     replace: "($2.config.ctaConfig||$1)"
                 }
             ]
+        },
+        {
+            // Allow non-shareable Quests to embed in chat and to have
+            // their share URLs copyable from the embed context menu.
+            find: "NOT_SHAREABLE}function",
+            group: true,
+            predicate: () => !getQuestifySettings().disableQuestsEverything,
+            replacement: {
+                match: /(?<=return )(?=\i.sharePolicy!==\i.\i.NOT_SHAREABLE)/,
+                replace: "true||"
+            }
         },
         {
             find: 'STEP_2_CLICKED_INTERNAL,"quest_embed_card_footer',
@@ -510,24 +560,13 @@ export default definePlugin({
             ]
         },
         {
-            // Allow non-shareable Quests to embed in chat and to have
-            // their share URLs copyable from the embed context menu.
-            find: "NOT_SHAREABLE}function",
-            group: true,
-            predicate: () => !getQuestifySettings().disableQuestsEverything,
-            replacement: {
-                match: /(?<=return )(?=\i.sharePolicy!==\i.\i.NOT_SHAREABLE)/,
-                replace: "true||"
-            }
-        },
-        {
             // Adds a maxDigits prop to the LowerBadge component which allows for not truncating, or for truncating at a specific threshold.
             find: ".BADGE_NOTIFICATION_BACKGROUND.css,disableColor",
             group: true,
             replacement: [
                 {
                     // Extracts the custom maxDigits prop.
-                    match: /(=>{let{count:\i,)/,
+                    match: /(\(\i\){let{count:\i,)/,
                     replace: "$1maxDigits,"
                 },
                 {
@@ -584,10 +623,10 @@ export default definePlugin({
                 }
 
                 if (getQuestifySettings().questCompletedAlertSound) {
-                    playAudio(
+                    AudioPlayer(
                         getQuestifySettings().questCompletedAlertSound,
-                        { volume: Math.max(0, Math.min(100, getQuestifySettings().questCompletedAlertVolume)) }
-                    );
+                        Math.max(0, Math.min(100, getQuestifySettings().questCompletedAlertVolume)) / 100
+                    ).play();
                 }
             }
         },
