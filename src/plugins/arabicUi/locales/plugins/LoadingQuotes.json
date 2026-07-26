@@ -1,0 +1,11 @@
+{
+    "name": "LoadingQuotes",
+    "description": "هل تُطبق الإضافة أيضاً أثناء الأحداث ذات الاقتباسات المخصصة؟ (مثل الهالوين)",
+    "settings": {
+        "additionalQuotes": "اقتباسات مخصصة إضافية قد تظهر، مفصولة بالفاصل أدناه",
+        "additionalQuotesDelimiter": "فاصل الاقتباسات الإضافية",
+        "enableDiscordPresetQuotes": "Enable دسكورد",
+        "enablePluginPresetQuotes": "تفعيل إعداد الاقتباسات المسبق لهالبلوقن",
+        "replaceEvents": "هل البلوقن يطبّق أيضاً أثناء أحداث باقتباسات ثيم خاص؟ (مثل الهالوين)"
+    }
+}

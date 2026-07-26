@@ -1,0 +1,10 @@
+{
+    "name": "TypingIndicator",
+    "description": "إظهار مؤشر الكتابة للقناة المحددة حالياً",
+    "settings": {
+        "includeBlockedUsers": "عرض مؤشر الكتابة للمستخدمين المحظورين.",
+        "includeCurrentChannel": "عرض مؤشر الكتابة للقناة المختارة حالياً",
+        "includeMutedChannels": "عرض مؤشر الكتابة للقنوات المكتومة.",
+        "indicatorMode": "كيف يُعرض المؤشر؟"
+    }
+}

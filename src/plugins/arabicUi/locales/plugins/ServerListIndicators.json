@@ -1,0 +1,7 @@
+{
+    "name": "ServerListIndicators",
+    "description": "يعرض عدد الأصدقاء الاونلاين أو عدد السيرفرات في قائمة السيرفرات",
+    "settings": {
+        "mode": "الوضع"
+    }
+}

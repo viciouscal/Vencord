@@ -1,0 +1,5 @@
+{
+    "name": "ShikiCodeblocks",
+    "description": "يجيب كتل كود بأسلوب VSCode إلى دسكورد، مدعومة بـ Shiki",
+    "settings": {}
+}

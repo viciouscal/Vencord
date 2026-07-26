@@ -27,6 +27,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { HeadingTertiary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { getPluginDisplayDescription, getPluginDisplayName } from "@plugins/arabicUi/engine/pluginStrings";
 import { ChangeList } from "@utils/ChangeList";
 import { classNameFactory } from "@utils/css";
 import { isTruthy } from "@utils/guards";
@@ -158,7 +159,11 @@ function PluginSettings() {
     }, []);
 
     const sortedPlugins = useMemo(() =>
-        Object.values(Plugins).sort((a, b) => a.name.localeCompare(b.name)),
+        Object.values(Plugins).sort((a, b) => {
+            if (a.name === "ArabicUI") return -1;
+            if (b.name === "ArabicUI") return 1;
+            return a.name.localeCompare(b.name);
+        }),
         []
     );
 
@@ -198,6 +203,8 @@ function PluginSettings() {
             plugin.name.toLowerCase().includes(search) ||
             plugin.name.match(/[A-Z]/g)?.join("").toLowerCase().includes(search) || // acronyms like BF for BetterFolders
             plugin.description.toLowerCase().includes(search) ||
+            getPluginDisplayName(plugin).toLowerCase().includes(search) ||
+            getPluginDisplayDescription(plugin).toLowerCase().includes(search) ||
             plugin.searchTerms?.some(t => t.toLowerCase().includes(search))
         );
     };

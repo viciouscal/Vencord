@@ -1,0 +1,8 @@
+{
+    "name": "CrashHandler",
+    "description": "محاولة منع أعطال دسكورد",
+    "settings": {
+        "attemptToNavigateToHome": "محاولة الانتقال للرئيسية عند منع تعطل دسكورد.",
+        "attemptToPreventCrashes": "محاولة منع تعطل دسكورد."
+    }
+}

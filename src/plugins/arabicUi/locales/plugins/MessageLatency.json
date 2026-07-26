@@ -1,0 +1,10 @@
+{
+    "name": "MessageLatency",
+    "description": "عرض مؤشر للرسائل التي استغرقت ≥ ثانية للإرسال",
+    "settings": {
+        "detectDiscordKotlin": "كشف عملاء دسكورد اندرويد القديمة",
+        "ignoreSelf": "لا تضيف مؤشر لرسائلك",
+        "latency": "الحد بالثواني لمؤشر التأخير",
+        "showMillis": "عرض الميلي ثانية"
+    }
+}

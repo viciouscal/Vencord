@@ -1,0 +1,9 @@
+{
+    "name": "NoPendingCount",
+    "description": "يشيل عداد البنق لطلبات الصداقة وطلبات الرسائل وعروض نيترو.",
+    "settings": {
+        "hideFriendRequestsCount": "إخفاء عدد طلبات الصداقة الواردة",
+        "hideMessageRequestsCount": "إخفاء عدد طلبات الرسائل",
+        "hidePremiumOffersCount": "إخفاء عدد عروض نيترو"
+    }
+}

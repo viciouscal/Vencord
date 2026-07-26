@@ -1,0 +1,9 @@
+{
+    "name": "Dearrow",
+    "description": "إخفاء زر Dearrow من تضمينات يوتيوب",
+    "settings": {
+        "dearrowByDefault": "تطبيق ديارو على الفيديوهات تلقائياً",
+        "hideButton": "يخفي زر ديارو من تضمينات يوتيوب",
+        "replaceElements": "اختر أي عناصر التضمين ستُستبدَل"
+    }
+}

@@ -1,0 +1,7 @@
+{
+    "name": "PlatformSpoofer",
+    "description": "تزييف المنصة أو الجهاز الذي تعمل عليه.",
+    "settings": {
+        "platform": "المنصة التي تود الظهور بها"
+    }
+}

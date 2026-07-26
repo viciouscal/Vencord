@@ -1,0 +1,9 @@
+{
+    "name": "ConsoleJanitor",
+    "description": "تعطيل سجلات دسكورد",
+    "settings": {
+        "disableLoggers": "يعطّل مسجلات دسكورد",
+        "disableSpotifyLogger": "تعطيل مسجل سبوتفاي اللي يسرّب معلومات الحساب وتوكن الوصول",
+        "whitelistedLoggers": "قائمة مسجّلات مفصولة بفاصلة منقوطة (;) للسماح بها حتى لو الباقي مخفي"
+    }
+}

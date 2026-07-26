@@ -1,0 +1,8 @@
+{
+    "name": "NoBlockedMessages",
+    "description": "تجاهل رسائل المحظورين والمتجاهَلين تماماً",
+    "settings": {
+        "applyToIgnoredUsers": "طبّق أيضاً على",
+        "ignoreMessages": "يتجاهل بالكامل الرسائل الواردة من المحظورين والمتجاهلين (إذا مفعّل)"
+    }
+}

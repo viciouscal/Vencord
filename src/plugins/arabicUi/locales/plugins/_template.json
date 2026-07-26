@@ -1,0 +1,7 @@
+{
+  "_comment": "Rename to ExactPluginName.json. Titles stay English.",
+  "description": "",
+  "settings": {
+    "exampleSettingId": "وصف الإعداد بالعربي"
+  }
+}

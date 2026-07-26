@@ -1,0 +1,7 @@
+{
+    "name": "FakeProfileThemes",
+    "description": "مصدر اللون الافتراضي عند وجود كليهما",
+    "settings": {
+        "nitroFirst": "مصدر اللون الافتراضي إذا كان الاثنان موجودين"
+    }
+}

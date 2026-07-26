@@ -1,0 +1,7 @@
+{
+    "name": "VencordToolbox",
+    "description": "إظهار قائمة الإضافات في صندوق الأدوات",
+    "settings": {
+        "showPluginMenu": "عرض قائمة البلوقنات في صندوق الأدوات"
+    }
+}

@@ -1,0 +1,8 @@
+{
+    "name": "QuickReply",
+    "description": "تفعيل الإشارة في الرد افتراضياً",
+    "settings": {
+        "ignoreBlockedAndIgnored": "تجاهل رسائل المحظورين/المتجاهلين عند التنقل",
+        "shouldMention": "تفعيل المنشن في الرد افتراضياً"
+    }
+}

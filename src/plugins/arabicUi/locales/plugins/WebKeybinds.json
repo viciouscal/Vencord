@@ -1,0 +1,5 @@
+{
+    "name": "WebKeybinds",
+    "description": "يرجّع اختصارات ناقصة في ويب دسكورد: ctrl+t و ctrl+shift+t و ctrl+tab و ctrl+1-9 وغيرها. يشتغل كامل على Vesktop/Legcord مو داخل المتصفح",
+    "settings": {}
+}

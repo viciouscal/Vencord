@@ -1,0 +1,7 @@
+{
+    "name": "AutoDNDWhilePlaying",
+    "description": "الحالة أثناء اللعب",
+    "settings": {
+        "statusToSet": "الحالة عند تشغيل لعبة"
+    }
+}

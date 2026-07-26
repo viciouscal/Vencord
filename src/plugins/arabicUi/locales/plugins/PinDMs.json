@@ -1,0 +1,9 @@
+{
+    "name": "PinDMs",
+    "description": "ترتيب عرض الرسائل الخاصة المثبتة",
+    "settings": {
+        "canCollapseDmSection": "السماح بجعل قسم الخاص غير المصنّف قابلاً للطي",
+        "dmSectionCollapsed": "طيّ قسم الخاص",
+        "pinOrder": "بأي ترتيب يُعرض الخاص المثبّت؟"
+    }
+}

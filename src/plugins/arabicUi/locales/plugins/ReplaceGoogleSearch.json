@@ -1,0 +1,9 @@
+{
+    "name": "ReplaceGoogleSearch",
+    "description": "يستبدل بحث Google بمحركات بحث ثانية",
+    "settings": {
+        "customEngineName": "اسم محرك البحث المخصص",
+        "customEngineURL": "رابط المحرك اللي تستخدمه",
+        "replacementEngine": "الاستبدال بمحرك بحث محدد بدل إضافة قائمة"
+    }
+}

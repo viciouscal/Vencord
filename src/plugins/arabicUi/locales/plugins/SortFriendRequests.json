@@ -1,0 +1,7 @@
+{
+    "name": "SortFriendRequests",
+    "description": "إظهار التواريخ على طلبات الصداقة",
+    "settings": {
+        "showDates": "عرض التواريخ على طلبات الصداقة"
+    }
+}

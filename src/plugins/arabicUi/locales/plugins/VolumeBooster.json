@@ -1,0 +1,7 @@
+{
+    "name": "VolumeBooster",
+    "description": "يخليك ترفع صوت المستخدم والبث فوق الحد الافتراضي",
+    "settings": {
+        "multiplier": "مضاعف الصوت"
+    }
+}

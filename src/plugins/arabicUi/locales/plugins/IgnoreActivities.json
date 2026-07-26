@@ -1,0 +1,12 @@
+{
+    "name": "IgnoreActivities",
+    "description": "تغيير وضع قائمة الفلتر",
+    "settings": {
+        "ignoreCompeting": "تجاهل كل أنشطة المنافسة، عادة أنشطة ألعاب خاصة",
+        "ignoreListening": "تجاهل كل أنشطة الاستماع",
+        "ignorePlaying": "تجاهل كل أنشطة اللعب",
+        "ignoreStreaming": "تجاهل كل أنشطة البث",
+        "ignoreWatching": "تجاهل كل أنشطة المشاهدة",
+        "listMode": "يغيّر وضع قائمة الفلتر"
+    }
+}

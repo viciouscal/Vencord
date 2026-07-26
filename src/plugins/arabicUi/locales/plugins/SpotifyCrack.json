@@ -1,0 +1,8 @@
+{
+    "name": "SpotifyCrack",
+    "description": "استماع مشترك مجاني، بدون إيقاف تلقائي في الصوت، ويخلي النشاط يكمل لما تكون خامل",
+    "settings": {
+        "keepSpotifyActivityOnIdle": "إبقاء نشاط سبوتفاي شغّال عند الخمول",
+        "noSpotifyAutoPause": "تعطيل الإيقاف التلقائي لـ سبوتفاي"
+    }
+}

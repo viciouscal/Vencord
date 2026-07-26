@@ -1,0 +1,7 @@
+{
+    "name": "AccountPanelServerProfile",
+    "description": "كليك يمين على لوحة حسابك أسفل اليسار عشان تشوف ملفك في السيرفر الحالي",
+    "settings": {
+        "prioritizeServerProfile": "أعطِ الأولوية لملف السيرفر الشخصي عند النقر الأيسر على لوحة حسابك"
+    }
+}

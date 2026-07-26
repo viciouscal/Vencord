@@ -1,0 +1,9 @@
+{
+    "name": "SuperReactionTweaks",
+    "description": "منتقي التفاعلات سيفتح على التفاعلات الخارقة افتراضياً",
+    "settings": {
+        "superReactByDefault": "منتقي التفاعلات يفتح على التفاعلات الخارقة افتراضياً",
+        "superReactionPlayingLimit": "أقصى عدد سوبر رياكشنز تُشغّل مرة واحدة، 0 لتعطيل تشغيل سوبر رياكشنز",
+        "unlimitedSuperReactionPlaying": "إزالة حد تشغيل التفاعلات الخارقة دفعة واحدة"
+    }
+}

@@ -1,0 +1,22 @@
+{
+    "name": "AppleMusicRichPresence",
+    "description": "حالة نشاط دسكورد لـ Apple Music!",
+    "settings": {
+        "activityType": "نوع النشاط",
+        "detailsLink": "رابط تفاصيل النشاط",
+        "detailsString": "نص تنسيق تفاصيل النشاط",
+        "enableButtons": "تفعيل الأزرار أم لا",
+        "enableTimestamps": "تفعيل الطوابع الزمنية أم لا",
+        "largeImageLink": "رابط الصورة الكبيرة لأصول حالة النشاط",
+        "largeImageType": "نوع الصورة الكبيرة لأصول حالة النشاط",
+        "largeTextString": "نص تنسيق الصورة الكبيرة لأصول حالة النشاط",
+        "nameString": "نص تنسيق اسم النشاط",
+        "refreshInterval": "الفترة بين تحديثات النشاط",
+        "smallImageLink": "رابط الصورة الصغيرة لأصول حالة النشاط",
+        "smallImageType": "نوع الصورة الصغيرة لأصول حالة النشاط",
+        "smallTextString": "نص تنسيق الصورة الصغيرة لأصول حالة النشاط",
+        "stateLink": "رابط حالة النشاط",
+        "stateString": "نص تنسيق حالة النشاط",
+        "statusDisplayType": "عرض اسم المقطع / الفنان في قائمة الأعضاء"
+    }
+}

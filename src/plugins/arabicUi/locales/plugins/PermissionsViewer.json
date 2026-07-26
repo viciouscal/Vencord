@@ -1,0 +1,7 @@
+{
+    "name": "PermissionsViewer",
+    "description": "طريقة الترتيب لتحديد أي دور يمنح المستخدم صلاحية معينة",
+    "settings": {
+        "permissionsSortOrder": "طريقة الترتيب لتحديد أي رتبة تعطي المستخدم صلاحية معيّنة"
+    }
+}

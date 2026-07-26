@@ -1,0 +1,9 @@
+{
+    "name": "ShowHiddenChannels",
+    "description": "يعرض القنوات اللي ما عندك صلاحية تشوفها.",
+    "settings": {
+        "defaultAllowedUsersAndRolesDropdownState": "هل قائمة المستخدمين والرتب المسموحين في القنوات المخفية تكون مفتوحة افتراضياً",
+        "hideUnreads": "إخفاء غير المقروء",
+        "showMode": "وضع عرض القنوات المخفية."
+    }
+}

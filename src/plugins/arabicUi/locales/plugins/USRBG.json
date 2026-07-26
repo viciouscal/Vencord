@@ -1,0 +1,8 @@
+{
+    "name": "USRBG",
+    "description": "الشعار المستخدم عند وجود شعاري نيترو و USRBG",
+    "settings": {
+        "nitroFirst": "البانر المستخدم إذا كان بانر نيترو وUSRBG موجودين معاً",
+        "voiceBackground": "استخدام بانرات USRBG كخلفية للدردشة الصوتية"
+    }
+}

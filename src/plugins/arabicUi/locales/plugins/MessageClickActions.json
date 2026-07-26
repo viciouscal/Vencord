@@ -1,0 +1,10 @@
+{
+    "name": "MessageClickActions",
+    "description": "اضغط مطولاً على Backspace مع النقر للحذف، أو نقر مزدوج للتعديل/الرد",
+    "settings": {
+        "enableDeleteOnClick": "تفعيل الحذف بالنقر مع الاستمرار على Backspace",
+        "enableDoubleClickToEdit": "تفعيل النقر المزدوج للتعديل",
+        "enableDoubleClickToReply": "تفعيل النقر المزدوج للرد",
+        "requireModifier": "تنفيذ النقر المزدوج فقط مع الضغط على Shift أو Ctrl"
+    }
+}

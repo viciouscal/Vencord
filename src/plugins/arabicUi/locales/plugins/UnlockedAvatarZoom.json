@@ -1,0 +1,7 @@
+{
+    "name": "UnlockedAvatarZoom",
+    "description": "يخليك تكبّر أكثر في أداة قص الصورة عند تغيير الأفاتار",
+    "settings": {
+        "zoomMultiplier": "مضاعف التكبير"
+    }
+}
