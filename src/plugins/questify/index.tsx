@@ -7,10 +7,11 @@
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
 import { PlainSettings, Settings } from "@api/Settings";
 import { ErrorBoundary } from "@components/index";
+import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
 import { findComponentByCodeLazy, onceReady } from "@webpack";
 import type { JSX } from "react";
-import { Devs } from "@utils/constants";
+
 import { disguiseHomeButton, QuestButton, showQuestButton } from "./components/questButton";
 import { QuestTileContextMenu } from "./components/questTileContextMenu";
 import { getQuestifySettings } from "./settings/access";

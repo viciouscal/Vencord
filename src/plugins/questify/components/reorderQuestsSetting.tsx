@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { getQuestifySettings, useQuestifySettings } from "@plugins/questify/settings/access";
+import { defaultQuestOrder, type QuestOrderStatus, type QuestSubsort } from "@plugins/questify/settings/def";
+import { rerenderQuests } from "@plugins/questify/settings/rerender";
 import type { JSX } from "react";
 
-import { getQuestifySettings, useQuestifySettings } from "../settings/access";
-import { defaultQuestOrder, type QuestOrderStatus, type QuestSubsort } from "../settings/def";
-import { rerenderQuests } from "../settings/rerender";
 import { type ManaSelectOption, SettingsCard, SettingsDescription, SettingsHeader, SettingsRow, SettingsRowItem, SettingsSelect, SettingsSubheader, SettingsSubtleSwitch } from "./shared";
 
 const questStatusOptions = [

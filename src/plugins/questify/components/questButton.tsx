@@ -6,18 +6,18 @@
 
 import { plugins } from "@api/PluginManager";
 import { ErrorBoundary } from "@components/index";
+import { getQuestifySettings, useQuestifySettings } from "@plugins/questify/settings/access";
+import type { QuestButtonAction, QuestButtonDisplayMode, QuestButtonIndicatorMode } from "@plugins/questify/settings/def";
+import { getIgnoredQuestIDs, ignoreAllQuests, resetIgnoredQuests } from "@plugins/questify/settings/ignoredQuests";
+import { rerenderQuests } from "@plugins/questify/settings/rerender";
+import { initialQuestDataFetched } from "@plugins/questify/state";
+import { getActiveAutoCompletes, getQueueableAutoCompleteQuests, isQuestEnrollmentRateLimited, isQueueAllAutoCompleteQuestsInProgress, queueAllAutoCompleteQuests, stopAllAutoCompletes, stopQueueAllAutoCompleteQuests } from "@plugins/questify/utils/completion";
+import { fetchAndAlertQuests } from "@plugins/questify/utils/fetching";
+import { decimalToRGB, formatLowerBadge, isDarkish, leftClick, middleClick, q, QUEST_PAGE, rightClick } from "@plugins/questify/utils/ui";
 import { findComponentByCodeLazy } from "@webpack";
 import { ContextMenuApi, Menu, NavigationRouter, useState } from "@webpack/common";
 import type { CSSProperties, JSX, MouseEvent } from "react";
 
-import { getQuestifySettings, useQuestifySettings } from "../settings/access";
-import type { QuestButtonAction, QuestButtonDisplayMode, QuestButtonIndicatorMode } from "../settings/def";
-import { getIgnoredQuestIDs, ignoreAllQuests, resetIgnoredQuests } from "../settings/ignoredQuests";
-import { rerenderQuests } from "../settings/rerender";
-import { initialQuestDataFetched } from "../state";
-import { getActiveAutoCompletes, getQueueableAutoCompleteQuests, isQuestEnrollmentRateLimited, isQueueAllAutoCompleteQuestsInProgress, queueAllAutoCompleteQuests, stopAllAutoCompletes, stopQueueAllAutoCompleteQuests } from "../utils/completion";
-import { fetchAndAlertQuests } from "../utils/fetching";
-import { decimalToRGB, formatLowerBadge, isDarkish, leftClick, middleClick, q, QUEST_PAGE, rightClick } from "../utils/ui";
 import { openQuestifySettingsModal } from "./settingsModal";
 
 const GuildlessServerListItemComponent = findComponentByCodeLazy("tooltip:", "lowerBadgeSize:");

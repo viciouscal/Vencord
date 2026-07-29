@@ -4,15 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { addIgnoredQuest, questIsIgnored, removeIgnoredQuest } from "@plugins/questify/settings/ignoredQuests";
+import { rerenderQuests } from "@plugins/questify/settings/rerender";
+import { canAutoCompleteQuest, getQuestAutoCompleteEntry, processQuestForAutoComplete, stopQuestAutoComplete } from "@plugins/questify/utils/completion";
+import type { Quest } from "@plugins/questify/utils/types";
+import { q } from "@plugins/questify/utils/ui";
 import { copyToClipboard } from "@utils/index";
 import { Menu } from "@webpack/common";
 import type { ReactNode } from "react";
-
-import { addIgnoredQuest, questIsIgnored, removeIgnoredQuest } from "../settings/ignoredQuests";
-import { rerenderQuests } from "../settings/rerender";
-import { canAutoCompleteQuest, getQuestAutoCompleteEntry, processQuestForAutoComplete, stopQuestAutoComplete } from "../utils/completion";
-import type { Quest } from "../utils/types";
-import { q } from "../utils/ui";
 
 export function QuestTileContextMenu(
     children: ReactNode[],

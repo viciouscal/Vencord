@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { fetchAndAlertQuests } from "../utils/fetching";
-import { QL } from "../utils/logging";
-import type { Quest } from "../utils/types";
+import { fetchAndAlertQuests } from "@plugins/questify/utils/fetching";
+import { QL } from "@plugins/questify/utils/logging";
+import type { Quest } from "@plugins/questify/utils/types";
+
 import { getCurrentUserId, getQuestifySettings } from "./access";
 
 let autoFetchInterval: null | ReturnType<typeof setInterval> = null;

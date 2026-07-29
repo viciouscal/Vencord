@@ -7,8 +7,8 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
-import { Logger } from "@utils/Logger";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import {
     Button,
@@ -55,7 +55,7 @@ const settings = definePluginSettings({
             { label: "Custom numeric code", value: "custom" }
         ],
         onChange: () => {
-            
+
             settings.store.hash = undefined;
             settings.store.salt = undefined;
             settings.store.iterations = undefined;
@@ -97,7 +97,7 @@ function base64ToBytes(value: string): Uint8Array {
 }
 
 async function deriveHash(passcode: string, salt: Uint8Array, iterations: number): Promise<string> {
-    
+
     const saltBuffer = Uint8Array.from(salt).buffer;
     const material = await crypto.subtle.importKey(
         "raw",
@@ -135,7 +135,7 @@ async function verifyPasscode(passcode: string): Promise<boolean> {
     const candidate = await deriveHash(passcode, base64ToBytes(salt), iterations);
     if (candidate.length !== hash.length) return false;
 
-    
+
     let mismatch = 0;
     for (let i = 0; i < hash.length; i++) {
         mismatch |= hash.charCodeAt(i) ^ candidate.charCodeAt(i);
@@ -447,7 +447,7 @@ export default definePlugin({
         window.addEventListener("blur", onWindowBlur);
         window.addEventListener("focus", onWindowFocus);
 
-        
+
         if (settings.store.hash && (settings.store.locked || settings.store.lockOnStartup)) {
             window.setTimeout(lock, 250);
         }

@@ -8,14 +8,15 @@ import { set } from "@api/DataStore";
 import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
 import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot } from "@utils/modal";
+import type { RenderModalProps } from "@vencord/discord-types";
 import { Button, ColorPicker, useState } from "@webpack/common";
 
 import { colors, DATASTORE_KEY } from "./index";
 
 const cl = classNameFactory("vc-customColors-");
 
-export function SetColorModal({ id, modalProps }: { id: string, modalProps: ModalProps; }) {
+export function SetColorModal({ id, modalProps }: { id: string, modalProps: RenderModalProps; }) {
     const initialColor = parseInt(colors[id], 16) || 372735;
     // color picker default to current color set for user (if null it's 0x05afff :3 )
 

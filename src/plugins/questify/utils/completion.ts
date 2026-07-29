@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { getCurrentUserId, getQuestifySettings } from "@plugins/questify/settings/access";
+import { autoCompleteQuestTaskTypes, isDesktopCompatible } from "@plugins/questify/settings/def";
+import { resetQuestsToResume } from "@plugins/questify/settings/fetching";
+import { getIgnoredQuestIDs } from "@plugins/questify/settings/ignoredQuests";
+import { rerenderQuests } from "@plugins/questify/settings/rerender";
 import type { PluginNative } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { findByCodeLazy, findLazy } from "@webpack";
 import { FluxDispatcher, RestAPI, showToast, Toasts, UserStore } from "@webpack/common";
 
-import { getCurrentUserId, getQuestifySettings } from "../settings/access";
-import { autoCompleteQuestTaskTypes, isDesktopCompatible } from "../settings/def";
-import { resetQuestsToResume } from "../settings/fetching";
-import { getIgnoredQuestIDs } from "../settings/ignoredQuests";
-import { rerenderQuests } from "../settings/rerender";
 import { AuthorizedAppsStore, snakeToCamel } from "./fetching";
 import { normalizeQuestName, type QuestIncludedTypes, questMatchesIncludedTypes } from "./filtering";
 import { QL } from "./logging";

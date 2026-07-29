@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { QuestRewardType, QuestTaskType } from "../utils/types";
+import { QuestRewardType, QuestTaskType } from "@plugins/questify/utils/types";
 
 export type QuestButtonDisplayMode = "always" | "unclaimed" | "never";
 export type QuestButtonIndicatorMode = "pill" | "badge" | "both" | "none";

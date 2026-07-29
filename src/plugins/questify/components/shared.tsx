@@ -7,15 +7,14 @@
 import { Card } from "@components/Card";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
+import { q } from "@plugins/questify/utils/ui";
 import { findComponentByCodeLazy } from "@webpack";
 import { ColorPicker, Slider } from "@webpack/common";
 import type { ComponentProps, ComponentType, JSX, ReactNode } from "react";
 
-import { q } from "../utils/ui";
-
 export function SettingsCard({ children }: { children: ReactNode; }): JSX.Element {
     return (
-        <Card variant="primary" className={q("setting")}>
+        <Card variant="normal" className={q("setting")}>
             {children}
         </Card>
     );
@@ -191,20 +190,22 @@ function ColorPickerWithOnClose(props: ColorPickerWithOnCloseProps): JSX.Element
 
 export interface SettingsColorPickerProps extends ColorPickerWithOnCloseProps {
     className?: string | string[];
+    disabled?: boolean;
     label?: ReactNode;
     labelClassName?: string | string[];
 }
 
 export function SettingsColorPicker({
     className,
+    disabled,
     label,
     labelClassName,
     ...props
 }: SettingsColorPickerProps): JSX.Element {
     return (
         <>
-            {label != null && <SettingsParagraph className={withDimmedClass(labelClassName, !!props.disabled)}>{label}</SettingsParagraph>}
-            <div className={q("settings-color-picker", className)}>
+            {label != null && <SettingsParagraph className={withDimmedClass(labelClassName, !!disabled)}>{label}</SettingsParagraph>}
+            <div className={q("settings-color-picker", withDimmedClass(className, !!disabled))}>
                 <ColorPickerWithOnClose {...props} />
             </div>
         </>

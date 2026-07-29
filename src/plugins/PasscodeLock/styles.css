@@ -13,8 +13,8 @@
     place-items: center;
     overflow: auto;
     background:
-        radial-gradient(circle at 50% 25%, rgba(88, 101, 242, 0.22), transparent 34rem),
-        rgba(8, 9, 12, 0.94);
+        radial-gradient(circle at 50% 25%, rgb(88 101 242 / 22%), transparent 34rem),
+        rgb(8 9 12 / 94%);
     backdrop-filter: blur(32px);
     animation: vc-pcl-fade-in 160ms ease-out;
 }
@@ -28,10 +28,10 @@
     align-items: center;
     justify-content: center;
     padding: 32px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgb(255 255 255 / 10%);
     border-radius: 28px;
-    background: rgba(22, 24, 29, 0.78);
-    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
+    background: rgb(22 24 29 / 78%);
+    box-shadow: 0 30px 90px rgb(0 0 0 / 55%);
 }
 
 .vc-pcl-icon {
@@ -39,7 +39,7 @@
     height: 58px;
     margin-bottom: 18px;
     fill: var(--brand-500);
-    filter: drop-shadow(0 8px 20px rgba(88, 101, 242, 0.35));
+    filter: drop-shadow(0 8px 20px rgb(88 101 242 / 35%));
 }
 
 .vc-pcl-card h1 {
@@ -75,7 +75,7 @@
     height: 10px;
     border-radius: 50%;
     background: white;
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.35);
+    box-shadow: 0 0 12px rgb(255 255 255 / 35%);
     animation: vc-pcl-dot 120ms ease-out;
 }
 
@@ -96,18 +96,18 @@
     width: 64px;
     height: 64px;
     padding: 0;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgb(255 255 255 / 10%);
     border-radius: 50%;
     color: white;
-    background: rgba(255, 255, 255, 0.06);
+    background: rgb(255 255 255 / 6%);
     font: 500 25px/1 var(--font-primary);
     cursor: pointer;
     transition: background 100ms ease, border-color 100ms ease, transform 100ms ease;
 }
 
 .vc-pcl-keypad button:hover {
-    border-color: rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.12);
+    border-color: rgb(255 255 255 / 20%);
+    background: rgb(255 255 255 / 12%);
 }
 
 .vc-pcl-keypad button:active {
@@ -138,11 +138,18 @@
 }
 
 @keyframes vc-pcl-dot {
-    from { opacity: 0; transform: scale(0.5); }
-    to { opacity: 1; transform: scale(1); }
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
-@media (max-height: 650px) {
+@media (height <= 650px) {
     .vc-pcl-card {
         min-height: 0;
         margin: 20px;

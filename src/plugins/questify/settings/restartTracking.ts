@@ -5,9 +5,8 @@
  */
 
 import { SettingsStore } from "@api/Settings";
+import { Alerts } from "@plugins/questify/utils/ui";
 import type { DefinedSettings, SettingsDefinition } from "@utils/types";
-
-import { Alerts } from "../utils/ui";
 
 type RestartTrackingSettings = Pick<DefinedSettings<SettingsDefinition>, "def" | "pluginName">;
 
@@ -17,7 +16,7 @@ const restartListenerCleanups: (() => void)[] = [];
 
 function getRestartSettingPaths(settings: RestartTrackingSettings): string[] {
     return Object.entries(settings.def)
-        .filter(([, definition]) => definition.restartNeeded)
+        .filter(([, definition]) => "restartNeeded" in definition && definition.restartNeeded)
         .map(([key]) => `plugins.${settings.pluginName}.${key}`);
 }
 

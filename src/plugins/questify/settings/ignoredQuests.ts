@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { QuestIncludedTypes } from "../utils/filtering";
-import { countIncludedUnclaimedQuests, getQuestStatus, QuestStatus } from "../utils/questState";
-import { type Quest, QuestStore } from "../utils/types";
+import type { QuestIncludedTypes } from "@plugins/questify/utils/filtering";
+import { countIncludedUnclaimedQuests, getQuestStatus, QuestStatus } from "@plugins/questify/utils/questState";
+import { type Quest, QuestStore } from "@plugins/questify/utils/types";
+
 import { getQuestifySettings } from "./access";
 import { ignoredQuestIDsKey } from "./def";
 import { rerenderQuests } from "./rerender";

@@ -8,7 +8,7 @@ import { Settings } from "@api/Settings";
 import { findByCodeLazy, findLazy } from "@webpack";
 
 const AudioPlayerConstructor = findByCodeLazy("sound has no duration");
-const findDefaultSounds = findLazy(module => module.resolve && module.id && module.keys().some(key => key.endsWith(".mp3")), false);
+const findDefaultSounds = findLazy(module => module.resolve && module.id && module.keys().some(key => key.endsWith(".mp3")));
 
 let defaultSounds: string[] | null = null;
 
