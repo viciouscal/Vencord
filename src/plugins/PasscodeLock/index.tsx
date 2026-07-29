@@ -8,6 +8,7 @@ import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import {
     Button,
@@ -54,7 +55,7 @@ const settings = definePluginSettings({
             { label: "Custom numeric code", value: "custom" }
         ],
         onChange: () => {
-            // A passcode created for another format must be set again.
+            
             settings.store.hash = undefined;
             settings.store.salt = undefined;
             settings.store.iterations = undefined;
@@ -96,8 +97,7 @@ function base64ToBytes(value: string): Uint8Array {
 }
 
 async function deriveHash(passcode: string, salt: Uint8Array, iterations: number): Promise<string> {
-    // TypeScript 6 distinguishes ArrayBuffer from SharedArrayBuffer more
-    // strictly than Web Crypto does. Copying guarantees an ArrayBuffer here.
+    
     const saltBuffer = Uint8Array.from(salt).buffer;
     const material = await crypto.subtle.importKey(
         "raw",
@@ -135,7 +135,7 @@ async function verifyPasscode(passcode: string): Promise<boolean> {
     const candidate = await deriveHash(passcode, base64ToBytes(salt), iterations);
     if (candidate.length !== hash.length) return false;
 
-    // Compare the complete values without returning on the first mismatch.
+    
     let mismatch = 0;
     for (let i = 0; i < hash.length; i++) {
         mismatch |= hash.charCodeAt(i) ^ candidate.charCodeAt(i);
@@ -447,7 +447,7 @@ export default definePlugin({
         window.addEventListener("blur", onWindowBlur);
         window.addEventListener("focus", onWindowFocus);
 
-        // Restore a previously locked session, or obey lock-on-startup.
+        
         if (settings.store.hash && (settings.store.locked || settings.store.lockOnStartup)) {
             window.setTimeout(lock, 250);
         }
