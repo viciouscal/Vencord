@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { QuestRewardType, QuestTaskType } from "@plugins/questify/utils/types";
+import { QuestRewardType, QuestTaskType } from "../utils/types";
 
 export type QuestButtonDisplayMode = "always" | "unclaimed" | "never";
 export type QuestButtonIndicatorMode = "pill" | "badge" | "both" | "none";
@@ -46,6 +46,7 @@ export const defaultDisableFriendsListPromo = true;
 export const defaultDisableMembersListPromo = true;
 export const defaultResumeInterruptedQuests = false;
 export const defaultAllowChangingDangerousSettings = false; // true -> Risky
+export const defaultAcknowledgedNotices: Record<string, true> = {};
 export const defaultMakeMobileVideoQuestsDesktopCompatible = false; // true -> Risky
 export const defaultCompleteVideoQuestsQuicker = false; // true -> Risky
 export const defaultPreventVideoQuestsPausing = false; // true -> Risky

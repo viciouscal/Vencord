@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { getQuestifySettings, useQuestifySettings } from "@plugins/questify/settings/access";
-import { startAutoFetchingQuests } from "@plugins/questify/settings/fetching";
-import { AudioPlayer, formatSoundName, getDefaultSounds } from "@plugins/questify/utils/audio";
-import { q } from "@plugins/questify/utils/ui";
 import { useEffect, useMemo, useRef, useState } from "@webpack/common";
 import type { JSX, MouseEvent } from "react";
 
+import { getQuestifySettings, useQuestifySettings } from "../settings/access";
+import { startAutoFetchingQuests } from "../settings/fetching";
+import { AudioPlayer, formatSoundName, getDefaultSounds } from "../utils/audio";
+import { q } from "../utils/ui";
 import { ManaSelectFormattedOption, ManaSelectOption, SettingsCard, SettingsDescription, SettingsHeader, SettingsRow, SettingsRowItem, SettingsSelect, SettingsSlider, SettingsSubheader, SettingsSubtleSwitch } from "./shared";
 
 const questFetchIntervalOptions = [

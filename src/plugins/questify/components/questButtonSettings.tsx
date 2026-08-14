@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { getQuestifySettings, useQuestifySettings } from "@plugins/questify/settings/access";
-import { type QuestButtonAction, type QuestButtonDisplayMode, type QuestButtonIncludedTypes, type QuestButtonIndicatorMode } from "@plugins/questify/settings/def";
-import { startAutoFetchingQuests } from "@plugins/questify/settings/fetching";
-import { validateIgnoredQuests } from "@plugins/questify/settings/ignoredQuests";
-import { QuestRewardType, QuestTaskType } from "@plugins/questify/utils/types";
-import { canShowBadge, canShowButton, canShowPill } from "@plugins/questify/utils/ui";
 import type { JSX } from "react";
 
 import { enabledOnStartup } from "..";
+import { getQuestifySettings, useQuestifySettings } from "../settings/access";
+import { type QuestButtonAction, type QuestButtonDisplayMode, type QuestButtonIncludedTypes, type QuestButtonIndicatorMode } from "../settings/def";
+import { startAutoFetchingQuests } from "../settings/fetching";
+import { validateIgnoredQuests } from "../settings/ignoredQuests";
+import { QuestRewardType, QuestTaskType } from "../utils/types";
+import { canShowBadge, canShowButton, canShowPill } from "../utils/ui";
 import { DummyQuestButton } from "./questButton";
 import { type ManaSelectOption, SettingsCard, SettingsColorPicker, SettingsDescription, SettingsHeader, SettingsRow, SettingsRowItem, SettingsSelect, SettingsSubheader } from "./shared";
 

@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { getCurrentUserId, getQuestifySettings } from "@plugins/questify/settings/access";
-import { autoCompleteQuestTaskTypes, isDesktopCompatible } from "@plugins/questify/settings/def";
-import { resetQuestsToResume } from "@plugins/questify/settings/fetching";
-import { getIgnoredQuestIDs } from "@plugins/questify/settings/ignoredQuests";
-import { rerenderQuests } from "@plugins/questify/settings/rerender";
 import type { PluginNative } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { findByCodeLazy, findLazy } from "@webpack";
 import { FluxDispatcher, RestAPI, showToast, Toasts, UserStore } from "@webpack/common";
 
+import { getCurrentUserId, getQuestifySettings } from "../settings/access";
+import { autoCompleteQuestTaskTypes, isDesktopCompatible } from "../settings/def";
+import { resetQuestsToResume } from "../settings/fetching";
+import { getIgnoredQuestIDs } from "../settings/ignoredQuests";
+import { rerenderQuests } from "../settings/rerender";
 import { AuthorizedAppsStore, snakeToCamel } from "./fetching";
 import { normalizeQuestName, type QuestIncludedTypes, questMatchesIncludedTypes } from "./filtering";
 import { QL } from "./logging";
@@ -30,11 +30,13 @@ type QuestEnrollResult =
 type QuestManualEnrollResult =
     | { type: "success"; }
     | { type: "rate_limited"; retryAfter: number | null; }
+    | { type: "cancelled"; }
     | { type: "unknown_error"; error: unknown; };
 
 type QuestEnrollmentResult =
     | { type: "success"; }
     | { type: "rate_limited"; retryAfter: number | null; }
+    | { type: "cancelled"; }
     | { type: "unknown_error"; };
 
 interface QuestEnrollmentMetadata {
@@ -616,6 +618,7 @@ function showQuestEnrollmentFailureToast(quest: Quest, result: Exclude<QuestEnro
 
 export async function enrollInQuestManually(quest: Quest): Promise<QuestManualEnrollResult> {
     quest = refreshQuest(quest);
+    const userId = getCurrentUserId();
 
     if (quest.userStatus?.enrolledAt) {
         return { type: "success" };
@@ -638,6 +641,10 @@ export async function enrollInQuestManually(quest: Quest): Promise<QuestManualEn
             body: { location: QuestTargetedContent.QUEST_HOME_DESKTOP },
         });
 
+        if (getCurrentUserId() !== userId) {
+            return { type: "cancelled" };
+        }
+
         FluxDispatcher.dispatch({
             type: "QUESTS_ENROLL_SUCCESS",
             enrolledQuestUserStatus: snakeToCamel(response.body) as Quest["userStatus"],
@@ -645,6 +652,10 @@ export async function enrollInQuestManually(quest: Quest): Promise<QuestManualEn
 
         return { type: "success" };
     } catch (error) {
+        if (getCurrentUserId() !== userId) {
+            return { type: "cancelled" };
+        }
+
         FluxDispatcher.dispatch({
             type: "QUESTS_ENROLL_FAILURE",
             questId: quest.id,
@@ -675,6 +686,10 @@ async function ensureQuestEnrolledForAutoComplete(
     const result = options.method === "manual"
         ? await enrollInQuestManually(quest)
         : await enrollInQuestNative(quest.id, makeEnrollmentData(options.analytics ?? {}));
+
+    if (result.type === "cancelled") {
+        return { type: "cancelled" };
+    }
 
     if (result.type === "success" || result.type === "previous_in_flight_request") {
         return { type: "success" };
@@ -1372,6 +1387,8 @@ export function stopQuestAutoComplete(questOrId: Quest | string, options: AutoCo
 }
 
 export function stopAllAutoCompletes(options: AutoCompleteStopOptions = {}): void {
+    stopQueueAllAutoCompleteQuests();
+
     const resumeQuestIds = options.preserveResume ? getResumeQuestIds() : undefined;
 
     suppressQueueDrain = true;

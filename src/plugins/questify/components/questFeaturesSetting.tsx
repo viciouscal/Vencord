@@ -4,12 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { getQuestifySettings, useQuestifySettings } from "@plugins/questify/settings/access";
-import { autoCompleteQuestTaskTypes, defaultAllowChangingDangerousSettings, defaultAutoCompleteQuestsSimultaneously, defaultAutoCompleteQuestTypes, defaultCompleteVideoQuestsQuicker, defaultMakeMobileVideoQuestsDesktopCompatible, defaultResumeInterruptedQuests, isDesktopCompatible } from "@plugins/questify/settings/def";
-import { QuestTaskType } from "@plugins/questify/utils/types";
-import { Alerts, q } from "@plugins/questify/utils/ui";
 import type { JSX } from "react";
 
+import { getQuestifySettings, useQuestifySettings } from "../settings/access";
+import { resetDangerousSettings } from "../settings/dangerous";
+import { autoCompleteQuestTaskTypes, defaultAutoCompleteQuestTypes, isDesktopCompatible } from "../settings/def";
+import { QuestTaskType } from "../utils/types";
+import { Alerts, q } from "../utils/ui";
 import { ManaButton, type ManaSelectOption, SettingsCard, SettingsDescription, SettingsHeader, SettingsNotice, SettingsParagraph, SettingsSelect, SettingsSubheader, SettingsSubtleSwitch } from "./shared";
 
 type QuestDisableSettingKey =
@@ -197,17 +198,6 @@ export function QuestFeaturesSetting(): JSX.Element {
         }
     }
 
-    function resetDangerousSettings() {
-        const settings = getQuestifySettings();
-
-        settings.allowChangingDangerousSettings = defaultAllowChangingDangerousSettings;
-        settings.autoCompleteQuestsSimultaneously = defaultAutoCompleteQuestsSimultaneously;
-        settings.completeVideoQuestsQuicker = defaultCompleteVideoQuestsQuicker;
-        settings.makeMobileVideoQuestsDesktopCompatible = defaultMakeMobileVideoQuestsDesktopCompatible;
-        settings.resumeInterruptedQuests = defaultResumeInterruptedQuests;
-        settings.autoCompleteQuestTypes = { ...defaultAutoCompleteQuestTypes };
-    }
-
     function updateDangerousAccess(checked: boolean) {
         function setDangerousAccess() {
             getQuestifySettings().allowChangingDangerousSettings = checked;
@@ -267,11 +257,11 @@ export function QuestFeaturesSetting(): JSX.Element {
             <SettingsSubheader> Modify Features </SettingsSubheader>
             <SettingsNotice className={["notice-card-red", questFeatures.disableQuestsEverything ? "dimmed-settings-item" : undefined, questFeatures.allowChangingDangerousSettings ? undefined : "notice-card-solo", "no-bottom-margin"].filter(c => c !== undefined)}>
                 <SettingsParagraph>
-                    Discord has began issuing warnings to users of scripts or plugins that modify how Quests are completed, which is against their <a href="https://discord.com/safety/platform-manipulation-policy-explainer" target="_blank" rel="noreferrer">Terms of Service</a>.
+                    Discord has implemented a Quest Ban system which will temporarily or permanently limit your access to completing Quests and claiming their rewards if you are found to be completing them through unofficial means. Modifying the completion of Quests is against their <a href="https://discord.com/safety/platform-manipulation-policy-explainer" target="_blank" rel="noreferrer">Terms of Service</a>.
                 </SettingsParagraph>
                 <br />
                 <SettingsParagraph>
-                    The warnings appear limited to threat of loss of access to Quests or their rewards, but Discord may escalate at any time.
+                    The punishment appears limited to loss of access to Quests and their rewards, but Discord may escalate at any time.
                 </SettingsParagraph>
                 <br />
                 <SettingsParagraph>

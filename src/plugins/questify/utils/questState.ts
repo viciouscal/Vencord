@@ -4,9 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { getQuestifySettings, useQuestifySettings } from "@plugins/questify/settings/access";
-import { ignoredQuestIDsKey } from "@plugins/questify/settings/def";
-
+import { getQuestifySettings, useQuestifySettings } from "../settings/access";
+import { ignoredQuestIDsKey } from "../settings/def";
 import { getActiveAutoCompletes, getAutoCompleteQuestTarget, getQuestAutoCompleteEntry } from "./completion";
 import { type QuestIncludedTypes, questMatchesIncludedTypes } from "./filtering";
 import { type Quest, QuestStore, QuestTaskType } from "./types";

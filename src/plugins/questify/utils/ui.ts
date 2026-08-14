@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { QuestButtonDisplayMode, QuestButtonIndicatorMode } from "@plugins/questify/settings/def";
 import { classNameFactory } from "@utils/css";
 import { findByPropsLazy } from "@webpack";
+
+import type { QuestButtonDisplayMode, QuestButtonIndicatorMode } from "../settings/def";
 
 export interface RGB {
     r: number;

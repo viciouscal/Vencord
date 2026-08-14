@@ -5,10 +5,11 @@
  */
 
 import PluginModal from "@components/settings/tabs/plugins/PluginModal";
-import { promptToRestartIfDirty } from "@plugins/questify/settings/restartTracking";
-import { setSettingsModalOpen } from "@plugins/questify/state";
 import { openModal } from "@utils/modal";
 import type { Plugin } from "@utils/types";
+
+import { promptToRestartIfDirty } from "../settings/restartTracking";
+import { setSettingsModalOpen } from "../state";
 
 export function openQuestifySettingsModal(plugin: Plugin): void {
     setSettingsModalOpen(true);

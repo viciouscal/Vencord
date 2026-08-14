@@ -5,14 +5,14 @@
  */
 
 import { showNotification } from "@api/Notifications";
-import { getQuestifySettings } from "@plugins/questify/settings/access";
-import { questIsIgnored } from "@plugins/questify/settings/ignoredQuests";
 import { sleep } from "@utils/misc";
 import type { PluginNative } from "@utils/types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { RestAPI } from "@webpack/common";
 import { NavigationRouter } from "@webpack/common/utils";
 
+import { getQuestifySettings } from "../settings/access";
+import { questIsIgnored } from "../settings/ignoredQuests";
 import { AudioPlayer } from "./audio";
 import { getNewQuests, normalizeQuestName, type QuestIncludedTypes, questMatchesIncludedTypes } from "./filtering";
 import { QL } from "./logging";

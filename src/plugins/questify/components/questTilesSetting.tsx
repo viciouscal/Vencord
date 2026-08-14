@@ -4,16 +4,17 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { getQuestifySettings, useQuestifySettings } from "@plugins/questify/settings/access";
-import { defaultQuestTileClaimedColorSetting, defaultQuestTileExpiredColorSetting, defaultQuestTileIgnoredColorSetting, defaultQuestTileUnclaimedColorSetting, type QuestTileColorSetting, type QuestTileGradient } from "@plugins/questify/settings/def";
-import { rerenderQuests } from "@plugins/questify/settings/rerender";
-import { getQuestTileClasses, getQuestTileStyle } from "@plugins/questify/utils/questTiles";
-import { type Quest, QuestStore } from "@plugins/questify/utils/types";
-import { q } from "@plugins/questify/utils/ui";
 import { findComponentByCodeLazy } from "@webpack";
 import { useEffect, useMemo, useRef, useState, useStateFromStores } from "@webpack/common";
 import type { JSX, SyntheticEvent } from "react";
 
+import { enabledOnStartup } from "..";
+import { getQuestifySettings, useQuestifySettings } from "../settings/access";
+import { defaultQuestTileClaimedColorSetting, defaultQuestTileExpiredColorSetting, defaultQuestTileIgnoredColorSetting, defaultQuestTileUnclaimedColorSetting, type QuestTileColorSetting, type QuestTileGradient } from "../settings/def";
+import { rerenderQuests } from "../settings/rerender";
+import { getQuestTileClasses, getQuestTileStyle } from "../utils/questTiles";
+import { type Quest, QuestStore } from "../utils/types";
+import { q } from "../utils/ui";
 import { ManaButton, type ManaSelectOption, SettingsCard, SettingsColorPicker, SettingsDescription, SettingsHeader, SettingsRow, SettingsRowItem, SettingsSelect, SettingsSubheader } from "./shared";
 
 const QuestTile = findComponentByCodeLazy(".rowIndex,trackGuildAndChannelMetadata") as React.ComponentType<{
@@ -320,11 +321,11 @@ export function QuestTilesSetting(): JSX.Element {
                     );
                 })}
             </SettingsRow>
-            <DummyQuestPreview
+            {enabledOnStartup && <DummyQuestPreview
                 disabled={disabled}
                 dummyColor={previewColor}
                 dummyGradient={questTiles.questTileGradient as QuestTileGradient}
-            />
+            />}
         </SettingsCard>
     );
 }
