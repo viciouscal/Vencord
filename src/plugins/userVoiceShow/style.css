@@ -14,11 +14,9 @@
 }
 
 .vc-uvs-profile-speaker {
-    width: var(--custom-nickname-icon-size);
     height: var(--custom-nickname-icon-size);
-    display: inline-flex !important;
-    order: 999 !important;
-    margin-left: 2px !important;
+    margin-right: 4px;
+    transform: translateY(1.3px);
 }
 
 .vc-uvs-tooltip-container {
