@@ -196,6 +196,21 @@ export default definePlugin({
                 match: /(\i)===\i\.\i\.GIF\.title/,
                 replace: '$&||$1==="Tenor"'
             }
+        },
+        // Add back tenor command
+        {
+            find: 'commandId:"-16"',
+            replacement: {
+                match: /commandId:"-16"}/,
+                replace: '$&,TENOR:{type:"GIF",command:"tenor",title:"Tenor",commandId:"-9"}'
+            }
+        },
+        {
+            find: "#{intl::COMMAND_GIPHY_DESCRIPTION}",
+            replacement: {
+                match: /(\i)===\i\.\i\.GIF\.title/,
+                replace: '$&||$1==="Tenor"'
+            }
         }
     ],
 

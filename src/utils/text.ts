@@ -6,6 +6,8 @@
 
 import { isTruthy } from "./guards";
 
+import { isTruthy } from "./guards";
+
 // Utils for readable text transformations eg: `toTitle(fromKebab())`
 
 // Case style to words

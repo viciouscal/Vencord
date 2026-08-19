@@ -146,6 +146,18 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
                     leadingAccessory={{ type: "icon", icon: ImageIcon }}
                 />
             )}
+            {avatarDecoration && (
+                <Menu.MenuItem
+                    id="view-avatar-decoration"
+                    label="View Avatar Decoration"
+                    action={() => openAvatar(IconUtils.getAvatarDecorationURL({
+                        avatarDecoration,
+                        size: 1024,
+                        canAnimate: true
+                    })!)}
+                    icon={ImageIcon}
+                />
+            )}
         </Menu.MenuGroup>
     ));
 };
