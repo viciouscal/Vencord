@@ -1,0 +1,166 @@
+#vc-passcode-lock {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    color: white;
+    font-family: var(--font-primary);
+}
+
+.vc-pcl-screen {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    overflow: auto;
+    background:
+        radial-gradient(circle at 50% 25%, rgb(88 101 242 / 22%), transparent 34rem),
+        rgb(8 9 12 / 94%);
+    backdrop-filter: blur(32px);
+    animation: vc-pcl-fade-in 160ms ease-out;
+}
+
+.vc-pcl-card {
+    display: flex;
+    width: min(360px, calc(100vw - 40px));
+    min-height: 560px;
+    box-sizing: border-box;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    border: 1px solid rgb(255 255 255 / 10%);
+    border-radius: 28px;
+    background: rgb(22 24 29 / 78%);
+    box-shadow: 0 30px 90px rgb(0 0 0 / 55%);
+}
+
+.vc-pcl-icon {
+    width: 58px;
+    height: 58px;
+    margin-bottom: 18px;
+    fill: var(--brand-500);
+    filter: drop-shadow(0 8px 20px rgb(88 101 242 / 35%));
+}
+
+.vc-pcl-card h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.vc-pcl-card > p {
+    margin: 8px 0 22px;
+    color: var(--text-muted);
+}
+
+.vc-pcl-hidden-input {
+    position: fixed;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.vc-pcl-dots {
+    display: flex;
+    min-height: 12px;
+    max-width: 290px;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+.vc-pcl-dots span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 0 12px rgb(255 255 255 / 35%);
+    animation: vc-pcl-dot 120ms ease-out;
+}
+
+.vc-pcl-status {
+    height: 36px;
+    padding-top: 10px;
+    color: var(--text-danger);
+    font-size: 13px;
+}
+
+.vc-pcl-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 64px);
+    gap: 14px 20px;
+}
+
+.vc-pcl-keypad button {
+    width: 64px;
+    height: 64px;
+    padding: 0;
+    border: 1px solid rgb(255 255 255 / 10%);
+    border-radius: 50%;
+    color: white;
+    background: rgb(255 255 255 / 6%);
+    font: 500 25px/1 var(--font-primary);
+    cursor: pointer;
+    transition: background 100ms ease, border-color 100ms ease, transform 100ms ease;
+}
+
+.vc-pcl-keypad button:hover {
+    border-color: rgb(255 255 255 / 20%);
+    background: rgb(255 255 255 / 12%);
+}
+
+.vc-pcl-keypad button:active {
+    transform: scale(0.94);
+}
+
+.vc-pcl-unlock {
+    width: 232px;
+    margin-top: 22px;
+}
+
+.vc-pcl-settings-inputs {
+    display: grid;
+    max-width: 520px;
+    gap: 10px;
+    margin: 14px 0;
+}
+
+.vc-pcl-settings-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+@keyframes vc-pcl-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes vc-pcl-dot {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (height <= 650px) {
+    .vc-pcl-card {
+        min-height: 0;
+        margin: 20px;
+    }
+
+    .vc-pcl-keypad {
+        gap: 8px 16px;
+    }
+
+    .vc-pcl-keypad button {
+        width: 52px;
+        height: 52px;
+    }
+}

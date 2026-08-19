@@ -170,6 +170,11 @@ export interface PluginDef {
      */
     reporterTestable?: number;
     /**
+     * Legacy plugin settings definition.
+     * @deprecated Use `settings` instead
+     */
+    options?: Record<string, PluginSettingDef>;
+    /**
      * Optionally provide settings that the user can configure in the Plugins tab of settings.
      */
     settings?: DefinedSettings;
@@ -395,6 +400,7 @@ type SettingsStore<D extends SettingsDefinition> = {
 /** An instance of defined plugin settings */
 export interface DefinedSettings<
     Def extends SettingsDefinition = SettingsDefinition,
+    Checks extends SettingsChecks<Def> = {},
     PrivateSettings extends object = {}
 > {
     /** Definitions of each setting */
@@ -403,6 +409,8 @@ export interface DefinedSettings<
     store: SettingsStore<Def> & PrivateSettings;
     /** Pure Read-only settings object */
     plain: SettingsStore<Def> & PrivateSettings;
+    /** Setting methods with return values that may depend on other settings */
+    checks: Checks;
     /**
      * React hook for getting the settings for this plugin
      * @param filter optional filter to avoid rerenders for irrelevant settings
@@ -414,7 +422,7 @@ export interface DefinedSettings<
      */
     pluginName: string;
     /** Extend this Settings object type with more properties, useful for non-user-facing settings */
-    withPrivateSettings<T extends object>(): DefinedSettings<Def, T>;
+    withPrivateSettings<T extends object>(): DefinedSettings<Def, Checks, T>;
 }
 
 export type PartialExcept<T, R extends keyof T> = Partial<T> & Required<Pick<T, R>>;

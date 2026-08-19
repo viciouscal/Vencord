@@ -56,6 +56,7 @@ export interface Settings {
     frameless: boolean;
     transparent: boolean;
     winCtrlQ: boolean;
+    windowsMaterial: "none" | "auto" | "mica" | "acrylic" | "tabbed";
     macosVibrancyStyle:
     | "content"
     | "fullscreen-ui"
@@ -126,6 +127,7 @@ const DefaultSettings: Settings = {
     frameless: false,
     transparent: false,
     winCtrlQ: false,
+    windowsMaterial: "none",
     macosVibrancyStyle: undefined,
     disableMinSize: false,
     winNativeTitleBar: false,

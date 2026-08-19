@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { User } from "discord-types/general";
+import { User } from "@vencord/discord-types";
 import type { ComponentType } from "react";
 
 export interface UserSummaryItemProps {

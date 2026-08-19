@@ -176,12 +176,12 @@ const settings = definePluginSettings({
         ),
     },
     caretOpacity: {
-        type: OptionType.HIDDEN,
+        type: OptionType.CUSTOM,
         description: "Caret opacity (0.25–1)",
         default: 1,
     },
     caretGlow: {
-        type: OptionType.HIDDEN,
+        type: OptionType.CUSTOM,
         description: "Soft glow radius (px, 0 = off)",
         default: 0,
     },
@@ -396,7 +396,7 @@ function SmoothTypeQuickPanel({ close }: { close(): void; }) {
             <ColorPicker
                 color={settings.store.caretColor}
                 onChange={c => {
-                    settings.store.caretColor = c;
+                    if (c != null) settings.store.caretColor = c;
                     applyCSS();
                 }}
                 showEyeDropper={true}

@@ -16,10 +16,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ScreenshareProfile, ScreenshareStore } from "@plugins/betterScreenshare.desktop/stores";
 import { ProfilableStore, replaceObjectValuesIfExist, types, utils } from "@plugins/philsPluginLibrary";
 import { Logger } from "@utils/Logger";
 import { lodash } from "@webpack/common";
+
+interface ScreenshareProfile {
+    width?: number;
+    height?: number;
+    framerate?: number;
+    videoCodec?: string;
+    keyframeInterval?: number;
+    videoBitrate?: number;
+    videoBitrateEnabled?: boolean;
+    resolutionEnabled?: boolean;
+    framerateEnabled?: boolean;
+    videoCodecEnabled?: boolean;
+    keyframeIntervalEnabled?: boolean;
+    hdrEnabled?: boolean;
+}
+
+interface ScreenshareStore {
+    audioSource?: string;
+    audioSourceEnabled?: boolean;
+}
 
 
 export function getDefaultVideoTransportationOptions(connection: types.Connection) {

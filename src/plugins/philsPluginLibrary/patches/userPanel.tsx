@@ -28,7 +28,7 @@ export interface PanelButton {
     tooltipText?: string,
     icon?: IconComponent;
     onClick?: () => void;
-    
+
     onContextMenu?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
