@@ -17,7 +17,7 @@ import { q } from "../utils/ui";
 
 export function SettingsCard({ children }: { children: ReactNode; }): JSX.Element {
     return (
-        <Card variant="primary" className={q("setting")}>
+        <Card className={q("setting")}>
             {children}
         </Card>
     );
@@ -182,6 +182,7 @@ export function SettingsSelect({
 }
 
 type ColorPickerWithOnCloseProps = ComponentProps<typeof ColorPicker> & {
+    disabled?: boolean;
     onClose?: () => void;
 };
 

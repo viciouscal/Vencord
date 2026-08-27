@@ -21,7 +21,7 @@ const restartListenerCleanups: (() => void)[] = [];
 
 function getRestartSettingPaths(settings: RestartTrackingSettings): string[] {
     return Object.entries(settings.def)
-        .filter(([, definition]) => definition.restartNeeded)
+        .filter(([, definition]) => "restartNeeded" in definition && definition.restartNeeded)
         .map(([key]) => `plugins.${settings.pluginName}.${key}`);
 }
 
