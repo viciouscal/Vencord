@@ -221,7 +221,7 @@ export default definePlugin({
         },
         {
             // Hides Quests tab in the DMs tab list.
-            find: ".QUEST_HOME):",
+            find: '.QUEST_HOME)},"quests")',
             predicate: () => getQuestifySettings().disableQuestsEverything,
             replacement: [
                 {
@@ -408,7 +408,7 @@ export default definePlugin({
             }
         },
         {
-            find: "QUEST_HOME_TILE_HEADER_WATCH_VIDEO})},",
+            find: "questNameHeadingId",
             group: true,
             predicate: () => !getQuestifySettings().disableQuestsEverything,
             replacement: [
@@ -468,7 +468,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "QUEST_HOME_TILE_HEADER_WATCH_VIDEO})},",
+            find: "questNameHeadingId",
             group: true,
             predicate: () => !getQuestifySettings().disableQuestsEverything,
             replacement: [
