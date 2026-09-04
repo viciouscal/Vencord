@@ -1,8 +1,8 @@
-
-
-
-
-
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { ChannelRTCStore, ChannelStore, GuildStore, MediaEngineStore, SelectedChannelStore, UserStore, VoiceStateStore } from "@webpack/common";
 
@@ -144,7 +144,7 @@ function isLocallyMuted(userId: string) {
 
     const store = MediaEngineStore as any;
     let engine: any = null;
-    try { engine = store?.getMediaEngine?.(); } catch {   }
+    try { engine = store?.getMediaEngine?.(); } catch { }
     const connections = Array.from(engine?.connections ?? []) as any[];
     const checks: Array<() => unknown> = [
         () => store?.isLocalMute?.("default", userId),
@@ -168,7 +168,7 @@ function isLocallyMuted(userId: string) {
                 localMuteCache.set(userId, { value: true, expiresAt: now + 200 });
                 return true;
             }
-        } catch {   }
+        } catch { }
     }
     localMuteCache.set(userId, { value: false, expiresAt: now + 200 });
     return false;
@@ -301,7 +301,7 @@ class VoiceActivityTracker {
             const user = UserStore.getUser(userId);
             let avatarUrl: string | null = tracked?.avatarUrl ?? null;
             if (!avatarUrl && user) {
-                try { avatarUrl = user.getAvatarURL?.(undefined, 128, true) ?? null; } catch {   }
+                try { avatarUrl = user.getAvatarURL?.(undefined, 128, true) ?? null; } catch { }
             }
             return {
                 userId,

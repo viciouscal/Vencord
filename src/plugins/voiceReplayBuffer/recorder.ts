@@ -1,4 +1,8 @@
-
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { MediaEngineStore } from "@webpack/common";
 
@@ -465,7 +469,7 @@ class RollingVoiceRecorder {
                 outputChannelCount: [2]
             });
             masterNode.port.onmessage = event => {
-                const data = event.data;
+                const { data } = event;
                 if (data?.left instanceof Float32Array && data?.right instanceof Float32Array) {
                     this.writeMasterChunk(data.left, data.right);
                 }
@@ -545,17 +549,17 @@ class RollingVoiceRecorder {
         if (this.captureNode) {
             if (this.captureNode instanceof ScriptProcessorNode) this.captureNode.onaudioprocess = null;
             if (this.captureNode instanceof AudioWorkletNode) this.captureNode.port.onmessage = null;
-            try { this.captureNode.disconnect(); } catch {   }
+            try { this.captureNode.disconnect(); } catch { }
         }
         if (this.stemCaptureNode) {
             this.stemCaptureNode.port.onmessage = null;
-            try { this.stemCaptureNode.disconnect(); } catch {   }
+            try { this.stemCaptureNode.disconnect(); } catch { }
         }
-        try { this.mixer?.disconnect(); } catch {   }
-        try { this.masterLimiter?.disconnect(); } catch {   }
-        try { this.silentOutput?.disconnect(); } catch {   }
+        try { this.mixer?.disconnect(); } catch { }
+        try { this.masterLimiter?.disconnect(); } catch { }
+        try { this.silentOutput?.disconnect(); } catch { }
 
-        const context = this.context;
+        const { context } = this;
         this.context = null;
         this.captureNode = null;
         this.stemCaptureNode = null;
@@ -572,7 +576,7 @@ class RollingVoiceRecorder {
         this.waveBands = [0, 0, 0, 0, 0, 0, 0];
 
         if (context && context.state !== "closed") {
-            try { await context.close(); } catch {   }
+            try { await context.close(); } catch { }
         }
 
         if (clearBuffer) {
@@ -786,7 +790,7 @@ class RollingVoiceRecorder {
 
 
 
-            const mappedUserId = source.mappedUserId;
+            const { mappedUserId } = source;
             const soleSpeakingUser = this.speakingRemoteUserIds.size === 1
                 ? Array.from(this.speakingRemoteUserIds)[0]
                 : null;
@@ -933,7 +937,7 @@ class RollingVoiceRecorder {
         const source = this.stemSources.get(this.nativeRemoteCaptureKey);
         if (source) source.active = false;
         if (!this.nativeRemoteBridge) return;
-        try { await this.nativeRemoteBridge.stop(); } catch {   }
+        try { await this.nativeRemoteBridge.stop(); } catch { }
     }
 
     private startNativeRemotePoll() {
@@ -1202,7 +1206,7 @@ class RollingVoiceRecorder {
             if (source.sourceType === "remote" && !source.approvedVoiceSource) continue;
             for (const chunk of source.chunks) {
                 if (chunk.startSample + chunk.samples.length <= clipStartSample || chunk.startSample >= clipEndSample) continue;
-                const userId = chunk.userId;
+                const { userId } = chunk;
                 if (userId) {
                     let target = grouped.get(userId);
                     if (!target) {
@@ -1456,7 +1460,7 @@ class RollingVoiceRecorder {
                         }
                     }
                 }
-            } catch {   }
+            } catch { }
             return null;
         };
 
@@ -1469,7 +1473,7 @@ class RollingVoiceRecorder {
                 const userId = resolveSsrc(Number(source.source));
                 if (userId) return userId;
             }
-        } catch {   }
+        } catch { }
         return null;
     }
 
@@ -1490,7 +1494,7 @@ class RollingVoiceRecorder {
             this.slotCaptureKeys[MICROPHONE_SLOT] = null;
             this.microphoneCaptureKey = null;
         }
-        try { this.microphoneSource?.disconnect(); } catch {   }
+        try { this.microphoneSource?.disconnect(); } catch { }
         this.microphoneSource = null;
         this.microphoneStream?.getTracks().forEach(track => track.stop());
         this.microphoneStream = null;
@@ -1595,7 +1599,7 @@ class RollingVoiceRecorder {
                 this.attachRemoteStream(stream);
                 return;
             }
-        } catch {   }
+        } catch { }
 
         try {
             const track = candidate.mediaStreamTrack;
@@ -1603,12 +1607,12 @@ class RollingVoiceRecorder {
                 this.attachRemoteTrack(track, null, { captureKind: "direct", masterIncluded: true });
                 return;
             }
-        } catch {   }
+        } catch { }
 
         try {
             const element = candidate.mediaElement;
             if (element instanceof HTMLMediaElement) this.attachMediaElement(element);
-        } catch {   }
+        } catch { }
     }
 
     private rememberEngineSsrc(userIdValue: unknown, ssrcValue: unknown) {
@@ -1663,17 +1667,17 @@ class RollingVoiceRecorder {
                 wrappedCreateUser
             });
         } catch {
-            try { if (originalNative && target.handleSpeakingNative === wrappedNative) target.handleSpeakingNative = originalNative; } catch {   }
-            try { if (originalFlags && target.handleSpeakingFlags === wrappedFlags) target.handleSpeakingFlags = originalFlags; } catch {   }
-            try { if (originalCreateUser && target.createUser === wrappedCreateUser) target.createUser = originalCreateUser; } catch {   }
+            try { if (originalNative && target.handleSpeakingNative === wrappedNative) target.handleSpeakingNative = originalNative; } catch { }
+            try { if (originalFlags && target.handleSpeakingFlags === wrappedFlags) target.handleSpeakingFlags = originalFlags; } catch { }
+            try { if (originalCreateUser && target.createUser === wrappedCreateUser) target.createUser = originalCreateUser; } catch { }
         }
     }
 
     private restoreMediaEngineSpeakingHooks() {
         for (const [target, hook] of this.mediaEngineSpeakingHooks) {
-            try { if (hook.originalNative && target.handleSpeakingNative === hook.wrappedNative) target.handleSpeakingNative = hook.originalNative; } catch {   }
-            try { if (hook.originalFlags && target.handleSpeakingFlags === hook.wrappedFlags) target.handleSpeakingFlags = hook.originalFlags; } catch {   }
-            try { if (hook.originalCreateUser && target.createUser === hook.wrappedCreateUser) target.createUser = hook.originalCreateUser; } catch {   }
+            try { if (hook.originalNative && target.handleSpeakingNative === hook.wrappedNative) target.handleSpeakingNative = hook.originalNative; } catch { }
+            try { if (hook.originalFlags && target.handleSpeakingFlags === hook.wrappedFlags) target.handleSpeakingFlags = hook.originalFlags; } catch { }
+            try { if (hook.originalCreateUser && target.createUser === hook.wrappedCreateUser) target.createUser = hook.originalCreateUser; } catch { }
         }
         this.mediaEngineSpeakingHooks.clear();
         this.engineSsrcUserMap.clear();
@@ -1698,7 +1702,7 @@ class RollingVoiceRecorder {
                 if (connection?.context && connection.context !== "default") continue;
                 this.installMediaEngineSpeakingHooks(connection);
             }
-        } catch {   }
+        } catch { }
 
         const seen = new WeakSet<object>();
         const remoteIds = this.presentRemoteUserIds;
@@ -1710,7 +1714,7 @@ class RollingVoiceRecorder {
                 try {
                     const id = value?.[key];
                     if (id != null && remoteIds.has(String(id))) return String(id);
-                } catch {   }
+                } catch { }
             }
             return fallback;
         };
@@ -1741,7 +1745,7 @@ class RollingVoiceRecorder {
                 }
                 if (typeof RTCRtpReceiver !== "undefined" && value instanceof RTCRtpReceiver) {
                     let track: MediaStreamTrack | null = null;
-                    try { track = value.track; } catch {   }
+                    try { track = value.track; } catch { }
                     if (track?.kind === "audio") this.attachRemoteTrack(track, value, {
                         captureKind: "engine-scan",
                         masterIncluded: true,
@@ -1753,7 +1757,7 @@ class RollingVoiceRecorder {
                     this.observePeerConnection(value);
                     return;
                 }
-            } catch {   }
+            } catch { }
 
             if (typeof value !== "object") return;
             if (seen.has(value)) return;
@@ -1776,7 +1780,7 @@ class RollingVoiceRecorder {
 
                     try {
                         if (/connection/i.test(propertyHint) && child?.context && child.context !== "default") continue;
-                    } catch {   }
+                    } catch { }
                     walk(child, depth + 1, effectiveHint, propertyHint);
                 }
                 return;
@@ -1810,12 +1814,12 @@ class RollingVoiceRecorder {
                 try {
                     const options = connection?.getUserOptions?.();
                     if (options) walk(options, 1, null, "remoteUserOptions");
-                } catch {   }
+                } catch { }
 
 
                 walk(connection, 1, null, "remoteConnection");
             }
-        } catch {   }
+        } catch { }
 
         walk(engine, 0, null, "mediaEngine");
     }
@@ -1874,7 +1878,7 @@ class RollingVoiceRecorder {
                             || candidate.mediaStream instanceof MediaStream
                             || candidate.mediaStreamTrack instanceof MediaStreamTrack
                             || candidate.mediaElement instanceof HTMLMediaElement;
-                    } catch {   }
+                    } catch { }
                     if (!recorder.bypassAudioDiscovery && discoverableSource) {
                         queueMicrotask(() => recorder.inspectAudioNodeSource(this));
                     }
@@ -1920,7 +1924,7 @@ class RollingVoiceRecorder {
 
     private restoreLocalCaptureHook() {
         if (this.mediaDevicesTarget && this.originalGetUserMedia && this.mediaDevicesTarget.getUserMedia === this.wrappedGetUserMedia) {
-            try { this.mediaDevicesTarget.getUserMedia = this.originalGetUserMedia; } catch {   }
+            try { this.mediaDevicesTarget.getUserMedia = this.originalGetUserMedia; } catch { }
         }
         this.mediaDevicesTarget = null;
         this.originalGetUserMedia = null;
@@ -1998,12 +2002,12 @@ class RollingVoiceRecorder {
         if (element.controls || element.ended) return;
 
         let duration = Number.NaN;
-        try { duration = Number(element.duration); } catch {   }
+        try { duration = Number(element.duration); } catch { }
         const liveLike = !Number.isFinite(duration) || duration === Infinity || (duration <= 0 && !element.paused);
         if (!liveLike) return;
 
         let src = "";
-        try { src = element.currentSrc || element.getAttribute("src") || ""; } catch {   }
+        try { src = element.currentSrc || element.getAttribute("src") || ""; } catch { }
 
         if (/\.(?:mp3|wav|flac|ogg|oga|m4a|aac|mp4|m4v|webm)(?:[?#]|$)/i.test(src)) return;
 
@@ -2034,7 +2038,7 @@ class RollingVoiceRecorder {
                 }
             }
             for (const track of captured.getTracks()) {
-                try { track.stop(); } catch {   }
+                try { track.stop(); } catch { }
             }
         };
         this.elementFallbacks.set(element, { stream: captured, trackIds, cleanup });
@@ -2117,7 +2121,7 @@ class RollingVoiceRecorder {
 
             const cleanup = () => {
                 track.removeEventListener("ended", endedHandler);
-                try { source?.disconnect(); } catch {   }
+                try { source?.disconnect(); } catch { }
                 if (slot != null && this.slotCaptureKeys[slot] === captureKey) this.slotCaptureKeys[slot] = null;
                 if (captureKey) {
                     const stem = this.stemSources.get(captureKey);
@@ -2174,7 +2178,7 @@ class RollingVoiceRecorder {
 
             this.emitStatus(true);
         } catch (error) {
-            try { source?.disconnect(); } catch {   }
+            try { source?.disconnect(); } catch { }
             this.remoteTracks.delete(track.id);
             this.lastError = `Could not attach an incoming Discord audio track: ${errorMessage(error)}`;
             this.emitStatus(true);
@@ -2202,14 +2206,14 @@ class RollingVoiceRecorder {
         }
         for (const receiver of receivers ?? []) {
             let track: MediaStreamTrack | null = null;
-            try { track = receiver.track; } catch {   }
+            try { track = receiver.track; } catch { }
             if (track?.kind === "audio") this.attachRemoteTrack(track, receiver);
         }
     }
 
     private installPeerConnectionHook() {
         if (typeof RTCPeerConnection === "undefined") return;
-        const prototype = RTCPeerConnection.prototype;
+        const { prototype } = RTCPeerConnection;
         try {
             if (!this.originalGetReceivers && typeof prototype.getReceivers === "function") {
                 this.originalGetReceivers = prototype.getReceivers;
@@ -2247,7 +2251,7 @@ class RollingVoiceRecorder {
 
     private restorePeerConnectionHook() {
         if (typeof RTCPeerConnection !== "undefined") {
-            const prototype = RTCPeerConnection.prototype;
+            const { prototype } = RTCPeerConnection;
             if (this.originalSetRemoteDescription) prototype.setRemoteDescription = this.originalSetRemoteDescription;
             if (this.originalSetLocalDescription) prototype.setLocalDescription = this.originalSetLocalDescription;
             if (this.originalGetReceivers) prototype.getReceivers = this.originalGetReceivers;
@@ -2256,7 +2260,7 @@ class RollingVoiceRecorder {
         this.originalSetLocalDescription = null;
         this.originalGetReceivers = null;
         for (const [pc, handler] of this.peerTrackHandlers) {
-            try { pc.removeEventListener("track", handler); } catch {   }
+            try { pc.removeEventListener("track", handler); } catch { }
         }
         this.peerTrackHandlers.clear();
         this.observedPeerConnections.clear();
@@ -2265,7 +2269,7 @@ class RollingVoiceRecorder {
     private installReceiverTrackHook() {
         if (this.originalReceiverTrackDescriptor || typeof RTCRtpReceiver === "undefined") return;
         try {
-            const prototype = RTCRtpReceiver.prototype;
+            const { prototype } = RTCRtpReceiver;
             const descriptor = Object.getOwnPropertyDescriptor(prototype, "track");
             if (!descriptor?.get || descriptor.configurable === false) return;
             this.originalReceiverTrackDescriptor = descriptor;
@@ -2291,7 +2295,7 @@ class RollingVoiceRecorder {
 
     private installSrcObjectHook() {
         if (this.originalSrcObjectDescriptor) return;
-        const prototype = HTMLMediaElement.prototype;
+        const { prototype } = HTMLMediaElement;
         const descriptor = Object.getOwnPropertyDescriptor(prototype, "srcObject");
         if (!descriptor?.get || !descriptor?.set || descriptor.configurable === false) {
             this.lastError = "Could not hook media srcObject; WebRTC receiver capture remains enabled.";
@@ -2352,7 +2356,7 @@ class RollingVoiceRecorder {
             if (pc.connectionState === "closed") {
                 const handler = this.peerTrackHandlers.get(pc);
                 if (handler) {
-                    try { pc.removeEventListener("track", handler); } catch {   }
+                    try { pc.removeEventListener("track", handler); } catch { }
                     this.peerTrackHandlers.delete(pc);
                 }
                 this.observedPeerConnections.delete(pc);

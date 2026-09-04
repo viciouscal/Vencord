@@ -1,8 +1,14 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { definePluginSettings } from "@api/Settings";
-import { findModuleId, wreq } from "@webpack";
-import { copyWithToast, openUserProfile } from "@utils/discord";
 import { Devs } from "@utils/constants";
+import { copyWithToast, openUserProfile } from "@utils/discord";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
+import { findModuleId, wreq } from "@webpack";
 import {
     createRoot,
     MediaEngineStore,
@@ -21,7 +27,7 @@ import type { ReactNode } from "react";
 
 import { ActivitySnapshot, voiceActivityTracker } from "./activity";
 import { encodePcm16FlacAsync, encodePcm16Wav } from "./codec";
-import { RecordingFormat, RecorderStatus, voiceRecorder } from "./recorder";
+import { RecorderStatus, RecordingFormat, voiceRecorder } from "./recorder";
 import managedStyle from "./style.css?managed";
 
 const Native = VencordNative.pluginHelpers.VoiceReplayBuffer as PluginNative<typeof import("./native")>;
@@ -615,14 +621,14 @@ async function saveLatestClip(requestedSeconds: number) {
             try {
                 const bytes = new Uint8Array(clip.residualStem.buffer, clip.residualStem.byteOffset, clip.residualStem.byteLength);
                 hasResidualStem = Boolean(await Native.saveRecordingStem(folder, audioName, RESIDUAL_STEM_ID, bytes));
-            } catch {   }
+            } catch { }
         }
         let hasRoomEventStem = false;
         if (roomCueStem) {
             try {
                 const bytes = new Uint8Array(roomCueStem.buffer, roomCueStem.byteOffset, roomCueStem.byteLength);
                 hasRoomEventStem = Boolean(await Native.saveRecordingStem(folder, audioName, ROOM_EVENTS_STEM_ID, bytes));
-            } catch {   }
+            } catch { }
         }
 
         const isolatedSet = new Set(isolatedTrackUserIds);
@@ -898,7 +904,7 @@ function useMorphProgress(active: boolean) {
             const dt = Math.min(0.032, Math.max(0.001, (now - last) / 1000));
             last = now;
             const target = targetRef.current;
-            const current = progressRef.current;
+            const { current } = progressRef;
 
 
             const response = target > current ? 13.5 : 11.5;
@@ -1092,7 +1098,7 @@ async function loadExportAvatarAssets(metadata: RecordingMetadata | null): Promi
                 image.onerror = () => reject(new Error("Avatar load failed"));
             });
             images.set(participant.userId, image);
-        } catch {   }
+        } catch { }
     }));
     return { images, objectUrls };
 }
@@ -1163,7 +1169,7 @@ function drawReplayVideoFrame(
     width: number,
     height: number
 ) {
-    const metadata = recording.metadata;
+    const { metadata } = recording;
     const event = roomEventAt(metadata, time);
     const speaking = activeSpeakerIds(metadata, time);
     const participantDirectory = new Map((metadata?.participants ?? []).map(participant => [participant.userId, participant]));
@@ -1181,7 +1187,7 @@ function drawReplayVideoFrame(
     context.fillStyle = background;
     context.fillRect(0, 0, width, height);
     context.imageSmoothingEnabled = true;
-    try { context.imageSmoothingQuality = "high"; } catch {   }
+    try { context.imageSmoothingQuality = "high"; } catch { }
 
 
 
@@ -1318,7 +1324,7 @@ function drawReplayVideoFrame(
             context.fillText(tr("No members in the recorded room at this moment", "لا يوجد أعضاء في الروم في هذه اللحظة"), width / 2, memberStartY + 41);
         }
 
-        let footerY = memberStartY + Math.max(82, visibleStates.length * rowHeight + overflowHeight);
+        const footerY = memberStartY + Math.max(82, visibleStates.length * rowHeight + overflowHeight);
         if (states.length > maxRows) {
             context.textAlign = "left";
             context.fillStyle = mutedText;
@@ -1467,7 +1473,7 @@ async function exportRecordingVideo(recording: SavedRecording, onProgress: (prog
                 });
                 chosen = candidate;
                 break;
-            } catch {   }
+            } catch { }
         }
         if (!recorder) throw new Error("No supported high-quality video encoder was found.");
 
@@ -1533,8 +1539,8 @@ async function exportRecordingVideo(recording: SavedRecording, onProgress: (prog
         return outputPath as string;
     } finally {
         cancelAnimationFrame(frame);
-        try { if (audioSource) audioSource.stop(); } catch {   }
-        try { if (recorder && recorder.state !== "inactive") recorder.stop(); } catch {   }
+        try { if (audioSource) audioSource.stop(); } catch { }
+        try { if (recorder && recorder.state !== "inactive") recorder.stop(); } catch { }
         for (const track of videoStream?.getTracks() ?? []) track.stop();
         if (audioContext && audioContext.state !== "closed") await audioContext.close().catch(() => void 0);
         avatars.objectUrls.forEach(url => URL.revokeObjectURL(url));
@@ -1807,9 +1813,9 @@ function RecordingPlayer({ recording, onDeleted, onBack }: { recording: SavedRec
 
     const stopStemSources = React.useCallback(() => {
         for (const source of stemSourcesRef.current.values()) {
-            try { source.onended = null; } catch {   }
-            try { source.stop(); } catch {   }
-            try { source.disconnect(); } catch {   }
+            try { source.onended = null; } catch { }
+            try { source.stop(); } catch { }
+            try { source.disconnect(); } catch { }
         }
         stemSourcesRef.current.clear();
     }, []);
@@ -1818,9 +1824,9 @@ function RecordingPlayer({ recording, onDeleted, onBack }: { recording: SavedRec
         const source = masterBufferSourceRef.current;
         masterBufferSourceRef.current = null;
         if (!source) return;
-        try { source.onended = null; } catch {   }
-        try { source.stop(); } catch {   }
-        try { source.disconnect(); } catch {   }
+        try { source.onended = null; } catch { }
+        try { source.stop(); } catch { }
+        try { source.disconnect(); } catch { }
     }, []);
 
     const masterBufferPosition = React.useCallback(() => {
@@ -1893,7 +1899,7 @@ function RecordingPlayer({ recording, onDeleted, onBack }: { recording: SavedRec
         const context = getPlaybackContext();
         const gain = ensureMasterBufferGain();
         if (!context || !gain) return false;
-        try { if (context.state === "suspended") await context.resume(); } catch {   }
+        try { if (context.state === "suspended") await context.resume(); } catch { }
         const buffer = await ensureMasterBuffer();
         if (!buffer) return false;
 
@@ -1998,7 +2004,7 @@ function RecordingPlayer({ recording, onDeleted, onBack }: { recording: SavedRec
             await Promise.all(missing.map(async userId => {
                 const bytes = await Native.readRecordingStem(settings.store.saveFolder, recording.audioFilename, userId) as Uint8Array | null;
                 if (!bytes || generation !== loadGenerationRef.current) return;
-                try { working.set(userId, pcmBytesToAudioBuffer(context, bytes, sampleRate)); } catch {   }
+                try { working.set(userId, pcmBytesToAudioBuffer(context, bytes, sampleRate)); } catch { }
             }));
             if (generation === loadGenerationRef.current) stemBuffersRef.current = working;
             return working;
@@ -2037,7 +2043,7 @@ function RecordingPlayer({ recording, onDeleted, onBack }: { recording: SavedRec
         stopMasterBufferSource();
         masterBufferModeRef.current = false;
         const startAt = offset >= effectiveDuration - .01 ? 0 : Math.max(0, offset);
-        try { if (context.state === "suspended") await context.resume(); } catch {   }
+        try { if (context.state === "suspended") await context.resume(); } catch { }
         gain.gain.value = volumeBoost;
 
         for (const id of ids) {
@@ -2047,7 +2053,7 @@ function RecordingPlayer({ recording, onDeleted, onBack }: { recording: SavedRec
             source.buffer = buffer;
             source.connect(gain);
             stemSourcesRef.current.set(id, source);
-            try { source.start(0, Math.min(startAt, Math.max(0, buffer.duration - .001))); } catch {   }
+            try { source.start(0, Math.min(startAt, Math.max(0, buffer.duration - .001))); } catch { }
         }
 
         audioRef.current?.pause();
@@ -2091,7 +2097,7 @@ function RecordingPlayer({ recording, onDeleted, onBack }: { recording: SavedRec
                     setPlaying(false);
                     return;
                 }
-                try { audio.currentTime = clamped; } catch {   }
+                try { audio.currentTime = clamped; } catch { }
                 void audio.play().catch(() => {
                     playingRef.current = false;
                     setPlaying(false);
@@ -2265,10 +2271,10 @@ function RecordingPlayer({ recording, onDeleted, onBack }: { recording: SavedRec
         masterBufferRef.current = null;
         masterDecodePromiseRef.current = null;
         masterBufferModeRef.current = false;
-        try { playbackSourceRef.current?.disconnect(); } catch {   }
-        try { playbackGainRef.current?.disconnect(); } catch {   }
-        try { masterBufferGainRef.current?.disconnect(); } catch {   }
-        try { stemGainRef.current?.disconnect(); } catch {   }
+        try { playbackSourceRef.current?.disconnect(); } catch { }
+        try { playbackGainRef.current?.disconnect(); } catch { }
+        try { masterBufferGainRef.current?.disconnect(); } catch { }
+        try { stemGainRef.current?.disconnect(); } catch { }
         const context = playbackContextRef.current;
         playbackSourceRef.current = null;
         playbackGainRef.current = null;
@@ -2343,7 +2349,7 @@ function RecordingPlayer({ recording, onDeleted, onBack }: { recording: SavedRec
         if (generation !== seekGenerationRef.current) return;
         const context = playbackContextRef.current;
         if (context?.state === "suspended") {
-            try { await context.resume(); } catch {   }
+            try { await context.resume(); } catch { }
         }
         if (resumeAfterSeek && audioUrl) {
             try {
@@ -2732,11 +2738,11 @@ function RecordingPlayer({ recording, onDeleted, onBack }: { recording: SavedRec
                     value={Math.min(currentTime, Math.max(.01, effectiveDuration))}
                     disabled={(!audioUrl && !stemMode) || loading || stemPreparing || masterPreparing}
                     onPointerDown={event => {
-                        try { event.currentTarget.setPointerCapture(event.pointerId); } catch {   }
+                        try { event.currentTarget.setPointerCapture(event.pointerId); } catch { }
                         beginSeekDrag();
                     }}
                     onPointerUp={event => {
-                        try { event.currentTarget.releasePointerCapture(event.pointerId); } catch {   }
+                        try { event.currentTarget.releasePointerCapture(event.pointerId); } catch { }
                         finishSeekDrag();
                     }}
                     onPointerCancel={() => finishSeekDrag()}
