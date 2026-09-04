@@ -57,7 +57,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     atb: {
     name: "at.b",
-    id: 297283663991668738n
+    id: 297283663991668738n,
     badge: false
     },
     Yazan:{
