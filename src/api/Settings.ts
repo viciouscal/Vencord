@@ -72,7 +72,7 @@ export interface Settings {
     | "window"
     | undefined;
     disableMinSize: boolean;
-    winNativeTitleBar: boolean;
+    nativeTitleBar: boolean;
     plugins: {
         [plugin: string]: {
             enabled: boolean;
@@ -130,7 +130,7 @@ const DefaultSettings: Settings = {
     windowsMaterial: "none",
     macosVibrancyStyle: undefined,
     disableMinSize: false,
-    winNativeTitleBar: false,
+    nativeTitleBar: false,
     plugins: {},
 
     uiElements: {
