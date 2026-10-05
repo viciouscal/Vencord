@@ -8,6 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { copyWithToast, openUserProfile } from "@utils/discord";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
+import type { ToastType } from "@vencord/discord-types";
 import { findModuleId, wreq } from "@webpack";
 import {
     createRoot,
@@ -18,7 +19,6 @@ import {
     ReactDOM,
     SelectedChannelStore,
     showToast,
-    Toasts,
     Tooltip,
     UserStore,
     UserUtils
@@ -304,7 +304,7 @@ function timestampForFilename(date: Date) {
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}_${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}`;
 }
 
-function toast(message: string, type = Toasts.Type.MESSAGE) {
+function toast(message: string, type: ToastType = "message") {
     if (settings.store.notifications) showToast(message, type);
 }
 
@@ -528,7 +528,7 @@ async function chooseFolder() {
     const selected = await Native.chooseSaveFolder(tr("Choose recordings folder", "اختيار مجلد التسجيلات"));
     if (selected) {
         settings.store.saveFolder = selected;
-        toast(tr("Recordings folder updated.", "تم تحديث مجلد تسجيلات."), Toasts.Type.SUCCESS);
+        toast(tr("Recordings folder updated.", "تم تحديث مجلد تسجيلات."), "success");
     }
     return selected;
 }
@@ -551,10 +551,10 @@ async function startRecorder(showStateToast = true) {
             const message = channelId
                 ? tr("Voice Replay started.", "تم تشغيل Voice Replay.")
                 : tr("Voice Replay is armed and will keep running until you stop it.", "Voice Replay جاهز وسيبقى شغالًا حتى توقفه بنفسك.");
-            toast(message, Toasts.Type.SUCCESS);
+            toast(message, "success");
         }
     } catch (error) {
-        toast(localizedError(error), Toasts.Type.FAILURE);
+        toast(localizedError(error), "failure");
     }
 }
 
@@ -562,7 +562,7 @@ async function stopRecorder(showStateToast = true) {
     await voiceRecorder.stop(true);
     voiceActivityTracker.stop(true);
     if (showStateToast) {
-        toast(tr("Voice Replay stopped.", "تم إيقاف Voice Replay."), Toasts.Type.MESSAGE);
+        toast(tr("Voice Replay stopped.", "تم إيقاف Voice Replay."), "message");
     }
 }
 
@@ -575,17 +575,17 @@ async function saveLatestClip(requestedSeconds: number) {
     if (saving) return;
     const status = voiceRecorder.getStatus();
     if (!status.armed) {
-        toast(tr("Start Voice Replay before saving a clip.", "شغّل Voice Replay قبل حفظ التسجيل."), Toasts.Type.FAILURE);
+        toast(tr("Start Voice Replay before saving a clip.", "شغّل Voice Replay قبل حفظ التسجيل."), "failure");
         return;
     }
     if (status.bufferedSeconds < .1) {
-        toast(tr("Voice Replay is on, but the rolling window has not started yet.", "Voice Replay شغال، لكن التسجيل المؤقت لم يبدأ بعد."), Toasts.Type.FAILURE);
+        toast(tr("Voice Replay is on, but the rolling window has not started yet.", "Voice Replay شغال، لكن التسجيل المؤقت لم يبدأ بعد."), "failure");
         return;
     }
 
     const requested = Math.min(bufferCapacitySeconds(), Math.max(1, Math.floor(requestedSeconds)));
     if (status.bufferedSeconds + .02 < requested) {
-        toast(tr(`Wait ${formatDuration(requested - status.bufferedSeconds)} more, exact ${formatDuration(requested)} saving requires a full ${formatDuration(requested)} buffer.`, `انتظر ${formatDuration(requested - status.bufferedSeconds)} إضافية، حفظ ${formatDuration(requested)} بالضبط يحتاج توفر المدة كاملة في التسجيل المؤقت.`), Toasts.Type.FAILURE);
+        toast(tr(`Wait ${formatDuration(requested - status.bufferedSeconds)} more, exact ${formatDuration(requested)} saving requires a full ${formatDuration(requested)} buffer.`, `انتظر ${formatDuration(requested - status.bufferedSeconds)} إضافية، حفظ ${formatDuration(requested)} بالضبط يحتاج توفر المدة كاملة في التسجيل المؤقت.`), "failure");
         return;
     }
     saving = true;
@@ -668,10 +668,10 @@ async function saveLatestClip(requestedSeconds: number) {
         await Native.indexRecording(audioPath, metadata);
 
         emitSaveFlash();
-        toast(tr(`Saved the latest ${formatDuration(clip.durationSeconds)} as ${clip.format.toUpperCase()}.`, `تم حفظ آخر ${formatDuration(clip.durationSeconds)} بصيغة ${clip.format.toUpperCase()}.`), Toasts.Type.SUCCESS);
+        toast(tr(`Saved the latest ${formatDuration(clip.durationSeconds)} as ${clip.format.toUpperCase()}.`, `تم حفظ آخر ${formatDuration(clip.durationSeconds)} بصيغة ${clip.format.toUpperCase()}.`), "success");
         return { audioPath };
     } catch (error) {
-        toast(localizedError(error), Toasts.Type.FAILURE);
+        toast(localizedError(error), "failure");
     } finally {
         saving = false;
     }
@@ -727,14 +727,14 @@ function openSaveDurationModal(durations: number[]) {
 function requestReplaySave() {
     const status = voiceRecorder.getStatus();
     if (!status.armed) {
-        toast(tr("Start Voice Replay before saving a clip.", "شغّل Voice Replay قبل حفظ التسجيل."), Toasts.Type.FAILURE);
+        toast(tr("Start Voice Replay before saving a clip.", "شغّل Voice Replay قبل حفظ التسجيل."), "failure");
         return;
     }
 
     const durations = availableSaveDurations(status);
     if (!durations.length) {
         const remaining = Math.max(0, 30 - status.bufferedSeconds);
-        toast(tr(`Wait ${formatDuration(remaining)} before the first save.`, `انتظر ${formatDuration(remaining)} قبل أول حفظ.`), Toasts.Type.MESSAGE);
+        toast(tr(`Wait ${formatDuration(remaining)} before the first save.`, `انتظر ${formatDuration(remaining)} قبل أول حفظ.`), "message");
         return;
     }
     if (durations.length === 1) {
@@ -1552,7 +1552,7 @@ async function exportRecordingVideo(recording: SavedRecording, onProgress: (prog
 
 function startManagedVideoExport(recording: SavedRecording) {
     if (videoExportPromise || videoExportSnapshot.phase === "exporting") {
-        toast(tr("A replay video is already being exported.", "يوجد فيديو تسجيل قيد التصدير بالفعل."), Toasts.Type.MESSAGE);
+        toast(tr("A replay video is already being exported.", "يوجد فيديو تسجيل قيد التصدير بالفعل."), "message");
         return videoExportPromise;
     }
     if (videoExportResetTimer != null) {
@@ -1567,12 +1567,12 @@ function startManagedVideoExport(recording: SavedRecording) {
         setVideoExportSnapshot({ phase: "exporting", progress: normalized, recordingId: recording.id });
     }).then(path => {
         setVideoExportSnapshot({ phase: "done", progress: 1, recordingId: recording.id, outputPath: path });
-        toast(tr("High-quality replay video exported.", "تم تصدير فيديو التسجيل بجودة عالية."), Toasts.Type.SUCCESS);
+        toast(tr("High-quality replay video exported.", "تم تصدير فيديو التسجيل بجودة عالية."), "success");
         scheduleVideoExportReset(1400);
         return path;
     }).catch(error => {
         setVideoExportSnapshot({ phase: "error", progress: lastProgress, recordingId: recording.id, outputPath: null });
-        toast(localizedError(error), Toasts.Type.FAILURE);
+        toast(localizedError(error), "failure");
         scheduleVideoExportReset(2200);
         return null;
     }).finally(() => {
@@ -2028,14 +2028,14 @@ function RecordingPlayer({ recording, onDeleted, onBack }: { recording: SavedRec
         const context = getPlaybackContext();
         const gain = ensureStemGain();
         if (!context || !gain) {
-            toast(tr("Separate-track playback is unavailable in this Discord build.", "تشغيل المسارات المنفصلة غير متاح في إصدار دسكورد الحالي."), Toasts.Type.FAILURE);
+            toast(tr("Separate-track playback is unavailable in this Discord build.", "تشغيل المسارات المنفصلة غير متاح في إصدار دسكورد الحالي."), "failure");
             return false;
         }
 
         const ids = selectedStemIds(nextMuted, nextSolo);
         const buffers = await ensureStemBuffers(ids);
         if (nextSolo && !buffers.has(nextSolo)) {
-            toast(tr("Could not load this participant's separate audio track.", "تعذر تحميل المسار الصوتي المنفصل لهذا الشخص."), Toasts.Type.FAILURE);
+            toast(tr("Could not load this participant's separate audio track.", "تعذر تحميل المسار الصوتي المنفصل لهذا الشخص."), "failure");
             return false;
         }
 
@@ -2191,7 +2191,7 @@ function RecordingPlayer({ recording, onDeleted, onBack }: { recording: SavedRec
         void Native.readRecordingBytes(settings.store.saveFolder, recording.audioFilename).then(bytes => {
             if (cancelled) return;
             if (!bytes) {
-                toast(tr("Could not read this recording.", "تعذر فتح هذا التسجيل."), Toasts.Type.FAILURE);
+                toast(tr("Could not read this recording.", "تعذر فتح هذا التسجيل."), "failure");
                 return;
             }
             const rawBytes = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes as any);
@@ -2579,16 +2579,16 @@ function RecordingPlayer({ recording, onDeleted, onBack }: { recording: SavedRec
     const deleteThis = async () => {
         try {
             await Native.deleteRecording(settings.store.saveFolder, recording.audioFilename);
-            toast(tr("Recording deleted.", "تم حذف التسجيل."), Toasts.Type.SUCCESS);
+            toast(tr("Recording deleted.", "تم حذف التسجيل."), "success");
             onDeleted();
         } catch (error) {
-            toast(localizedError(error), Toasts.Type.FAILURE);
+            toast(localizedError(error), "failure");
         }
     };
 
     const exportVideo = () => {
         if (videoExporting) {
-            toast(tr("A replay video is already being exported.", "يوجد فيديو تسجيل قيد التصدير بالفعل."), Toasts.Type.MESSAGE);
+            toast(tr("A replay video is already being exported.", "يوجد فيديو تسجيل قيد التصدير بالفعل."), "message");
             return;
         }
         if (stemModeRef.current && playingRef.current) pauseStemPlayback();
@@ -2610,9 +2610,9 @@ function RecordingPlayer({ recording, onDeleted, onBack }: { recording: SavedRec
             setDisplayTitle(next);
             setTitleDraft(next);
             setEditingTitle(false);
-            toast(tr("Recording name updated.", "تم تعديل اسم التسجيل."), Toasts.Type.SUCCESS);
+            toast(tr("Recording name updated.", "تم تعديل اسم التسجيل."), "success");
         } catch (error) {
-            toast(localizedError(error), Toasts.Type.FAILURE);
+            toast(localizedError(error), "failure");
         } finally {
             setSavingTitle(false);
         }
@@ -2905,10 +2905,10 @@ function RecordingsList({
                 setRecordings(current => current.map(item => item.id === recording.id
                     ? { ...item, metadata: { ...(item.metadata ?? {}), customTitle: String(savedTitle) } }
                     : item));
-                toast(tr("Recording name updated.", "تم تعديل اسم التسجيل."), Toasts.Type.SUCCESS);
+                toast(tr("Recording name updated.", "تم تعديل اسم التسجيل."), "success");
             }
         } catch (error) {
-            toast(localizedError(error), Toasts.Type.FAILURE);
+            toast(localizedError(error), "failure");
         }
     }, [titleDraft]);
 
@@ -2934,9 +2934,9 @@ function RecordingsList({
                 next.delete(recording.id);
                 return next;
             });
-            toast(tr("Recording deleted.", "تم حذف التسجيل."), Toasts.Type.SUCCESS);
+            toast(tr("Recording deleted.", "تم حذف التسجيل."), "success");
         } catch (error) {
-            toast(localizedError(error), Toasts.Type.FAILURE);
+            toast(localizedError(error), "failure");
         } finally {
             setDeleting(false);
         }
@@ -2960,7 +2960,7 @@ function RecordingsList({
             onCount?.(next.length);
             toast(
                 tr(`${deletedIds.size} recordings deleted.`, `تم حذف ${deletedIds.size} من التسجيلات.`),
-                Toasts.Type.SUCCESS
+                "success"
             );
         } catch (error) {
             if (deletedIds.size) {
@@ -2969,7 +2969,7 @@ function RecordingsList({
                 setSelectedIds(current => new Set(Array.from(current).filter(id => !deletedIds.has(id))));
                 onCount?.(next.length);
             }
-            toast(localizedError(error), Toasts.Type.FAILURE);
+            toast(localizedError(error), "failure");
         } finally {
             setDeleting(false);
         }
@@ -3483,7 +3483,7 @@ function ToggleShortcutButton() {
                 if (!next) return;
                 settings.store.toggleShortcut = next;
                 stopCapturing();
-                toast(tr(`Voice Replay shortcut: ${next}`, `اختصار Voice Replay: ${next}`), Toasts.Type.SUCCESS);
+                toast(tr(`Voice Replay shortcut: ${next}`, `اختصار Voice Replay: ${next}`), "success");
             }}
             aria-label={tr("Voice Replay keyboard shortcut", "اختصار تسجيل الصوت")}
         >

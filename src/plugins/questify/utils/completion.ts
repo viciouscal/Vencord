@@ -12,7 +12,7 @@ import { rerenderQuests } from "@plugins/questify/settings/rerender";
 import type { PluginNative } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { findByCodeLazy, findLazy } from "@webpack";
-import { FluxDispatcher, RestAPI, showToast, Toasts, UserStore } from "@webpack/common";
+import { FluxDispatcher, RestAPI, showToast, UserStore } from "@webpack/common";
 
 import { AuthorizedAppsStore, snakeToCamel } from "./fetching";
 import { normalizeQuestName, type QuestIncludedTypes, questMatchesIncludedTypes } from "./filtering";
@@ -251,7 +251,7 @@ function showBrokenAutoCompleteToast(): void {
     }
 
     didShowBrokenAutoCompleteToast = true;
-    showToast("AutoComplete is broken. A fix will be implemented shortly.", Toasts.Type.FAILURE);
+    showToast("AutoComplete is broken. A fix will be implemented shortly.", "failure");
 }
 
 export function hasEnabledAutoCompleteQuestTypes(): boolean {
@@ -613,7 +613,7 @@ function blockQuestEnrollmentForRetryAfter(retryAfter: number | null): void {
 function showQuestEnrollmentFailureToast(quest: Quest, result: Exclude<QuestEnrollmentResult, { type: "success"; }>): void {
     const rateLimitSuffix = result.type === "rate_limited" ? " due to rate limits" : "";
 
-    showToast(`Enrollment in ${normalizeQuestName(quest)} Quest failed${rateLimitSuffix}.`, Toasts.Type.FAILURE);
+    showToast(`Enrollment in ${normalizeQuestName(quest)} Quest failed${rateLimitSuffix}.`, "failure");
 }
 
 export async function enrollInQuestManually(quest: Quest): Promise<QuestManualEnrollResult> {
