@@ -35,11 +35,7 @@ import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { Channel, RenderModalProps } from "@vencord/discord-types";
-<<<<<<< HEAD
-import { Alerts, Button, ChannelStore, ConfirmModal, Forms, GuildMemberStore, openModal, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
-=======
 import { Button, ChannelStore, ConfirmModal, Forms, GuildMemberStore, openModal, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, UserStore } from "@webpack/common";
->>>>>>> upstream/main
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
@@ -86,7 +82,7 @@ async function generateDebugInfoMessage() {
 
     const info = {
         Vencord:
-            `v${VERSION} • [${gitHash}](<https://github.com/viciouscal/Vencord/commit/${gitHash}>)` +
+            `v${VERSION} • [${gitHash}](<https://github.com/Vendicated/Vencord/commit/${gitHash}>)` +
             `${SettingsPlugin.additionalInfo} - ${Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
         Client: `${RELEASE_CHANNEL} ~ ${client}`,
         Platform: navigator.platform
@@ -237,35 +233,28 @@ export default definePlugin({
             if (!roles || TrustedRolesIds.some(id => roles.includes(id))) return;
 
             if (!IS_WEB && IS_UPDATER_DISABLED) {
-                return Alerts.show({
-                    title: "Hold on!",
-                    body: <div>
-                        <Forms.FormText>You are using an externally updated Vencord version, which we do not provide support for!</Forms.FormText>
-                        <Forms.FormText className={Margins.top8}>
-                            Please either switch to an <Link href="https://vencordar.com/download">officially supported version of Vencord</Link>, or
-                            contact your package maintainer for support instead.
-                        </Forms.FormText>
-                    </div>
-                });
+                openModal(props => (
+                    <ConfirmModal
+                        {...props}
+                        title="Hold on!"
+                        confirmText="OK"
+                        variant="primary"
+                    >
+                        <div>
+                            <Forms.FormText>You are using an externally updated Vencord version, which we do not provide support for!</Forms.FormText>
+                            <Forms.FormText className={Margins.top8}>
+                                Please either switch to an <Link href="https://vencord.dev/download">officially supported version of Vencord</Link>, or
+                                contact your package maintainer for support instead.
+                            </Forms.FormText>
+                        </div>
+                    </ConfirmModal>
+                ));
+                return;
             }
 
             if (!IS_STANDALONE && !settings.store.dismissedDevBuildWarning) {
-                return Alerts.show({
-                    title: "Hold on!",
-                    body: <div>
-                        <Forms.FormText>You are using a custom build of Vencord, which we do not provide support for!</Forms.FormText>
-
-                        <Forms.FormText className={Margins.top8}>
-                            We only provide support for <Link href="https://vencordar.com/download">official builds</Link>.
-                            Either <Link href="https://vencordar.com/download">switch to an official build</Link> or figure your issue out yourself.
-                        </Forms.FormText>
-
-                        <Text variant="text-md/bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</Text>
-                    </div>,
-                    confirmText: "Understood",
-                    secondaryConfirmText: "Don't show again",
-                    onConfirmSecondary: () => settings.store.dismissedDevBuildWarning = true
-                });
+                openModal(props => <DevBuildConfirmModal {...props} />);
+                return;
             }
         }
     },
@@ -340,10 +329,9 @@ export default definePlugin({
             <Card variant="warning" className={Margins.top8} defaultPadding>
                 Please do not private message Vencord plugin developers for support!
                 <br />
-                Instead, use the Vencord support channel: {Parser.parse("https://discord.com/channels/457304065261568011/1460651683179925585")}
+                Instead, use the Vencord support channel: {Parser.parse("https://discord.com/channels/1015060230222131221/1026515880080842772")}
                 {!ChannelStore.getChannel(SUPPORT_CHANNEL_ID) && " (Click the link to join)"}
             </Card>
         );
     }, { noop: true }),
 });
-
