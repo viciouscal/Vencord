@@ -95,6 +95,10 @@ function enrolledIncompleteButton(args: { quest: Quest, size: string; }): JSX.El
     );
 }
 
+function wrapOrbsBalance(balance: String): JSX.Element {
+    return (<span style={{ fontSize: "90%" }}>{balance}</span>);
+}
+
 export default definePlugin({
     name: "Questify",
     description: "Enhance specific Quest features, disable annoyances, or completely remove Quests.",
@@ -135,6 +139,7 @@ export default definePlugin({
     sortQuests,
     stopQuestAutoComplete,
     useQuestRerender,
+    wrapOrbsBalance,
 
     patches: [
         {
@@ -174,7 +179,7 @@ export default definePlugin({
             // Exports the guildless server list item component used by the Quest button.
             find: '="DOWNLOAD_APPS";function',
             replacement: {
-                match: /(?=\i:\(\)=>\i.{0,30000}?asContainer:!\i.{0,50};let (\i)=\i.forwardRef\(function)/,
+                match: /(?<=\i\.\i\(\i,\{)(?=\i:\(\)=>\i.{0,30000}?let (\i)=function\(\i\)\{let\{ref:)/,
                 replace: "GuildlessServerListItemComponent:()=>$1,"
             }
         },
@@ -193,7 +198,7 @@ export default definePlugin({
             find: '("ActivityStatus"),',
             predicate: () => getQuestifySettings().disableQuestsEverything || getQuestifySettings().disableMembersListPromo,
             replacement: {
-                match: /(,hasQuest:)(?=\i=!1)/,
+                match: /,hasQuest:(?=\i=!1)/,
                 replace: ",questifyInvalid1:"
             }
         },
@@ -246,7 +251,7 @@ export default definePlugin({
             predicate: () => !getQuestifySettings().disableQuestsEverything && getQuestifySettings().disableOrbsAndQuestsBadges,
             replacement: [
                 {
-                    match: /(,\{badges:\i)(?=,displayProfile:\i)/,
+                    match: /(,{badges:\i)(?=,overflowCount:\i,displayProfile:\i)/,
                     replace: '$1.filter(badge=>!["quest_completed","orb_profile_badge"].includes(badge.id))',
                 }
             ]
@@ -256,8 +261,8 @@ export default definePlugin({
             find: "collapsed-with-rewards\":\"collapsed-without-rewards",
             predicate: () => getQuestifySettings().disableAccountPanelPromo || !getQuestifySettings().disableAccountPanelQuestProgress,
             replacement: {
-                match: /(?<=function\(\){)(let (\i)=\(0,\i.\i\)\(\);)/,
-                replace: "void $self.useQuestRerender();$1$2=$self.getQuestPanelOverride($2);"
+                match: /(?<=function\(\)\{)(let (\i)=\(0,\i\.\i\)\(\),\i=\(0,\i\.\i\)\(.{0,55}?\);)(?=switch\(\2\.type\)\{case (\i\.\i\.QUEST):)/,
+                replace: "void $self.useQuestRerender();$1$2=$self.getQuestPanelOverride($2,$3);if(null==$2)return null;"
             }
         },
         {
@@ -283,7 +288,7 @@ export default definePlugin({
             find: ",{progressTextAnimation:",
             predicate: () => !getQuestifySettings().disableQuestsEverything,
             replacement: {
-                match: /(let{percentComplete:.{0,115}?children:\i,useAltStyle:\i=!1}=)(\i)/,
+                match: /(let{percentComplete:[^}]+}=)(\i)/,
                 replace: "const questifyProgress=$self.getQuestPanelPercentComplete({...$2,quest:$2.children?.props?.quest});$1Object.assign({},$2,questifyProgress??{})"
             }
         },
@@ -297,7 +302,7 @@ export default definePlugin({
             }
         },
         {
-            // Formats the Orbs balance on the Quests page with locale string formatting.
+            // Formats the Orbs balance in the default balance counter on the Quests page with locale string formatting.
             find: '("BalanceCounter")',
             predicate: () => !getQuestifySettings().disableQuestsEverything,
             replacement: [
@@ -306,8 +311,19 @@ export default definePlugin({
                     replace: "$1+($2>=1e6?0.8:$2>=1e3?0.4:0)"
                 },
                 {
-                    match: /(?<=children:\i.to\(\i=>`\${\i)(.toFixed\(0\))/,
+                    match: /(?<=children:\i.to\(\i=>`\${\i).toFixed\(0\)/,
                     replace: ".toLocaleString(undefined,{maximumFractionDigits:0})"
+                }
+            ]
+        },
+        {
+            // Formats the Orbs balance in the balance popout on the Quests page with locale string formatting.
+            find: 'location:"BalanceWidgetMenu"',
+            predicate: () => !getQuestifySettings().disableQuestsEverything,
+            replacement: [
+                {
+                    match: /(?<=children:)(\i\?\?0)/,
+                    replace: "$self.wrapOrbsBalance(($1).toLocaleString(undefined,{maximumFractionDigits:0}))"
                 }
             ]
         },
@@ -352,7 +368,7 @@ export default definePlugin({
             replacement: [
                 {
                     // Subscribes the Quest page sort/filter state to Questify rerenders.
-                    match: /(let \i,\i,\i,\i,\i=\i\.useRef\(null\),)/,
+                    match: /(\{ref:\i,\.\.\.\i\}=\i,\i=\i\.useRef\(null\),)(?=\[\i,\i\]=)/,
                     replace: "$1questRerenderTrigger=$self.useQuestRerender(),"
                 },
                 {
@@ -384,7 +400,7 @@ export default definePlugin({
                 },
                 {
                     // Overwrite button props for ENROLLED/INCOMPLETE Quests.
-                    match: /(case \i\.\i\.(?:ENROLLED|INCOMPLETE):return)(?=\(0,\i\.jsx\)\(\i,\{quest:(\i),taskType:\i\.type,size:(\i),)/g,
+                    match: /(case \i\.\i\.(?:ENROLLED|INCOMPLETE):return)(?=\(0,\i\.jsx\)\(\i,\{quest:(\i),taskType:\i(?:\.type)?,size:(\i),)/g,
                     replace: "$1 $self.enrolledIncompleteButton({quest:$2,size:$3})||"
                 }
             ]
@@ -501,7 +517,7 @@ export default definePlugin({
         },
         {
             // Adds the Questify sort option to Discord's Quest sort enum.
-            find: "SUGGESTED=\"suggested\",",
+            find: "EXPIRING_SOON=\"expiring_soon\"",
             predicate: () => !getQuestifySettings().disableQuestsEverything,
             replacement: {
                 match: /(?<=\(\((\i)=\{\}\))(?=\.SUGGESTED="suggested",)/,
@@ -523,19 +539,19 @@ export default definePlugin({
             predicate: () => !getQuestifySettings().disableQuestsEverything,
             replacement: [
                 {
-                    // Runs Questify sorting in the hook-safe Quest list path and tracks manual rerenders.
+                    // Applies Questify filtering and sorting before Discord's Quest list hooks.
                     match: /,(\i)=new Map\((\i)\.map/,
-                    replace: ";const questRerenderTrigger=$self.useQuestRerender();const questifySorted=$self.sortQuests($2,arguments[1]?.sortMethod!==\"questify\");let $1=new Map($2.map"
+                    replace: ";const questRerenderTrigger=$self.useQuestRerender();const questifySorted=$self.sortQuests($2,arguments[1]?.sortMethod!==\"questify\");const questifyListChanged=questifySorted!==$2;$2=questifySorted;let $1=new Map($2.map"
                 },
                 {
-                    // Replaces Discord's filtered Quest list with Questify's order only when selected.
-                    match: /(?=if\(0===(\i)\.length\)return\[\];if\(\i\.current\.length>0)/,
-                    replace: "if(arguments[1]?.sortMethod===\"questify\"){$1=questifySorted;};"
-                },
-                {
-                    // Bypasses Discord's memo cache while the Questify sort is active.
+                    // Bypasses Discord's memo cache when Questify changes the list.
                     match: /(?<=if\()(?=\i\.current\.length>0&&\i\.current===)/,
-                    replace: "arguments[1]?.sortMethod!==\"questify\"&&"
+                    replace: "!questifyListChanged&&"
+                },
+                {
+                    // Bypasses the claimed Quest cache when Questify changes the list.
+                    match: /(?<=if\()(?=\i\.current\.length>0&&\i\.current\.length===)/,
+                    replace: "!questifyListChanged&&"
                 },
                 {
                     // If we already applied Questify's sort, skip further sorting.

@@ -12,13 +12,15 @@ const findDefaultSounds = findLazy(module => module.resolve && module.id && modu
 
 let defaultSounds: string[] | null = null;
 
-export function AudioPlayer(name: string, volume: number = 1, callback?: () => void): any {
+export function AudioPlayer(name: string, volume: number = 1, callback?: () => void, onError?: () => void): any {
     const clampedVolume = Math.max(0, Math.min(1, volume));
+    const audioPlayerApi = Reflect.get(Vencord.Api, "AudioPlayer");
 
-    if (Settings.plugins.AudioPlayerAPI?.enabled) {
-        return new AudioPlayerConstructor(name, null, clampedVolume, "default", {
-            onEnded: callback,
+    if (Settings.plugins.AudioPlayerAPI?.enabled && typeof audioPlayerApi?.createAudioPlayer === "function") {
+        return audioPlayerApi.createAudioPlayer(name, {
             volume: clampedVolume * 100,
+            onEnded: callback,
+            onError,
         });
     }
 

@@ -9,14 +9,30 @@ import "@plugins/questify/settings.css";
 import { Card } from "@components/Card";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
+import { collectSettingsSearchTerms, getSettingsSearchMatchScore, registerSettingsSearchTerms, SettingsSearchPriority, useSettingsSearchQuery } from "@plugins/questify/settings/search";
 import { q } from "@plugins/questify/utils/ui";
 import { findComponentByCodeLazy } from "@webpack";
-import { ColorPicker, Slider } from "@webpack/common";
-import type { ComponentProps, ComponentType, JSX, ReactNode } from "react";
+import { ColorPicker, React, Slider } from "@webpack/common";
+import type { ComponentProps, ComponentType, JSX, ReactElement, ReactNode } from "react";
+
+const searchComponentPriorities = new Map<ReactElement["type"], SettingsSearchPriority>([
+    [SettingsHeader, SettingsSearchPriority.Title],
+    [SettingsDescription, SettingsSearchPriority.Description],
+    [SettingsSubheader, SettingsSearchPriority.Subheading],
+    [SettingsParagraph, SettingsSearchPriority.Text],
+]);
 
 export function SettingsCard({ children }: { children: ReactNode; }): JSX.Element {
+    const query = useSettingsSearchQuery();
+    const id = React.useId();
+    const terms = React.useMemo(() => collectSettingsSearchTerms(children, searchComponentPriorities), [children]);
+    const score = getSettingsSearchMatchScore(query, terms);
+    const hidden = score === null;
+
+    React.useEffect(() => registerSettingsSearchTerms(id, terms), [id, terms]);
+
     return (
-        <Card className={q("setting")}>
+        <Card className={q("setting")} hidden={hidden} style={{ display: hidden ? "none" : undefined, order: query.trim() ? score ?? 0 : undefined }}>
             {children}
         </Card>
     );
@@ -268,7 +284,7 @@ interface SettingsSwitchLayoutProps extends SwitchWithLabelProps {
     tooltip?: { position: "top" | "bottom", text: string; };
 }
 
-const SwitchWithLabel = findComponentByCodeLazy('auxiliaryContentPosition:"under-label"') as React.ComponentType<SwitchWithLabelProps>;
+const SwitchWithLabel = findComponentByCodeLazy("switchIconsEnabled:", ".hasIcon?") as React.ComponentType<SwitchWithLabelProps>;
 
 export type SettingsSubtleSwitchProps = Omit<SettingsSwitchLayoutProps, "description">;
 

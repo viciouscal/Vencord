@@ -11,9 +11,9 @@ import { QuestFeaturesSetting } from "@plugins/questify/components/questFeatures
 import { QuestNotificationsSetting } from "@plugins/questify/components/questNotificationsSetting";
 import { QuestTilesSetting } from "@plugins/questify/components/questTilesSetting";
 import { ReorderQuestsSetting } from "@plugins/questify/components/reorderQuestsSetting";
+import { SettingsSearch } from "@plugins/questify/components/settingsSearch";
+import { defaultAcknowledgedNotices, defaultAllowChangingDangerousSettings, defaultAutoCompleteQuestsSimultaneously, defaultAutoCompleteQuestTypes, defaultClaimedSubsort, defaultCompleteVideoQuestsQuicker, defaultDisableAccountPanelPromo, defaultDisableAccountPanelQuestProgress, defaultDisableFriendsListPromo, defaultDisableMembersListPromo, defaultDisableOrbsAndQuestsBadges, defaultDisableQuestsEverything, defaultDisableRelocationNotices, defaultDisableSponsoredBanner, defaultExpiredSubsort, defaultHiddenQuestStatuses, defaultHideNonAutoCompletableQuests, defaultIgnoredQuestIDs, defaultIgnoredSubsort, defaultIsOnQuestsPage, defaultLastQuestPageFilters, defaultLastQuestPageSort, defaultLeftClickAction, defaultMakeMobileVideoQuestsDesktopCompatible, defaultMiddleClickAction, defaultNewExcludedQuestAlertSound, defaultNewExcludedQuestAlertVolume, defaultNewQuestAlertSound, defaultNewQuestAlertVolume, defaultNotifyOnNewExcludedQuests, defaultNotifyOnNewQuests, defaultNotifyOnQuestComplete, defaultPreventVideoQuestsPausing, defaultQuestButtonBadgeColor, defaultQuestButtonBadgeCount, defaultQuestButtonDisplay, defaultQuestButtonIncludedTypes, defaultQuestButtonIndicator, defaultQuestCompletedAlertSound, defaultQuestCompletedAlertVolume, defaultQuestFetchInterval, defaultQuestOrder, defaultQuestTileClaimedColorSetting, defaultQuestTileExpiredColorSetting, defaultQuestTileGradient, defaultQuestTileIgnoredColorSetting, defaultQuestTilePreload, defaultQuestTileUnclaimedColorSetting, defaultRememberQuestPageFilters, defaultRememberQuestPageSort, defaultResumeInterruptedQuests, defaultResumeQuestIDs, defaultRightClickAction, defaultUnclaimedSubsort, type QuestButtonAction, type QuestButtonDisplayMode, type QuestButtonIncludedTypes, type QuestButtonIndicatorMode, type QuestOrderStatus } from "@plugins/questify/settings/def";
 import { OptionType } from "@utils/types";
-
-import { defaultAcknowledgedNotices, defaultAllowChangingDangerousSettings, defaultAutoCompleteQuestsSimultaneously, defaultAutoCompleteQuestTypes, defaultClaimedSubsort, defaultCompleteVideoQuestsQuicker, defaultDisableAccountPanelPromo, defaultDisableAccountPanelQuestProgress, defaultDisableFriendsListPromo, defaultDisableMembersListPromo, defaultDisableOrbsAndQuestsBadges, defaultDisableQuestsEverything, defaultDisableRelocationNotices, defaultDisableSponsoredBanner, defaultExpiredSubsort, defaultIgnoredQuestIDs, defaultIgnoredSubsort, defaultIsOnQuestsPage, defaultLastQuestPageFilters, defaultLastQuestPageSort, defaultLeftClickAction, defaultMakeMobileVideoQuestsDesktopCompatible, defaultMiddleClickAction, defaultNewExcludedQuestAlertSound, defaultNewExcludedQuestAlertVolume, defaultNewQuestAlertSound, defaultNewQuestAlertVolume, defaultNotifyOnNewExcludedQuests, defaultNotifyOnNewQuests, defaultNotifyOnQuestComplete, defaultPreventVideoQuestsPausing, defaultQuestButtonBadgeColor, defaultQuestButtonBadgeCount, defaultQuestButtonDisplay, defaultQuestButtonIncludedTypes, defaultQuestButtonIndicator, defaultQuestCompletedAlertSound, defaultQuestCompletedAlertVolume, defaultQuestFetchInterval, defaultQuestOrder, defaultQuestTileClaimedColorSetting, defaultQuestTileExpiredColorSetting, defaultQuestTileGradient, defaultQuestTileIgnoredColorSetting, defaultQuestTilePreload, defaultQuestTileUnclaimedColorSetting, defaultRememberQuestPageFilters, defaultRememberQuestPageSort, defaultResumeInterruptedQuests, defaultResumeQuestIDs, defaultRightClickAction, defaultUnclaimedSubsort, type QuestButtonAction, type QuestButtonDisplayMode, type QuestButtonIncludedTypes, type QuestButtonIndicatorMode, type QuestOrderStatus } from "./def";
 
 const MIGRATION_TARGET = 1;
 const CURRENT_SETTINGS = PlainSettings.plugins.Questify;
@@ -44,6 +44,11 @@ export const settings = definePluginSettings({
         description: "One-time notices that the user has acknowledged.",
         default: { ...defaultAcknowledgedNotices },
         hidden: true,
+    },
+    settingsSearch: {
+        type: OptionType.COMPONENT,
+        component: ErrorBoundary.wrap(SettingsSearch) as any,
+        description: "Search Questify settings.",
     },
     questFeatures: {
         type: OptionType.COMPONENT,
@@ -124,6 +129,12 @@ export const settings = definePluginSettings({
         description: "Make mobile-only Video Quests compatible with desktop.",
         default: defaultMakeMobileVideoQuestsDesktopCompatible,
         restartNeeded: true,
+        hidden: true,
+    },
+    hideNonAutoCompletableQuests: {
+        type: OptionType.BOOLEAN,
+        description: "Hide incomplete Quests without a supported and enabled auto-complete task.",
+        default: defaultHideNonAutoCompletableQuests,
         hidden: true,
     },
     autoCompleteQuestsSimultaneously: {
@@ -323,6 +334,12 @@ export const settings = definePluginSettings({
         type: OptionType.CUSTOM,
         description: "Sort order for Quest status groups.",
         default: Array.from(defaultQuestOrder) as QuestOrderStatus[],
+        hidden: true,
+    },
+    hiddenQuestStatuses: {
+        type: OptionType.CUSTOM,
+        description: "Quest status groups to hide.",
+        default: Array.from(defaultHiddenQuestStatuses),
         hidden: true,
     },
     unclaimedSubsort: {

@@ -11,8 +11,8 @@ import { getQuestTileClasses, getQuestTileStyle } from "@plugins/questify/utils/
 import { type Quest, QuestStore } from "@plugins/questify/utils/types";
 import { q } from "@plugins/questify/utils/ui";
 import { findComponentByCodeLazy } from "@webpack";
-import { useEffect, useMemo, useRef, useState, useStateFromStores } from "@webpack/common";
-import type { JSX, SyntheticEvent } from "react";
+import { useMemo, useState, useStateFromStores } from "@webpack/common";
+import type { JSX } from "react";
 
 import { enabledOnStartup } from "..";
 import { ManaButton, type ManaSelectOption, SettingsCard, SettingsColorPicker, SettingsDescription, SettingsHeader, SettingsRow, SettingsRowItem, SettingsSelect, SettingsSubheader } from "./shared";
@@ -89,12 +89,6 @@ function cloneDummyQuest(quest: Quest, dummyColor: QuestTileColorSetting): Quest
     };
 }
 
-function stopDummyQuestInteraction(event: SyntheticEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
-}
-
 function DummyQuestTile({
     disabled,
     dummyQuest,
@@ -104,60 +98,14 @@ function DummyQuestTile({
     dummyQuest: Quest & { dummyColor: QuestTileColorSetting; };
     dummyGradient: QuestTileGradient;
 }): JSX.Element {
-    const blockerRef = useRef<HTMLDivElement>(null);
     const classes = getQuestTileClasses(q("dummy-quest"), dummyQuest, dummyGradient);
     const style = getQuestTileStyle(dummyQuest);
 
-    useEffect(() => {
-        const blocker = blockerRef.current;
-
-        if (!blocker) return;
-
-        const eventNames = [
-            "auxclick",
-            "click",
-            "contextmenu",
-            "dblclick",
-            "dragstart",
-            "mousedown",
-            "mouseup",
-            "pointercancel",
-            "pointerdown",
-            "pointerup",
-        ];
-
-        function stopEvent(event: Event) {
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-        }
-
-        for (const eventName of eventNames) {
-            blocker.addEventListener(eventName, stopEvent, true);
-        }
-
-        return () => {
-            for (const eventName of eventNames) {
-                blocker.removeEventListener(eventName, stopEvent, true);
-            }
-        };
-    }, []);
-
     return (
         <div
-            ref={blockerRef}
             className={q("dummy-quest-preview", disabled ? "dimmed-settings-item" : undefined)}
             style={style}
-            onAuxClickCapture={stopDummyQuestInteraction}
-            onClickCapture={stopDummyQuestInteraction}
-            onContextMenuCapture={stopDummyQuestInteraction}
-            onDoubleClickCapture={stopDummyQuestInteraction}
-            onDragStartCapture={stopDummyQuestInteraction}
-            onMouseDownCapture={stopDummyQuestInteraction}
-            onMouseUpCapture={stopDummyQuestInteraction}
-            onPointerCancelCapture={stopDummyQuestInteraction}
-            onPointerDownCapture={stopDummyQuestInteraction}
-            onPointerUpCapture={stopDummyQuestInteraction}
+            inert={true}
         >
             <QuestTile
                 className={classes}

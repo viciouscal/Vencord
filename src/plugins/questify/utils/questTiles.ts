@@ -8,7 +8,7 @@ import { getQuestifySettings, useQuestifySettings } from "@plugins/questify/sett
 import { defaultClaimedSubsort, defaultExpiredSubsort, defaultIgnoredSubsort, defaultQuestOrder, defaultUnclaimedSubsort, type QuestOrderStatus, type QuestSubsort, type QuestTileColorSetting, type QuestTileGradient } from "@plugins/questify/settings/def";
 import { getIgnoredQuestIDs } from "@plugins/questify/settings/ignoredQuests";
 
-import { getQuestStatus, QuestStatus } from "./questState";
+import { getQuestStatus, isQuestHidden, QuestStatus } from "./questState";
 import { Quest, QuestTaskType, QuestTaskWatchVideo, QuestTaskWatchVideoOnMobile } from "./types";
 import { adjustRGB, decimalToRGB, isDarkish, q, type RGB } from "./ui";
 
@@ -197,7 +197,7 @@ function getValidQuestOrder(value: unknown): QuestOrderStatus[] {
     const configuredOrder = Array.isArray(value)
         ? value
         : defaultQuestOrder;
-    const order = configuredOrder.filter((status): status is QuestOrderStatus => validStatuses.has(status as QuestOrderStatus));
+    const order = Array.from(new Set(configuredOrder.filter((status): status is QuestOrderStatus => validStatuses.has(status as QuestOrderStatus))));
 
     for (const status of defaultQuestOrder) {
         if (!order.includes(status)) {
@@ -248,6 +248,8 @@ export function sortQuests(quests: Quest[], skip?: boolean): Quest[] {
         "makeMobileVideoQuestsDesktopCompatible",
         "completeVideoQuestsQuicker",
         "questOrder",
+        "hiddenQuestStatuses",
+        "hideNonAutoCompletableQuests",
         "unclaimedSubsort",
         "claimedSubsort",
         "ignoredSubsort",
@@ -263,11 +265,16 @@ export function sortQuests(quests: Quest[], skip?: boolean): Quest[] {
         injectDesktopVideoQuestTasks(quests);
     }
 
+    const ignoredQuestIds = getIgnoredQuestIDs();
+
+    if (questSorting.hiddenQuestStatuses.length > 0 || questSorting.hideNonAutoCompletableQuests) {
+        quests = quests.filter(quest => !isQuestHidden(quest, ignoredQuestIds));
+    }
+
     if (skip) {
         return quests;
     }
 
-    const ignoredQuestIds = getIgnoredQuestIDs();
     const questGroups: Record<QuestGroupKey, Quest[]> = {
         claimed: [],
         expired: [],
