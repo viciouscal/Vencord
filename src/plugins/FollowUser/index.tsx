@@ -5,13 +5,14 @@
  */
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { HeaderBarButton } from "@api/HeaderBar";
 import { definePluginSettings, useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import type { Channel, User } from "@vencord/discord-types";
-import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
 import {
     ChannelStore,
     Menu,
@@ -23,8 +24,6 @@ import {
     UserStore
 } from "@webpack/common";
 import type { PropsWithChildren, SVGProps } from "react";
-
-const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '"aria-haspopup":');
 
 interface BaseIconProps extends IconProps {
     viewBox: string;
@@ -192,6 +191,11 @@ function triggerFollow(userChannelId: string | null = getChannelId(settings.stor
             // join when not already in the same channel
             if (userChannelId !== myChanId) {
                 const channel = ChannelStore.getChannel(userChannelId);
+                if (!channel) {
+                    showToast("Unable to access the followed user's voice channel", "failure");
+                    return;
+                }
+
                 const voiceStates = VoiceStateStore.getVoiceStatesForChannel(userChannelId);
                 const memberCount = voiceStates ? Object.keys(voiceStates).length : null;
                 if (channel.type === 1 || PermissionStore.can(CONNECT, channel)) {
@@ -230,6 +234,10 @@ function toggleFollow(userId: string) {
             triggerFollow();
         }
     }
+}
+
+function clearFollow() {
+    settings.store.followUserId = "";
 }
 
 interface UserContextProps {
@@ -278,6 +286,10 @@ export default definePlugin({
     },
 
     flux: {
+        LOGOUT() {
+            clearFollow();
+        },
+
         VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
             if (settings.store.onlyManualTrigger || !settings.store.followUserId) {
                 return;
@@ -301,6 +313,8 @@ export default definePlugin({
                     // if you're not in the channel of the followed user and it is no longer full, join
                     if (settings.store.channelFull && !isMe && !channelId && oldChannelId && oldChannelId !== SelectedChannelStore.getVoiceChannelId()) {
                         const channel = ChannelStore.getChannel(oldChannelId);
+                        if (!channel) continue;
+
                         const channelVoiceStates = VoiceStateStore.getVoiceStatesForChannel(oldChannelId);
                         const memberCount = channelVoiceStates ? Object.keys(channelVoiceStates).length : null;
                         if (channel.userLimit !== 0 && memberCount !== null && memberCount === (channel.userLimit - 1) && !PermissionStore.can(PermissionsBits.MOVE_MEMBERS, channel)) {
@@ -331,10 +345,11 @@ export default definePlugin({
 
     FollowIndicator() {
         const { plugins: { FollowUser: { followUserId } } } = useSettings(["plugins.FollowUser.followUserId"]);
-        if (followUserId) {
+        const followedUser = followUserId ? UserStore.getUser(followUserId) : null;
+        if (followedUser) {
             return (
-                <HeaderBarIcon
-                    tooltip={`Following ${UserStore.getUser(followUserId).username} (click to trigger manually, right-click to unfollow)`}
+                <HeaderBarButton
+                    tooltip={`Following ${followedUser.username} (click to trigger manually, right-click to unfollow)`}
                     icon={UnfollowIcon}
                     onClick={() => {
                         triggerFollow();
@@ -347,6 +362,10 @@ export default definePlugin({
         }
 
         return null;
+    },
+
+    start() {
+        clearFollow();
     },
 
     addIconToToolBar(e: { toolbar: React.ReactNode[] | React.ReactNode; }) {
