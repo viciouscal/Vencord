@@ -220,16 +220,23 @@ export default definePlugin({
     description: "You're deafened but you're not.",
     dependencies: ["PhilsPluginLibrary"],
     authors: [Devs.desu, Devs.viciouscal],
-
     patches: [
-        {
-            find: "}voiceStateUpdate(",
-            replacement: {
-                match: /self_mute:([^,]+),self_deaf:([^,]+),self_video:([^,]+)/,
-                replace: "self_mute:$self.toggle($1, 'mute'),self_deaf:$self.toggle($2, 'deaf'),self_video:$self.toggle($3, 'video')"
-            }
+    {
+        find: "}voiceStateUpdate(",
+        replacement: {
+            match: /self_mute:([^,]+),self_deaf:([^,]+),self_video:([^,]+)/,
+            replace: "self_mute:$self.toggle($1, 'mute'),self_deaf:$self.toggle($2, 'deaf'),self_video:$self.toggle($3, 'video')"
         }
-    ],
+    },
+    {
+        find: ".isSelfDeaf(),!1]:[",
+        all: true,
+        replacement: {
+            match: /(\i\.\i)\.isSelfDeaf\(\),!1\]:\[/,
+            replace: "$self.fakeDeaf($1.isSelfDeaf()),!1]:["
+        }
+    }
+],
 
     settings,
     toggle: (au: any, what: string) => {
@@ -242,6 +249,7 @@ export default definePlugin({
                 case "video": return settings.store.cam;
             }
     },
+    fakeDeaf: (real: boolean) => fakeD ? settings.store.deafen : real,
 
     start() {
 
