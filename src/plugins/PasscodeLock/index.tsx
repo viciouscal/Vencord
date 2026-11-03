@@ -10,18 +10,10 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import {
-    Button,
-    createRoot,
-    Forms,
-    React,
-    showToast,
-    TextInput,
-    useEffect,
-    useMemo,
-    useRef,
-    useState
-} from "@webpack/common";
+import { createRoot, React, showToast, TextInput, useEffect, useMemo, useRef, useState } from "@webpack/common";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
+import { Button } from "@components/Button";
 import type { Root } from "react-dom/client";
 
 const logger = new Logger("PasscodeLock");
@@ -182,10 +174,10 @@ function PasscodeSettings() {
 
     return (
         <div className="vc-pcl-settings">
-            <Forms.FormTitle tag="h3">{hasPasscode ? "Change passcode" : "Create passcode"}</Forms.FormTitle>
-            <Forms.FormText>
+            <Heading tag="h3">{hasPasscode ? "Change passcode" : "Create passcode"}</Heading>
+            <Paragraph>
                 This prevents casual access to Discord. For real device security, lock your operating-system account.
-            </Forms.FormText>
+            </Paragraph>
             <div className="vc-pcl-settings-inputs">
                 <TextInput
                     type="password"
@@ -210,7 +202,7 @@ function PasscodeSettings() {
                     {busy ? "Saving…" : "Save passcode"}
                 </Button>
                 <Button
-                    color={Button.Colors.PRIMARY}
+                    variant="secondary"
                     disabled={!hasPasscode}
                     onClick={() => lock()}
                 >

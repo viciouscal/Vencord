@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Forms } from "@webpack/common";
+import { Heading } from "@components/Heading";
 import React from "react";
 
 export interface SettingsModalCardItemProps extends Pick<React.ComponentProps<"div">,
@@ -32,7 +32,7 @@ export const SettingsModalCardItem = ({ children, title }: SettingsModalCardItem
             gap: "0.4em",
             width: "100%"
         }}>
-            {title && <Forms.FormTitle tag="h5" style={{ margin: 0 }}>{title}</Forms.FormTitle>}
+            {title && <Heading tag="h5" style={{ margin: 0 }}>{title}</Heading>}
             {children}
         </div>
     );

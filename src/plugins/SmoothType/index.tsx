@@ -11,14 +11,11 @@ import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { closeModal, ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { IconComponent, OptionType } from "@utils/types";
-import {
-    Button,
-    ColorPicker,
-    Forms,
-    SearchableSelect,
-    Slider,
-    Text,
-} from "@webpack/common";
+import { ColorPicker, SearchableSelect, Slider } from "@webpack/common";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
+import { Button } from "@components/Button";
+import { Text } from "@components/Text";
 
 const STYLE_ID = "vc-smoothtype";
 
@@ -60,7 +57,7 @@ function Divider16() {
 function PresetButtons() {
     return (
         <>
-            <Forms.FormTitle tag="h5">Presets</Forms.FormTitle>
+            <Heading tag="h5">Presets</Heading>
             <Flex style={{ gap: 8, flexWrap: "wrap" }}>
                 <Button onClick={() => applyPreset("snappy")}>Snappy</Button>
                 <Button onClick={() => applyPreset("cinematic")}>Cinematic</Button>
@@ -94,7 +91,7 @@ const settings = definePluginSettings({
         default: 0x00b0f4,
         component: () => (
             <div>
-                <Forms.FormTitle tag="h3">Caret Color</Forms.FormTitle>
+                <Heading tag="h3">Caret Color</Heading>
                 <ColorPicker
                     color={settings.store.caretColor}
                     onChange={onPickColor}
@@ -109,8 +106,8 @@ const settings = definePluginSettings({
         default: 55,
         component: () => (
             <div>
-                <Forms.FormTitle tag="h5">Caret movement speed</Forms.FormTitle>
-                <Forms.FormText style={{ marginBottom: 8 }}>Transition duration (ms) — higher is slower and usually smoother.</Forms.FormText>
+                <Heading tag="h5">Caret movement speed</Heading>
+                <Paragraph style={{ marginBottom: 8 }}>Transition duration (ms) — higher is slower and usually smoother.</Paragraph>
                 <Slider
                     initialValue={settings.store.transitionDelay ?? 55}
                     onValueChange={(v: number) => {
@@ -132,8 +129,8 @@ const settings = definePluginSettings({
         default: 2,
         component: () => (
             <div>
-                <Forms.FormTitle tag="h5">Caret appearance</Forms.FormTitle>
-                <Forms.FormText style={{ marginBottom: 8 }}>Width (px)</Forms.FormText>
+                <Heading tag="h5">Caret appearance</Heading>
+                <Paragraph style={{ marginBottom: 8 }}>Width (px)</Paragraph>
                 <Slider
                     initialValue={settings.store.caretWidth ?? 2}
                     onValueChange={(v: number) => {
@@ -146,7 +143,7 @@ const settings = definePluginSettings({
                     stickToMarkers={false}
                     onValueRender={(v: number) => `${Math.round(v)}px`}
                 />
-                <Forms.FormText style={{ marginBottom: 8 }}>Opacity</Forms.FormText>
+                <Paragraph style={{ marginBottom: 8 }}>Opacity</Paragraph>
                 <Slider
                     initialValue={(settings.store.caretOpacity ?? 1) * 100}
                     onValueChange={(v: number) => {
@@ -159,7 +156,7 @@ const settings = definePluginSettings({
                     stickToMarkers={false}
                     onValueRender={(v: number) => `${Math.round(v)}%`}
                 />
-                <Forms.FormText style={{ marginBottom: 8 }}>Glow (px)</Forms.FormText>
+                <Paragraph style={{ marginBottom: 8 }}>Glow (px)</Paragraph>
                 <Slider
                     initialValue={settings.store.caretGlow ?? 0}
                     onValueChange={(v: number) => {
@@ -388,11 +385,11 @@ function SmoothTypeQuickPanel({ close }: { close(): void; }) {
 
     return (
         <div className={Margins.bottom8}>
-            <Forms.FormText style={{ marginBottom: 12 }}>
+            <Paragraph style={{ marginBottom: 12 }}>
                 Quick controls from the chat bar. The same values appear in the SmoothType plugin page in Vencord settings.
-            </Forms.FormText>
+            </Paragraph>
 
-            <Forms.FormTitle tag="h5">Caret color</Forms.FormTitle>
+            <Heading tag="h5">Caret color</Heading>
             <ColorPicker
                 color={settings.store.caretColor}
                 onChange={c => {
@@ -404,8 +401,8 @@ function SmoothTypeQuickPanel({ close }: { close(): void; }) {
 
             <Divider16 />
 
-            <Forms.FormTitle tag="h5">Caret movement speed</Forms.FormTitle>
-            <Forms.FormText style={{ marginBottom: 8 }}>Transition duration (ms) — higher is slower and usually smoother.</Forms.FormText>
+            <Heading tag="h5">Caret movement speed</Heading>
+            <Paragraph style={{ marginBottom: 8 }}>Transition duration (ms) — higher is slower and usually smoother.</Paragraph>
             <Slider
                 initialValue={settings.store.transitionDelay}
                 onValueChange={(v: number) => {
@@ -421,7 +418,7 @@ function SmoothTypeQuickPanel({ close }: { close(): void; }) {
 
             <Divider16 />
 
-            <Forms.FormTitle tag="h5">Easing</Forms.FormTitle>
+            <Heading tag="h5">Easing</Heading>
             <SearchableSelect
                 options={[...EASING_OPTIONS]}
                 value={settings.store.animationType}
@@ -436,8 +433,8 @@ function SmoothTypeQuickPanel({ close }: { close(): void; }) {
 
             <Divider16 />
 
-            <Forms.FormTitle tag="h5">Caret appearance</Forms.FormTitle>
-            <Forms.FormText style={{ marginBottom: 8 }}>Width (px)</Forms.FormText>
+            <Heading tag="h5">Caret appearance</Heading>
+            <Paragraph style={{ marginBottom: 8 }}>Width (px)</Paragraph>
             <Slider
                 initialValue={settings.store.caretWidth}
                 onValueChange={(v: number) => {
@@ -450,7 +447,7 @@ function SmoothTypeQuickPanel({ close }: { close(): void; }) {
                 stickToMarkers={false}
                 onValueRender={(v: number) => `${Math.round(v)}px`}
             />
-            <Forms.FormText style={{ marginBottom: 8 }}>Opacity</Forms.FormText>
+            <Paragraph style={{ marginBottom: 8 }}>Opacity</Paragraph>
             <Slider
                 initialValue={settings.store.caretOpacity * 100}
                 onValueChange={(v: number) => {
@@ -463,7 +460,7 @@ function SmoothTypeQuickPanel({ close }: { close(): void; }) {
                 stickToMarkers={false}
                 onValueRender={(v: number) => `${Math.round(v)}%`}
             />
-            <Forms.FormText style={{ marginBottom: 8 }}>Glow (px)</Forms.FormText>
+            <Paragraph style={{ marginBottom: 8 }}>Glow (px)</Paragraph>
             <Slider
                 initialValue={settings.store.caretGlow}
                 onValueChange={(v: number) => {
@@ -482,7 +479,7 @@ function SmoothTypeQuickPanel({ close }: { close(): void; }) {
             <PresetButtons />
 
             <div style={{ marginTop: 20 }}>
-                <Button color={Button.Colors.PRIMARY} onClick={close}>
+                <Button variant="secondary" onClick={close}>
                     Done
                 </Button>
             </div>

@@ -22,12 +22,9 @@ import { generateId } from "@api/Commands";
 import { hasAnyVisibleSettings, isSettingHidden } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-<<<<<<< HEAD
 import { getPluginDisplayDescription, getPluginDisplayName } from "@plugins/arabicUi/engine/pluginStrings";
-=======
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
->>>>>>> upstream/main
 import { debounce } from "@shared/debounce";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { classNameFactory } from "@utils/css";
@@ -178,11 +175,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             size="lg"
             title={
                 <div className={cl("header")}>
-<<<<<<< HEAD
-                    <BaseText tag="h1" weight="semibold" size="lg">{getPluginDisplayName(plugin)}</BaseText>
-=======
                     <Heading tag="h3">{plugin.name}</Heading>
->>>>>>> upstream/main
                     {!pluginMeta.userPlugin && (
                         <div className="vc-settings-modal-links">
                             <FavoriteButton
@@ -204,11 +197,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             subtitle={
                 <div className={cl("info")}>
                     <div>
-<<<<<<< HEAD
-                        <Forms.FormText>{getPluginDisplayDescription(plugin)}</Forms.FormText>
-=======
                         <Paragraph>{plugin.description}</Paragraph>
->>>>>>> upstream/main
                         {!!plugin.tags?.length && <PluginTags tags={plugin.tags} />}
                     </div>
                 </div>

@@ -6,7 +6,7 @@
 
 import { BaseText } from "@components/BaseText";
 import { Card } from "@components/Card";
-import { HeadingPrimary } from "@components/Heading";
+import { HeadingPrimary } from "@components/LegacyHeading";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings";
 import { classNameFactory } from "@utils/css";

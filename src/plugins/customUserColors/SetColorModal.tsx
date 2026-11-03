@@ -5,12 +5,13 @@
  */
 
 import { set } from "@api/DataStore";
-import { HeadingPrimary, HeadingSecondary } from "@components/Heading";
+import { HeadingPrimary, HeadingSecondary } from "@components/LegacyHeading";
 import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot } from "@utils/modal";
 import type { RenderModalProps } from "@vencord/discord-types";
-import { Button, ColorPicker, useState } from "@webpack/common";
+import { ColorPicker, useState } from "@webpack/common";
+import { Button } from "@components/Button";
 
 import { colors, DATASTORE_KEY } from "./index";
 
@@ -67,13 +68,13 @@ export function SetColorModal({ id, modalProps }: { id: string, modalProps: Rend
 
             <ModalFooter className={cl("modal-footer")}>
                 <Button
-                    color={Button.Colors.RED}
+                    variant="dangerPrimary"
                     onClick={deleteUserColor}
                 >
                     Delete Entry
                 </Button>
                 <Button
-                    color={Button.Colors.BRAND}
+                    variant="primary"
                     onClick={saveUserColor}
                 >
                     Save

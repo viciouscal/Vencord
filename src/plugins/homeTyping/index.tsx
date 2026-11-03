@@ -8,7 +8,9 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { ColorPicker, Forms, NavigationRouter, Select, SelectedChannelStore, Slider, TypingStore, UserStore, useStateFromStores } from "@webpack/common";
+import { ColorPicker, NavigationRouter, Select, SelectedChannelStore, Slider, TypingStore, UserStore, useStateFromStores } from "@webpack/common";
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 
 const ThreeDots = findComponentByCodeLazy("Math.min(1,Math.max(", "dotRadius:");
 
@@ -56,8 +58,8 @@ function NotificationSettingsComponent() {
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "1em" }}>
             <div>
-                <Forms.FormTitle tag="h3">Notification Background Color</Forms.FormTitle>
-                <Forms.FormText style={{ marginBottom: "0.5em" }}>Choose a color for your typing notifications</Forms.FormText>
+                <Heading tag="h3">Notification Background Color</Heading>
+                <Paragraph style={{ marginBottom: "0.5em" }}>Choose a color for your typing notifications</Paragraph>
                 <ColorPicker
                     color={parseInt(settings.store.notificationColor, 16)}
                     onChange={onPickColor}
@@ -67,8 +69,8 @@ function NotificationSettingsComponent() {
             </div>
 
             <div>
-                <Forms.FormTitle tag="h3">Notification Position</Forms.FormTitle>
-                <Forms.FormText style={{ marginBottom: "0.5em" }}>Choose preset position or use custom coordinates below</Forms.FormText>
+                <Heading tag="h3">Notification Position</Heading>
+                <Paragraph style={{ marginBottom: "0.5em" }}>Choose preset position or use custom coordinates below</Paragraph>
                 <Select
                     options={[
                         { label: "Top Right", value: "top-right" },
@@ -89,8 +91,8 @@ function NotificationSettingsComponent() {
             {settings.store.notificationPosition === "custom" && (
                 <>
                     <div>
-                        <Forms.FormTitle tag="h3">Custom Position - X (Horizontal)</Forms.FormTitle>
-                        <Forms.FormText style={{ marginBottom: "0.5em" }}>Distance from left edge (in pixels, 0-2000)</Forms.FormText>
+                        <Heading tag="h3">Custom Position - X (Horizontal)</Heading>
+                        <Paragraph style={{ marginBottom: "0.5em" }}>Distance from left edge (in pixels, 0-2000)</Paragraph>
                         <Slider
                             initialValue={settings.store.customX}
                             onValueChange={(value: number) => {
@@ -106,8 +108,8 @@ function NotificationSettingsComponent() {
                     </div>
 
                     <div>
-                        <Forms.FormTitle tag="h3">Custom Position - Y (Vertical)</Forms.FormTitle>
-                        <Forms.FormText style={{ marginBottom: "0.5em" }}>Distance from top edge (in pixels, 0-1500)</Forms.FormText>
+                        <Heading tag="h3">Custom Position - Y (Vertical)</Heading>
+                        <Paragraph style={{ marginBottom: "0.5em" }}>Distance from top edge (in pixels, 0-1500)</Paragraph>
                         <Slider
                             initialValue={settings.store.customY}
                             onValueChange={(value: number) => {
@@ -125,8 +127,8 @@ function NotificationSettingsComponent() {
             )}
 
             <div>
-                <Forms.FormTitle tag="h3">Notification Size</Forms.FormTitle>
-                <Forms.FormText style={{ marginBottom: "0.5em" }}>Scale the size of notifications (50% - 150%)</Forms.FormText>
+                <Heading tag="h3">Notification Size</Heading>
+                <Paragraph style={{ marginBottom: "0.5em" }}>Scale the size of notifications (50% - 150%)</Paragraph>
                 <Slider
                     initialValue={settings.store.notificationSize}
                     onValueChange={(value: number) => {

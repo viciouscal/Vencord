@@ -17,7 +17,7 @@
 */
 
 import { openScreenshareModal } from "@plugins/betterScreenshare.desktop/modals";
-import { Button } from "@webpack/common";
+import { Button } from "@components/Button";
 import React from "react";
 
 export interface OpenScreenshareSettingsButtonProps {
@@ -27,8 +27,8 @@ export interface OpenScreenshareSettingsButtonProps {
 export const OpenScreenshareSettingsButton = (props: OpenScreenshareSettingsButtonProps) => {
     return (
         <Button
-            size={Button.Sizes.SMALL}
-            color={Button.Colors.PRIMARY}
+            size="small"
+            variant="secondary"
             onClick={openScreenshareModal}
         >
             {props.title ? props.title : "Screenshare Settings"}

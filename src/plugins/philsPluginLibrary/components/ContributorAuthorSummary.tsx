@@ -20,7 +20,7 @@ import { Flex } from "@components/Flex";
 import { Author, Contributor } from "@plugins/philsPluginLibrary/types";
 import { openURL } from "@plugins/philsPluginLibrary/utils";
 import { findByProps } from "@webpack";
-import { Text } from "@webpack/common";
+import { Text } from "@components/Text";
 import React from "react";
 
 import { AuthorUserSummaryItem } from "./AuthorSummaryItem";
@@ -65,7 +65,7 @@ export const ContributorAuthorSummary = ({ author, contributors }: ContributorAu
         <Flex style={{ gap: "0.7em" }}>
             {author &&
                 <Flex style={{ justifyContent: "center", alignItems: "center", gap: "0.5em" }}>
-                    <Text variant="text-sm/normal" style={{ color: "var(--text-muted)" }}>
+                    <Text size="sm" weight="normal" style={{ color: "var(--text-muted)" }}>
                         Author: <a
                             onClick={e => {
                                 e.preventDefault();
@@ -86,7 +86,7 @@ export const ContributorAuthorSummary = ({ author, contributors }: ContributorAu
             }
             {(contributors && contributors.length > 0) &&
                 <Flex style={{ justifyContent: "center", alignItems: "center", gap: "0.5em" }}>
-                    <Text variant="text-sm/normal" style={{ color: "var(--text-muted)" }}>
+                    <Text size="sm" weight="normal" style={{ color: "var(--text-muted)" }}>
                         Contributors:
                     </Text>
                     <AuthorUserSummaryItem authors={contributors} />

@@ -18,7 +18,7 @@
 
 import { Card } from "@components/Card";
 import { Switch } from "@components/Switch";
-import { Forms } from "@webpack/common";
+import { Heading } from "@components/Heading";
 import React from "react";
 
 export interface SettingsModalItemProps extends Pick<React.ComponentProps<"div">,
@@ -42,7 +42,7 @@ export const SettingsModalCard = ({ children, title, switchProps, switchEnabled,
                 flex: flex ?? 1,
                 ...(cardProps?.style ? cardProps.style : {})
             }}>
-            {title && <Forms.FormTitle tag="h5" style={{ margin: 0 }}>{title}</Forms.FormTitle>}
+            {title && <Heading tag="h5" style={{ margin: 0 }}>{title}</Heading>}
             <div style={{
                 display: "flex",
                 gap: "1em",
@@ -69,7 +69,7 @@ export const SettingsModalCard = ({ children, title, switchProps, switchEnabled,
                         justifyContent: "center",
                         alignItems: "center",
                     }}>
-                        <Forms.FormTitle tag="h5">Status</Forms.FormTitle>
+                        <Heading tag="h5">Status</Heading>
                         <Switch
                             checked={false}
                             onChange={() => void 0}
