@@ -178,7 +178,7 @@ function toggleFakeDeafen() {
 
 let keydownListener: ((e: KeyboardEvent) => void) | null = null;
 
-function parseKeybind(keybind: string): { ctrl: boolean; shift: boolean; alt: boolean; key: string } {
+function parseKeybind(keybind: string): { ctrl: boolean; shift: boolean; alt: boolean; key: string; } {
     const parts = keybind.toLowerCase().split("+");
     return {
         ctrl: parts.includes("ctrl") || parts.includes("control"),
@@ -221,22 +221,22 @@ export default definePlugin({
     dependencies: ["PhilsPluginLibrary"],
     authors: [Devs.desu, Devs.viciouscal],
     patches: [
-    {
-        find: "}voiceStateUpdate(",
-        replacement: {
-            match: /self_mute:([^,]+),self_deaf:([^,]+),self_video:([^,]+)/,
-            replace: "self_mute:$self.toggle($1, 'mute'),self_deaf:$self.toggle($2, 'deaf'),self_video:$self.toggle($3, 'video')"
+        {
+            find: "}voiceStateUpdate(",
+            replacement: {
+                match: /self_mute:([^,]+),self_deaf:([^,]+),self_video:([^,]+)/,
+                replace: "self_mute:$self.toggle($1, 'mute'),self_deaf:$self.toggle($2, 'deaf'),self_video:$self.toggle($3, 'video')"
+            }
+        },
+        {
+            find: ".isSelfDeaf(),!1]:[",
+            all: true,
+            replacement: {
+                match: /\[(!\i\.\i\.isSupported\(\)\|\|\i\.\i\.isSelfMute\(\)\|\|\i\.\i\.isSelfMutedTemporarily\(\)),(\i\.\i)\.isSelfDeaf\(\),!1\]:\[/,
+                replace: "[$self.toggle($1, 'mute'),$self.toggle($2.isSelfDeaf(), 'deaf'),!1]:["
+            }
         }
-    },
-    {
-        find: ".isSelfDeaf(),!1]:[",
-        all: true,
-        replacement: {
-            match: /(\i\.\i)\.isSelfDeaf\(\),!1\]:\[/,
-            replace: "$self.fakeDeaf($1.isSelfDeaf()),!1]:["
-        }
-    }
-],
+    ],
 
     settings,
     toggle: (au: any, what: string) => {
@@ -249,7 +249,6 @@ export default definePlugin({
                 case "video": return settings.store.cam;
             }
     },
-    fakeDeaf: (real: boolean) => fakeD ? settings.store.deafen : real,
 
     start() {
 
