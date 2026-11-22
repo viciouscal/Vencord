@@ -35,31 +35,31 @@ const settings = definePluginSettings({
                 label: "VR",
                 value: "vr",
             },
-        ]
-    }
+        ],
+    },
 });
 
 export default definePlugin({
     name: "PlatformSpoofer",
     description: "Spoof what platform or device you're on",
     authors: [Devs.Drag, Devs.neoarz, Devs.viciouscal],
-    settings: settings,
+    settings,
     patches: [
         {
             find: "_doIdentify(){",
             replacement: [
                 {
                     match: /window._ws=null,null!=\i/,
-                    replace: "false"
+                    replace: "false",
                 },
                 {
-                    match: /(?<="GatewaySocket"\)\}\),properties:)(\i)/,
-                    replace: "{...$1,...$self.getPlatform(true)}"
+                    match: /properties:(\i),presence:(\i),compress:this\.compressionHandler\.usesLegacyCompression\(\)/,
+                    replace: "properties:{...$1,...$self.getPlatform(true)},presence:$2,compress:this.compressionHandler.usesLegacyCompression()",
                 },
-            ]
+            ],
         },
     ],
-    getPlatform(bypass, userId?: any) {
+    getPlatform(bypass, userId?: unknown) {
         const platform = settings.store.platform ?? "desktop";
 
         if (bypass) {
@@ -67,7 +67,7 @@ export default definePlugin({
                 case "desktop":
                     return { browser: "Discord Client" };
                 case "web":
-                    return { browser: "Chrome" };
+                    return { browser: "Discord Web" };
                 case "mobile":
                     return { browser: "Discord iOS" };
                 case "embedded":
@@ -80,5 +80,5 @@ export default definePlugin({
         }
 
         return null;
-    }
+    },
 });
